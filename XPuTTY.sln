@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPuTTY", "XPuTTY\XPuTTY.csproj", "{A9ECE311-D657-41D0-A0BA-F072949320CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPuTTY-cli", "XPuTTY-cli\XPuTTY-cli.csproj", "{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{A9ECE311-D657-41D0-A0BA-F072949320CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9ECE311-D657-41D0-A0BA-F072949320CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9ECE311-D657-41D0-A0BA-F072949320CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
