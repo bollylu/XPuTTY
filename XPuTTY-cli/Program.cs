@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BLTools;
 using BLTools.ConsoleExtension;
-using XPuTTY;
+using libxputty_std20;
 
 namespace XPuTTY_cli {
   internal class Program {

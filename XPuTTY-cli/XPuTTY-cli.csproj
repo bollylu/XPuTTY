@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\XPuTTY\XPuTTY.csproj" />
+    <ProjectReference Include="..\libxputty-std20\libxputty-std20.csproj" />
   </ItemGroup>
 
 </Project>

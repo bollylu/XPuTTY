@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPuTTY", "XPuTTY\XPuTTY.csproj", "{A9ECE311-D657-41D0-A0BA-F072949320CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPuTTY-cli", "XPuTTY-cli\XPuTTY-cli.csproj", "{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPuTTY-cli", "XPuTTY-cli\XPuTTY-cli.csproj", "{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XPuttyMan", "XPuttyMan\XPuttyMan.csproj", "{C3512F02-414E-493B-8C3C-4E790751BD23}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libxputty-std20", "libxputty-std20\libxputty-std20.csproj", "{2B9E7713-2477-401E-973A-7F157CD7F6F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +15,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A9ECE311-D657-41D0-A0BA-F072949320CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9ECE311-D657-41D0-A0BA-F072949320CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9ECE311-D657-41D0-A0BA-F072949320CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9ECE311-D657-41D0-A0BA-F072949320CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3512F02-414E-493B-8C3C-4E790751BD23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3512F02-414E-493B-8C3C-4E790751BD23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3512F02-414E-493B-8C3C-4E790751BD23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3512F02-414E-493B-8C3C-4E790751BD23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B9E7713-2477-401E-973A-7F157CD7F6F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B9E7713-2477-401E-973A-7F157CD7F6F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B9E7713-2477-401E-973A-7F157CD7F6F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B9E7713-2477-401E-973A-7F157CD7F6F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
