@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySession {
+  public class TPuttySession : IDisposable {
 
+    #region --- Constants --------------------------------------------
     public const string REG_BASE = @"Software\SimonTatham\PuTTY\Sessions";
 
     public const string VAL_HOSTNAME = "HostName";
@@ -21,9 +25,11 @@ namespace libxputty_std20 {
     public const string VAL_PROTOCOL_SERIAL_FLOW_CONTROL = "SerialFlowControl";
 
     public const string VAL_SSH_REMOTE_COMMAND = "RemoteCommand";
+    #endregion --- Constants --------------------------------------------
 
+    #region --- Public properties ------------------------------------------------------------------------------
     public string Name { get; set; }
-    public string DisplayName => Name.Replace("%20", " ");
+    public string CleanName => Name.Replace("%20", " ");
 
     public string HostName { get; set; }
     public int Port { get; set; }
@@ -37,12 +43,33 @@ namespace libxputty_std20 {
 
     public string SSH_RemoteCommand { get; set; }
 
-    public TPuttySession() { }
+    public int PID { get; set; }
+    #endregion --- Public properties ---------------------------------------------------------------------------
 
+    #region --- Event handlers --------------------------------------------
+    public event EventHandler OnStart;
+    public event EventHandler OnExit;
+    #endregion --- Event handlers --------------------------------------------
 
+    private Task WatchTask;
+    private CancellationTokenSource WatchTaskCancellation = new CancellationTokenSource();
+
+    #region --- Constructor(s) ---------------------------------------------------------------------------------
+    public TPuttySession() {
+      Name = "<no name>";
+    }
+
+    public void Dispose() {
+      if ( WatchTask != null ) {
+        WatchTaskCancellation.Cancel();
+      }
+    }
+    #endregion --- Constructor(s) ------------------------------------------------------------------------------
+
+    #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
       StringBuilder RetVal = new StringBuilder();
-      RetVal.Append($"Session {DisplayName.PadRight(80, '.')} : ");
+      RetVal.Append($"Session {CleanName.PadRight(80, '.')} : ");
 
       if ( Protocol.IsSSH || Protocol.IsTelnet || Protocol.IsRaw || Protocol.IsRLogin ) {
         RetVal.Append(Protocol.ToString().PadRight(8, '.'));
@@ -68,7 +95,9 @@ namespace libxputty_std20 {
 
       return RetVal.ToString();
     }
+    #endregion --- Converters -------------------------------------------------------------------------------------
 
+    #region Public methods
     public TPuttySession ReadFromRegistry(string sessionKeyName = "") {
 
       if ( !string.IsNullOrWhiteSpace(sessionKeyName) ) {
@@ -93,13 +122,53 @@ namespace libxputty_std20 {
 
     public void Start() {
       Process PuttyProcess = new Process();
-      ProcessStartInfo StartInfo = new ProcessStartInfo();
-      StartInfo.FileName = "putty.exe";
-      StartInfo.Arguments = $"-load {"\"" + DisplayName + "\""}";
+      ProcessStartInfo StartInfo = new ProcessStartInfo {
+        FileName = "putty.exe",
+        Arguments = $"-load {"\"" + CleanName + "\""}"
+      };
       Console.WriteLine($"Loading {StartInfo.Arguments} ...");
       PuttyProcess.StartInfo = StartInfo;
 
       PuttyProcess.Start();
+      PID = PuttyProcess.Id;
+
+      if ( OnStart != null ) {
+        OnStart(this, EventArgs.Empty);
+      }
+
+      WatchTask = Task.Run(async () => {
+        while ( PID != 0 || WatchTaskCancellation.IsCancellationRequested ) {
+          try {
+            Process WatchedProcess = Process.GetProcessById(PID);
+            await Task.Delay(50);
+          } catch {
+            PID = 0;
+          }
+        }
+        if ( OnExit != null ) {
+          OnExit(this, EventArgs.Empty);
+        }
+      }, WatchTaskCancellation.Token);
+
     }
+
+    public static bool CheckIsRunning(int pid) {
+      return Process.GetProcesses().Any(x => x.Id == pid);
+    }
+
+    #endregion Public methods
+
+    #region --- Static fields --------------------------------------------
+    public static TPuttySession EmptySession {
+      get {
+        if ( _EmptySesssion == null ) {
+          _EmptySesssion = new TPuttySession() { Name = "<Empty>" };
+        }
+        return _EmptySesssion;
+      }
+    }
+    private static TPuttySession _EmptySesssion;
+    #endregion --- Static fields --------------------------------------------
+
   }
 }

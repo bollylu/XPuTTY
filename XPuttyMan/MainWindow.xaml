@@ -7,12 +7,10 @@
         xmlns:libputty="clr-namespace:libxputty_std20;assembly=libxputty-std20"
         xmlns:local="clr-namespace:XPuttyMan"
         mc:Ignorable="d"
-        Title="XPuttyMan" Height="800" Width="720">
-
-  <Window.Resources>
-    <local:MainViewModel x:Key="FakeMainWiewModel" />
-    <libputty:TPuttySession x:Key="FakeSession" />
-  </Window.Resources>
+        Title="XPuttyMan"
+        Height="800"
+        Width="725"
+        MaxWidth="725">
 
   <Grid>
     <Grid.RowDefinitions>
@@ -22,32 +20,31 @@
     </Grid.RowDefinitions>
 
     <Menu Grid.Row="0"
-            Height="23"
-            HorizontalAlignment="Stretch"
-            Name="mnuMain"
-            VerticalAlignment="Top">
+          Height="23"
+          HorizontalAlignment="Stretch"
+          Name="mnuMain"
+          VerticalAlignment="Top">
       <MenuItem Header="File"
-                  Name="mnuFile">
+                Name="mnuFile">
         <MenuItem Name="mnuFileOpen"
-                    Header="Open"
-                    />
+                  Header="Open" />
         <MenuItem Name="mnuFileQuit"
-                    Header="Quit"
-                    Click="MnuFileQuit_Click" />
+                  Header="Quit"
+                  Click="MnuFileQuit_Click" />
       </MenuItem>
       <MenuItem Header="View"
-                  Name="mnuView">
+                Name="mnuView">
 
       </MenuItem>
       <MenuItem Header="Tools"
-                  Name="mnuTools">
+                Name="mnuTools">
 
         <MenuItem Name="mnuToolsOptions"
-                    Header="Options">
+                  Header="Options">
         </MenuItem>
       </MenuItem>
       <MenuItem Header="Help"
-                  Name="mnuHelp">
+                Name="mnuHelp">
         <MenuItem Name="mnuHelpContact"
                   Header="Contact"
                   Command="{Binding Path=CommandHelpAboutContact}" />
@@ -58,31 +55,107 @@
 
     </Menu>
 
-    <Grid d:DataContext="{Binding Source={StaticResource FakeMainWiewModel}}">
-      <StackPanel Orientation="Vertical">
-        <Button Command="{Binding Path=CommandRefreshSessions}" Content="Refresh"/>
-        <ListView Grid.Row="1"
-                ItemsSource="{Binding Path=ObservableSessions}"
-                SelectedItem="{Binding Path=SelectedSession}">
-          <ListView.View>
-            <GridView >
-              <GridViewColumn Header="DisplayName" DisplayMemberBinding="{Binding Path=DisplayName}" Width="400"/>
-              <GridViewColumn Header="Host" DisplayMemberBinding="{Binding Path=HostName}" Width="200"/>
-              <GridViewColumn Header="Action" Width="100">
-                <GridViewColumn.CellTemplate>
-                  <DataTemplate>
-                    <Button Content="Start" Command="{Binding Path=DataContext.CommandStartSession, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}}" HorizontalAlignment="Center"/>
-                  </DataTemplate>
-                </GridViewColumn.CellTemplate>
-              </GridViewColumn>
-            </GridView>
-          </ListView.View>
-        </ListView>
+    <Grid d:DataContext="{Binding Source={x:Static local:MainViewModel.Design}}"
+          Grid.Row="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
 
-        <TextBlock Text="{Binding Path=SelectedSession.DisplayName}"/>
-      </StackPanel>
+      <Button Command="{Binding Path=CommandRefreshSessions}"
+              Content="Refresh"
+              Margin="10"
+              Grid.Row="0" />
+
+      <ItemsControl ItemsSource="{Binding Path=ObservableSessions}"
+                    Grid.Row="1"
+                    Margin="10">
+        <ItemsControl.Template>
+          <ControlTemplate TargetType="ItemsControl">
+            <ScrollViewer VerticalScrollBarVisibility="Visible">
+              <ItemsPresenter />
+            </ScrollViewer>
+          </ControlTemplate>
+        </ItemsControl.Template>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <DataTemplate.Resources>
+              <Style TargetType="TextBlock">
+                <Setter Property="FontSize"
+                        Value="14" />
+                <Setter Property="HorizontalAlignment"
+                        Value="Left" />
+                <Setter Property="VerticalAlignment"
+                        Value="Center" />
+              </Style>
+              <Style TargetType="Image">
+                <Setter Property="HorizontalAlignment"
+                        Value="Right" />
+                <Setter Property="VerticalAlignment"
+                        Value="Center" />
+              </Style>
+            </DataTemplate.Resources>
+            <Border BorderBrush="DarkBlue"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Margin="2"
+                    Name="InnerBorder"
+                    d:DataContext="{Binding Source={x:Static local:TPuttySessionVM.Design}}">
+              <StackPanel Orientation="Horizontal"
+                          Margin="2">
+                <StackPanel.Style>
+                  <Style TargetType="StackPanel">
+                    <Style.Triggers>
+                      <Trigger Property="IsMouseOver"
+                               Value="True">
+                        <Setter Property="Background"
+                                Value="Yellow" />
+                      </Trigger>
+                      <Trigger Property="IsMouseOver"
+                               Value="False">
+                        <Setter Property="Background"
+                                Value="White" />
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </StackPanel.Style>
+                <StackPanel Orientation="Vertical">
+                  <TextBlock Text="{Binding Path=DisplayName}"
+                             Width="550"
+                             FontWeight="Bold"
+                             Margin="10,0,0,0" />
+                  <TextBlock Text="{Binding Path=HostName}"
+                             Width="550"
+                             Margin="20,2,0,5" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            Margin="5,0,0,0"
+                            VerticalAlignment="Center">
+                  <Button Content="Start"
+                          Command="{Binding Path=CommandStartSession}"
+                          Margin="2"
+                          Padding="5,2,5,2" />
+                  <Image Source="{Binding Path=RunningIcon}"
+                         Width="32"
+                         Height="32"
+                         Margin="5,2,5,2"
+                         VerticalAlignment="Center" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+
+      <TextBlock Text="{Binding Path=SelectedSession.DisplayName}"
+                 Margin="10"
+                 Grid.Row="2" />
+
     </Grid>
 
-    <bltoolswpfctrl:ExtendedStatusBar x:Name="stsBar" Grid.Row="2" />
+    <bltoolswpfctrl:ExtendedStatusBar x:Name="stsBar"
+                                      Grid.Row="2" />
   </Grid>
 </Window>

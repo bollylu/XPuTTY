@@ -25,11 +25,11 @@ namespace XPuttyMan {
 
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
 
-    public ObservableCollection<TPuttySession> ObservableSessions { get; set; }
-    public TPuttySession SelectedSession {
+    public ObservableCollection<TPuttySessionVM> ObservableSessions { get; set; }
+    public TPuttySessionVM SelectedSession {
       get {
-        if (!ObservableSessions.Any() && _SelectedSession == null) {
-          return new TPuttySession() { Name = "<empty>" };
+        if ( !ObservableSessions.Any() && _SelectedSession == null ) {
+          return new TPuttySessionVM(new TPuttySession() { Name = "<empty>" });
         }
         return _SelectedSession;
       }
@@ -38,7 +38,7 @@ namespace XPuttyMan {
         NotifyPropertyChanged(nameof(SelectedSession));
       }
     }
-    private TPuttySession _SelectedSession;
+    private TPuttySessionVM _SelectedSession;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() {
@@ -47,7 +47,7 @@ namespace XPuttyMan {
     }
 
     protected void _Initialize() {
-      ObservableSessions = new ObservableCollection<TPuttySession>();
+      ObservableSessions = new ObservableCollection<TPuttySessionVM>();
       RefreshSessions();
     }
 
@@ -56,15 +56,15 @@ namespace XPuttyMan {
       CommandHelpContact = new TRelayCommand(() => HelpContact(), _ => { return true; });
       CommandHelpAbout = new TRelayCommand(() => HelpAbout(), _ => { return true; });
       CommandRefreshSessions = new TRelayCommand(() => RefreshSessions(), _ => { return true; });
-      CommandStartSession = new TRelayCommand(() => StartSession(), _ => { return true; });
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Menu --------------------------------------------
     public void FileOpen() {
-      OpenFileDialog OFD = new OpenFileDialog();
-      OFD.Title = "Select new parameter file";
-      OFD.Filter = "Parameter file|*.xml";
+      OpenFileDialog OFD = new OpenFileDialog {
+        Title = "Select new parameter file",
+        Filter = "Parameter file|*.xml"
+      };
       if ( OFD.ShowDialog() != true ) {
         return;
       }
@@ -85,21 +85,34 @@ namespace XPuttyMan {
     public void RefreshSessions() {
       Log.Write("Refreshing sessions...");
       NotifyExecutionProgress("Reading sessions...");
+
+      IEnumerable<TPuttySessionVM> CurrentlyRunningSessions = ObservableSessions.Where(x => x.IsRunning);
+
       TPuttySessionList Sessions = new TPuttySessionList();
       Sessions.ReadFromRegistry();
       ObservableSessions.Clear();
-      foreach ( TPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH) ) {
-        ObservableSessions.Add(SessionItem);
+      foreach ( TPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH && !string.IsNullOrWhiteSpace(x.HostName)) ) {
+        TPuttySessionVM NewPuttySessionVM = new TPuttySessionVM(SessionItem);
+        TPuttySessionVM PotentialRunningSession = CurrentlyRunningSessions.FirstOrDefault(x => x.DisplayName == NewPuttySessionVM.DisplayName);
+        if (PotentialRunningSession!=null) {
+          NewPuttySessionVM.PID = PotentialRunningSession.PID;
+        }
+        ObservableSessions.Add(NewPuttySessionVM);
       }
       NotifyExecutionProgress("Done.");
       NotifyExecutionStatus($"{ObservableSessions.Count} session(s)");
       Log.Write("Refresh done.");
     }
 
-    public void StartSession() {
-      Log.Write($"Starting session {SelectedSession.DisplayName}");
-      SelectedSession.Start();
-    }
 
+    public static MainViewModel Design {
+      get {
+        if ( _Design == null ) {
+          _Design = new MainViewModel();
+        }
+        return _Design;
+      }
+    }
+    private static MainViewModel _Design;
   }
 }
