@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,9 +9,9 @@ using BLTools.MVVM;
 using libxputty_std20;
 
 namespace XPuttyMan {
-  public class TPuttySessionVM : MVVMBase, IDisposable {
+  public class VMPuttySession : MVVMBase, IDisposable {
 
-    private TPuttySession _PuttySession;
+    private IPuttySession _PuttySession;
 
     #region RelayCommand
     public TRelayCommand CommandStartSession { get; private set; }
@@ -18,33 +19,43 @@ namespace XPuttyMan {
 
     public string Name => _PuttySession.Name ?? "";
     public string DisplayName => Name.Replace("%20", " ");
-    public string HostName => $"{_PuttySession.HostName ?? ""}:{_PuttySession.Port}";
+    public string HostName {
+      get {
+        if ( _PuttySession.Protocol.IsSSH ) {
+          TPuttySessionSSH TempPuttySessionSSH = _PuttySession as TPuttySessionSSH;
+          return $"{TempPuttySessionSSH.HostName ?? ""}:{TempPuttySessionSSH.Port}";
+        }
+        return "";
+      }
+    }
 
     public bool IsRunning => PID != 0;
+
+    public string RunningProcess => IsRunning ? TPuttySession.GetAllRunningSessions().First(x => x.PID == PID).Name : "";
 
     public int PID {
       get {
         return _PuttySession.PID;
       }
-      set {
-        _PuttySession.PID = value;
-      }
+      //set {
+      //  _PuttySession.PID = value;
+      //}
     }
 
     public string RunningIcon => IsRunning ? App.GetPictureFullname("putty_icon") : "";
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
 
-    public TPuttySessionVM() {
-      _Initialize(TPuttySession.EmptySession);
+    public VMPuttySession() {
+      _Initialize(TPuttySession.Empty);
       _InitializeCommands();
     }
-    public TPuttySessionVM(TPuttySession puttySession) {
+    public VMPuttySession(IPuttySession puttySession) {
       _Initialize(puttySession);
       _InitializeCommands();
     }
 
-    protected void _Initialize(TPuttySession puttySession) {
+    protected void _Initialize(IPuttySession puttySession) {
       _PuttySession = puttySession;
       NotifyPropertyChanged(nameof(Name));
       NotifyPropertyChanged(nameof(DisplayName));
@@ -80,14 +91,14 @@ namespace XPuttyMan {
       NotifyPropertyChanged(nameof(RunningIcon));
     }
 
-    public static TPuttySessionVM Design {
+    public static VMPuttySession Design {
       get {
         if ( _Design == null ) {
-          _Design = new TPuttySessionVM();
+          _Design = new VMPuttySession();
         }
         return _Design;
       }
     }
-    private static TPuttySessionVM _Design;
+    private static VMPuttySession _Design;
   }
 }

@@ -101,10 +101,10 @@
                     CornerRadius="5"
                     Margin="2"
                     Name="InnerBorder"
-                    d:DataContext="{Binding Source={x:Static local:TPuttySessionVM.Design}}">
+                    d:DataContext="{Binding Source={x:Static local:VMPuttySession.Design}}">
               <StackPanel Orientation="Horizontal"
                           Margin="2">
-                <StackPanel.Style>
+                <StackPanel.Resources>
                   <Style TargetType="StackPanel">
                     <Style.Triggers>
                       <Trigger Property="IsMouseOver"
@@ -119,7 +119,16 @@
                       </Trigger>
                     </Style.Triggers>
                   </Style>
-                </StackPanel.Style>
+                  <Style TargetType="Image">
+                    <Style.Triggers>
+                      <Trigger Property="IsMouseOver"
+                               Value="True">
+                        <Setter Property="ToolTip"
+                                Value="{Binding Path=RunningProcess}" />
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </StackPanel.Resources>
                 <StackPanel Orientation="Vertical">
                   <TextBlock Text="{Binding Path=DisplayName}"
                              Width="550"

@@ -182,7 +182,7 @@
     </ApplicationDefinition>
     <Compile Include="Base classes\TRelayCommand.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\TPuttySessionVM.cs" />
+    <Compile Include="ViewModels\VMPuttySession.cs" />
     <Compile Include="Views\ViewOneSession.xaml.cs">
       <DependentUpon>ViewOneSession.xaml</DependentUpon>
     </Compile>

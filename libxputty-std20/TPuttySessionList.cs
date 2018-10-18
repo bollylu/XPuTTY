@@ -8,18 +8,24 @@ using Microsoft.Win32;
 namespace libxputty_std20 {
   public class TPuttySessionList {
 
-    public List<TPuttySession> Content { get; } = new List<TPuttySession>();
+    #region --- Public properties ------------------------------------------------------------------------------
+    public List<IPuttySession> Content { get; } = new List<IPuttySession>();
+    #endregion --- Public properties ---------------------------------------------------------------------------
 
-    private readonly object Lock_Content = new object();
+    #region Private variables
+    private readonly object Lock_Content = new object(); 
+    #endregion Private variables
 
+    #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionList() { }
+    #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-
+    #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
       StringBuilder RetVal = new StringBuilder();
       if ( Content.Any() ) {
         RetVal.AppendLine($"List of sessions ({Content.Count})");
-        foreach ( TPuttySession SessionItem in Content ) {
+        foreach ( IPuttySession SessionItem in Content ) {
           RetVal.AppendLine($"  {SessionItem.ToString()}");
         }
       } else {
@@ -27,8 +33,10 @@ namespace libxputty_std20 {
       }
       return RetVal.ToString();
     }
+    #endregion --- Converters -------------------------------------------------------------------------------------
 
-    public TPuttySession this[int index] {
+    #region --- Indexers --------------------------------------------
+    public IPuttySession this[int index] {
       get {
         lock ( Lock_Content ) {
           return Content[index];
@@ -36,7 +44,16 @@ namespace libxputty_std20 {
       }
     }
 
-    public IEnumerable<string> GetSessionListFromRegistry() {
+    public IPuttySession this[string sessionName] {
+      get {
+        lock ( Lock_Content ) {
+          return Content.FirstOrDefault(x => x.Name == sessionName);
+        }
+      }
+    }
+    #endregion --- Indexers --------------------------------------------
+
+    public IEnumerable<string> GetSessionNamesFromRegistry() {
 
       using ( RegistryKey BaseKey = Registry.CurrentUser.OpenSubKey(TPuttySession.REG_BASE) ) {
         IEnumerable<string> Sessions = BaseKey.GetSubKeyNames();
@@ -45,9 +62,9 @@ namespace libxputty_std20 {
 
     }
 
-    public void ReadFromRegistry() {
+    public void ReadSessionsFromRegistry() {
 
-      IEnumerable<string> Sessions = GetSessionListFromRegistry();
+      IEnumerable<string> Sessions = GetSessionNamesFromRegistry();
       if ( !Sessions.Any() ) {
         return;
       }
@@ -55,11 +72,8 @@ namespace libxputty_std20 {
       lock ( Lock_Content ) {
         Content.Clear();
         foreach ( string SessionItem in Sessions ) {
-          TPuttySession NewSession = new TPuttySession();
-          NewSession.ReadFromRegistry(SessionItem);
-          Content.Add(NewSession);
+          Content.Add(TPuttySession.GetSessionFromRegistry(SessionItem));
         }
-
       }
 
     }

@@ -25,11 +25,11 @@ namespace XPuttyMan {
 
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
 
-    public ObservableCollection<TPuttySessionVM> ObservableSessions { get; set; }
-    public TPuttySessionVM SelectedSession {
+    public ObservableCollection<VMPuttySession> ObservableSessions { get; set; }
+    public VMPuttySession SelectedSession {
       get {
         if ( !ObservableSessions.Any() && _SelectedSession == null ) {
-          return new TPuttySessionVM(new TPuttySession() { Name = "<empty>" });
+          return new VMPuttySession(TPuttySession.Empty);
         }
         return _SelectedSession;
       }
@@ -38,7 +38,7 @@ namespace XPuttyMan {
         NotifyPropertyChanged(nameof(SelectedSession));
       }
     }
-    private TPuttySessionVM _SelectedSession;
+    private VMPuttySession _SelectedSession;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() {
@@ -47,7 +47,7 @@ namespace XPuttyMan {
     }
 
     protected void _Initialize() {
-      ObservableSessions = new ObservableCollection<TPuttySessionVM>();
+      ObservableSessions = new ObservableCollection<VMPuttySession>();
       RefreshSessions();
     }
 
@@ -86,17 +86,17 @@ namespace XPuttyMan {
       Log.Write("Refreshing sessions...");
       NotifyExecutionProgress("Reading sessions...");
 
-      IEnumerable<TPuttySessionVM> CurrentlyRunningSessions = ObservableSessions.Where(x => x.IsRunning);
+      IEnumerable<VMPuttySession> CurrentlyRunningSessions = ObservableSessions.Where(x => x.IsRunning);
 
       TPuttySessionList Sessions = new TPuttySessionList();
-      Sessions.ReadFromRegistry();
+      Sessions.ReadSessionsFromRegistry();
       ObservableSessions.Clear();
-      foreach ( TPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH && !string.IsNullOrWhiteSpace(x.HostName)) ) {
-        TPuttySessionVM NewPuttySessionVM = new TPuttySessionVM(SessionItem);
-        TPuttySessionVM PotentialRunningSession = CurrentlyRunningSessions.FirstOrDefault(x => x.DisplayName == NewPuttySessionVM.DisplayName);
-        if (PotentialRunningSession!=null) {
-          NewPuttySessionVM.PID = PotentialRunningSession.PID;
-        }
+      foreach ( IPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH && !string.IsNullOrWhiteSpace(((TPuttySessionSSH)x).HostName)) ) {
+        VMPuttySession NewPuttySessionVM = new VMPuttySession(SessionItem);
+        VMPuttySession PotentialRunningSession = CurrentlyRunningSessions.FirstOrDefault(x => x.DisplayName == NewPuttySessionVM.DisplayName);
+        //if (PotentialRunningSession!=null) {
+        //  NewPuttySessionVM.PID = PotentialRunningSession.PID;
+        //}
         ObservableSessions.Add(NewPuttySessionVM);
       }
       NotifyExecutionProgress("Done.");
