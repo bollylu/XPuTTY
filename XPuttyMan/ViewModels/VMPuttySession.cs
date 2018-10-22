@@ -9,7 +9,7 @@ using BLTools.MVVM;
 using libxputty_std20;
 
 namespace XPuttyMan {
-  public class VMPuttySession : MVVMBase, IDisposable {
+  public sealed class VMPuttySession : MVVMBase, IDisposable {
 
     private IPuttySession _PuttySession;
 
@@ -53,7 +53,7 @@ namespace XPuttyMan {
       _InitializeCommands();
     }
 
-    protected void _Initialize(IPuttySession puttySession) {
+    private void _Initialize(IPuttySession puttySession) {
       _PuttySession = puttySession;
       NotifyPropertyChanged(nameof(Name));
       NotifyPropertyChanged(nameof(DisplayName));
@@ -62,7 +62,7 @@ namespace XPuttyMan {
       _PuttySession.OnExit += _PuttySession_OnExit;
     }
 
-    protected void _InitializeCommands() {
+    private void _InitializeCommands() {
       CommandStartSession = new TRelayCommand(() => Start(), _ => { return true; });
     }
 

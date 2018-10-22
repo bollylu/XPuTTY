@@ -57,18 +57,18 @@ namespace XPuttyMan {
     private VMPuttySession _SelectedCommandSession;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public MainViewModel() {
+    public MainViewModel() : base() {
       _InitializeCommands();
       _Initialize();
     }
 
-    protected void _Initialize() {
+    private void _Initialize() {
       ObservableSessions = new ObservableCollection<VMPuttySession>();
       ObservableCommandSessions = new ObservableCollection<VMPuttySession>();
       RefreshSessions();
     }
 
-    protected void _InitializeCommands() {
+    private void _InitializeCommands() {
       CommandFileOpen = new TRelayCommand(() => FileOpen(), _ => { return true; });
       CommandHelpContact = new TRelayCommand(() => HelpContact(), _ => { return true; });
       CommandHelpAbout = new TRelayCommand(() => HelpAbout(), _ => { return true; });
@@ -99,7 +99,7 @@ namespace XPuttyMan {
     }
     #endregion --- Menu --------------------------------------------
 
-    public async void RefreshSessions() {
+    public void RefreshSessions() {
 
       WorkInProgress = true;
       CommandRefreshSessions.NotifyCanExecuteChanged();
@@ -129,7 +129,7 @@ namespace XPuttyMan {
           NewPuttySessionVM.SetRunningProcess(Runningsession);
         }
 
-        await Task.Delay(200);
+        //await Task.Delay(200);
         ObservableSessions.Add(NewPuttySessionVM);
       } 
       #endregion --- Sessions --------------------------------------------
@@ -145,7 +145,7 @@ namespace XPuttyMan {
         if ( Runningsession != null ) {
           NewPuttySessionVM.SetRunningProcess(Runningsession);
         }
-        await Task.Delay(200);
+        //await Task.Delay(200);
         ObservableCommandSessions.Add(NewPuttySessionVM);
       }
       #endregion --- Command sessions --------------------------------------------
