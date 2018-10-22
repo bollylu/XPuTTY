@@ -28,18 +28,16 @@ namespace XPuttyMan {
         return "";
       }
     }
+    public bool IsRunning => _PuttySession.IsRunning;
+    public string PuttyCommandLine => _PuttySession.CommandLine;
+    public int PID => _PuttySession.PID;
 
-    public bool IsRunning => PID != 0;
-
-    public string RunningProcess => IsRunning ? TPuttySession.GetAllRunningSessions().First(x => x.PID == PID).Name : "";
-
-    public int PID {
-      get {
-        return _PuttySession.PID;
-      }
-      //set {
-      //  _PuttySession.PID = value;
-      //}
+    public void SetRunningProcess(IPuttySession puttySession) {
+      _PuttySession.SetRunningProcess(puttySession.PuttyProcess);
+      NotifyPropertyChanged(nameof(PID));
+      NotifyPropertyChanged(nameof(IsRunning));
+      NotifyPropertyChanged(nameof(PuttyCommandLine));
+      NotifyPropertyChanged(nameof(RunningIcon));
     }
 
     public string RunningIcon => IsRunning ? App.GetPictureFullname("putty_icon") : "";

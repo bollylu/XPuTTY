@@ -40,6 +40,19 @@ namespace XPuttyMan {
         stsBar.SetStatusRight(e.Message);
       };
 
+      MVVMBase.OnInitProgressBar += (o, e) => {
+        stsBar.ProgressBarMaxValue = e.Value;
+        stsBar.ProgressBarVisibility = Visibility.Visible;
+      };
+
+      MVVMBase.OnProgressBarCompleted += (o, e) => {
+        stsBar.ProgressBarVisibility = Visibility.Collapsed;
+      };
+
+      MVVMBase.OnProgressBarNewValue += (o, e) => {
+        stsBar.ProgressBarValue = e.Value;
+      };
+
       MainItem = new MainViewModel();
       this.DataContext = MainItem;
 

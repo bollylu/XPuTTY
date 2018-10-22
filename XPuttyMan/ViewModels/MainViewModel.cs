@@ -26,6 +26,8 @@ namespace XPuttyMan {
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
 
     public ObservableCollection<VMPuttySession> ObservableSessions { get; set; }
+    public ObservableCollection<VMPuttySession> ObservableCommandSessions { get; set; }
+
     public VMPuttySession SelectedSession {
       get {
         if ( !ObservableSessions.Any() && _SelectedSession == null ) {
@@ -40,14 +42,29 @@ namespace XPuttyMan {
     }
     private VMPuttySession _SelectedSession;
 
+    public VMPuttySession SelectedCommandSession {
+      get {
+        if ( !ObservableCommandSessions.Any() && _SelectedCommandSession == null ) {
+          return new VMPuttySession(TPuttySession.Empty);
+        }
+        return _SelectedCommandSession;
+      }
+      set {
+        _SelectedCommandSession = value;
+        NotifyPropertyChanged(nameof(SelectedCommandSession));
+      }
+    }
+    private VMPuttySession _SelectedCommandSession;
+
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() {
-      _Initialize();
       _InitializeCommands();
+      _Initialize();
     }
 
     protected void _Initialize() {
       ObservableSessions = new ObservableCollection<VMPuttySession>();
+      ObservableCommandSessions = new ObservableCollection<VMPuttySession>();
       RefreshSessions();
     }
 
@@ -55,7 +72,7 @@ namespace XPuttyMan {
       CommandFileOpen = new TRelayCommand(() => FileOpen(), _ => { return true; });
       CommandHelpContact = new TRelayCommand(() => HelpContact(), _ => { return true; });
       CommandHelpAbout = new TRelayCommand(() => HelpAbout(), _ => { return true; });
-      CommandRefreshSessions = new TRelayCommand(() => RefreshSessions(), _ => { return true; });
+      CommandRefreshSessions = new TRelayCommand(() => RefreshSessions(), _ => { return !WorkInProgress; });
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -82,28 +99,63 @@ namespace XPuttyMan {
     }
     #endregion --- Menu --------------------------------------------
 
-    public void RefreshSessions() {
+    public async void RefreshSessions() {
+
+      WorkInProgress = true;
+      CommandRefreshSessions.NotifyCanExecuteChanged();
       Log.Write("Refreshing sessions...");
       NotifyExecutionProgress("Reading sessions...");
 
-      IEnumerable<VMPuttySession> CurrentlyRunningSessions = ObservableSessions.Where(x => x.IsRunning);
+      IEnumerable<IPuttySession> CurrentlyRunningSessions = TPuttySession.GetAllRunningSessions();
 
       TPuttySessionList Sessions = new TPuttySessionList();
       Sessions.ReadSessionsFromRegistry();
       ObservableSessions.Clear();
-      foreach ( IPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH && !string.IsNullOrWhiteSpace(((TPuttySessionSSH)x).HostName)) ) {
-        VMPuttySession NewPuttySessionVM = new VMPuttySession(SessionItem);
-        VMPuttySession PotentialRunningSession = CurrentlyRunningSessions.FirstOrDefault(x => x.DisplayName == NewPuttySessionVM.DisplayName);
-        //if (PotentialRunningSession!=null) {
-        //  NewPuttySessionVM.PID = PotentialRunningSession.PID;
-        //}
-        ObservableSessions.Add(NewPuttySessionVM);
-      }
-      NotifyExecutionProgress("Done.");
-      NotifyExecutionStatus($"{ObservableSessions.Count} session(s)");
-      Log.Write("Refresh done.");
-    }
+      ObservableCommandSessions.Clear();
 
+      NotifyInitProgressBar(Sessions.Content.Count);
+      int i = 0;
+      
+      #region --- Sessions --------------------------------------------
+      foreach ( IPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH)
+                                                             .Where(x => !string.IsNullOrWhiteSpace(((TPuttySessionSSH)x).HostName))
+                                                             .Where(x => !x.Name.StartsWith("zzz")) ) {
+        NotifyProgressBarNewValue(i++);
+        VMPuttySession NewPuttySessionVM = new VMPuttySession(SessionItem);
+
+        IPuttySession Runningsession = CurrentlyRunningSessions.FirstOrDefault(x => x.CleanName.EndsWith($"\"{SessionItem.CleanName}\""));
+
+        if ( Runningsession != null ) {
+          NewPuttySessionVM.SetRunningProcess(Runningsession);
+        }
+
+        await Task.Delay(200);
+        ObservableSessions.Add(NewPuttySessionVM);
+      } 
+      #endregion --- Sessions --------------------------------------------
+
+      #region --- Command sessions --------------------------------------------
+      foreach ( IPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH)
+                                                             .Where(x => !string.IsNullOrWhiteSpace(((TPuttySessionSSH)x).HostName))
+                                                             .Where(x => x.Name.StartsWith("zzz")) ) {
+        NotifyProgressBarNewValue(i++);
+        VMPuttySession NewPuttySessionVM = new VMPuttySession(SessionItem);
+        IPuttySession Runningsession = CurrentlyRunningSessions.FirstOrDefault(x => x.CleanName.EndsWith($"\"{SessionItem.CleanName}\""));
+
+        if ( Runningsession != null ) {
+          NewPuttySessionVM.SetRunningProcess(Runningsession);
+        }
+        await Task.Delay(200);
+        ObservableCommandSessions.Add(NewPuttySessionVM);
+      }
+      #endregion --- Command sessions --------------------------------------------
+
+      NotifyProgressBarCompleted("Done.");
+      NotifyExecutionStatus($"{ObservableSessions.Count + ObservableCommandSessions.Count} session(s)");
+      Log.Write("Refresh done.");
+      WorkInProgress = false;
+      CommandRefreshSessions.NotifyCanExecuteChanged();
+    }
 
     public static MainViewModel Design {
       get {

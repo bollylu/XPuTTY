@@ -38,12 +38,11 @@ namespace XPuttyMan {
     }
 
     public virtual void Execute(object parameter) {
-      //NotifyCanExecuteChanged();
       _ExecuteAction();
       NotifyCanExecuteChanged();
     }
 
-    protected void NotifyCanExecuteChanged() {
+    public void NotifyCanExecuteChanged() {
       CommandManager.InvalidateRequerySuggested();
     }
   }

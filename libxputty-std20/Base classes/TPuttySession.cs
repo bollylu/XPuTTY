@@ -6,7 +6,9 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BLTools;
 using Microsoft.Win32;
+using static System.Management.ManagementObjectCollection;
 
 namespace libxputty_std20 {
   public class TPuttySession : IPuttySession, IDisposable {
@@ -14,6 +16,8 @@ namespace libxputty_std20 {
     #region --- Constants --------------------------------------------
     internal const string REG_BASE = @"Software\SimonTatham\PuTTY\Sessions";
     internal const string EXECUTABLE_PUTTY = "putty.exe";
+    private const int WATCH_DELAY_MS = 200;
+    public const int NO_PROCESS_PID = -1;
 
     internal const string VAL_PROTOCOL_TYPE = "Protocol";
 
@@ -32,9 +36,14 @@ namespace libxputty_std20 {
     #region --- Public properties ------------------------------------------------------------------------------
     public string Name { get; set; }
     public string CleanName => Name.Replace("%20", " ");
-    public int PID { get; set; }
 
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
+
+    public Process PuttyProcess { get; protected set; }
+    public bool IsRunning => PuttyProcess != null;
+    public int PID => PuttyProcess == null ? NO_PROCESS_PID : PuttyProcess.Id;
+    public string CommandLine => PuttyProcess == null ? "" : GetCommandLine();
+
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Event handlers --------------------------------------------
@@ -56,15 +65,25 @@ namespace libxputty_std20 {
     public virtual void Dispose() {
       if ( WatchTask != null ) {
         WatchTaskCancellation.Cancel();
+        WatchTask.Wait(WatchTaskCancellation.Token);
       }
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    public static TPuttyProtocol GetSessionProtocolFromRegistry(string sessionKeyName = "") {
+    public void SetRunningProcess(Process process) {
+      PuttyProcess = process;
+    }
 
+    public void SetRunningProcess(IPuttySession puttySession) {
+      PuttyProcess = puttySession.PuttyProcess;
+    }
+
+    public static TPuttyProtocol GetSessionProtocolFromRegistry(string sessionKeyName = "") {
+      #region === Validate parameters ===
       if ( string.IsNullOrWhiteSpace(sessionKeyName) ) {
         return TPuttyProtocol.Unknown;
       }
+      #endregion === Validate parameters ===
 
       string PuttySessionKeyName = $@"{REG_BASE}\{sessionKeyName}";
       using ( RegistryKey PuttySessionKey = Registry.CurrentUser.OpenSubKey(PuttySessionKeyName) ) {
@@ -129,29 +148,36 @@ namespace libxputty_std20 {
     private static IPuttySession _Empty;
 
     public virtual void Start() {
-      Process PuttyProcess = new Process();
+      if ( CheckIsRunning() ) {
+        return;
+      }
+
+      PuttyProcess = new Process();
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
         Arguments = $"-load {"\"" + CleanName + "\""}"
       };
-      Console.WriteLine($"Loading {StartInfo.Arguments} ...");
-      PuttyProcess.StartInfo = StartInfo;
+      Log.Write($"Loading {StartInfo.Arguments} ...");
 
+      PuttyProcess.StartInfo = StartInfo;
       PuttyProcess.Start();
-      PID = PuttyProcess.Id;
 
       if ( OnStart != null ) {
         OnStart(this, EventArgs.Empty);
       }
 
       WatchTask = Task.Run(async () => {
-        while ( PID != 0 || WatchTaskCancellation.IsCancellationRequested ) {
+        while ( PID != NO_PROCESS_PID || WatchTaskCancellation.IsCancellationRequested ) {
           try {
             Process WatchedProcess = Process.GetProcessById(PID);
-            await Task.Delay(200);
+            await Task.Delay(WATCH_DELAY_MS);
           } catch {
-            PID = 0;
+            PuttyProcess.Dispose();
+            PuttyProcess = null;
           }
+        }
+        if ( PuttyProcess != null && WatchTaskCancellation.IsCancellationRequested ) {
+          PuttyProcess.Kill();
         }
         if ( OnExit != null ) {
           OnExit(this, EventArgs.Empty);
@@ -166,12 +192,24 @@ namespace libxputty_std20 {
       return Process.GetProcesses().Any(x => x.Id == PID);
     }
 
+    public string GetCommandLine() {
+      using ( ManagementObjectSearcher WmiSearch = new ManagementObjectSearcher($"SELECT Name,CommandLine,ProcessId FROM Win32_Process WHERE ProcessId={PID}") ) {
+        ManagementObjectCollection Processes = WmiSearch.Get();
+        ManagementObjectEnumerator managementObjectEnumerator = Processes.GetEnumerator();
+        managementObjectEnumerator.Reset();
+        if ( managementObjectEnumerator.MoveNext() ) {
+          return managementObjectEnumerator.Current["CommandLine"].ToString();
+        }
+        return "";
+      }
+    }
+
     public static IEnumerable<IPuttySession> GetAllRunningSessions() {
-      using ( ManagementClass WMI = new ManagementClass("Win32_Process") ) {
-        foreach ( ManagementObject ProcessItem in WMI.GetInstances() ) {
-          if ( ProcessItem["name"].ToString().ToLowerInvariant() == EXECUTABLE_PUTTY ) {
-            yield return new TPuttySession(ProcessItem["CommandLine"].ToString()) { PID = Convert.ToInt32(ProcessItem["ProcessId"]) };
-          }
+      using ( ManagementObjectSearcher WmiSearch = new ManagementObjectSearcher($"SELECT Name,CommandLine,ProcessId FROM Win32_Process WHERE Name=\"{EXECUTABLE_PUTTY}\"") ) {
+        foreach ( ManagementObject ProcessItem in WmiSearch.Get() ) {
+          TPuttySession RetVal = new TPuttySession(ProcessItem["CommandLine"].ToString());
+          RetVal.SetRunningProcess(Process.GetProcessById(Convert.ToInt32(ProcessItem["ProcessId"])));
+          yield return RetVal;
         }
       }
     }
