@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using BLTools;
 using BLTools.MVVM;
 using libxputty_std20;
@@ -18,45 +19,36 @@ namespace XPuttyMan {
     #endregion RelayCommand
 
     public string Name => _PuttySession.Name ?? "";
-    public string DisplayName => Name.Replace("%20", " ");
+    public string CleanName => Name.Replace("%20", " ");
     public string HostName {
       get {
-        if ( _PuttySession.Protocol.IsSSH ) {
-          TPuttySessionSSH TempPuttySessionSSH = _PuttySession as TPuttySessionSSH;
-          return $"{TempPuttySessionSSH.HostName ?? ""}:{TempPuttySessionSSH.Port}";
+        if ( _PuttySession is TPuttySessionSSH PuttySessionSSH ) {
+          return $"{PuttySessionSSH.HostName ?? ""}:{PuttySessionSSH.Port}";
         }
         return "";
       }
     }
+    public string RemoteCommand => _PuttySession is TPuttySessionSSH PuttySessionSSH ? PuttySessionSSH.SSH_RemoteCommand : "";
+    public Visibility IsRemoteCommandVisible => RemoteCommand == "" ? Visibility.Collapsed : Visibility.Visible;
     public bool IsRunning => _PuttySession.IsRunning;
     public string PuttyCommandLine => _PuttySession.CommandLine;
     public int PID => _PuttySession.PID;
-
-    public void SetRunningProcess(IPuttySession puttySession) {
-      _PuttySession.SetRunningProcess(puttySession.PuttyProcess);
-      NotifyPropertyChanged(nameof(PID));
-      NotifyPropertyChanged(nameof(IsRunning));
-      NotifyPropertyChanged(nameof(PuttyCommandLine));
-      NotifyPropertyChanged(nameof(RunningIcon));
-    }
-
     public string RunningIcon => IsRunning ? App.GetPictureFullname("putty_icon") : "";
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-
     public VMPuttySession() {
-      _Initialize(TPuttySession.Empty);
       _InitializeCommands();
+      _Initialize(TPuttySession.Empty);
     }
     public VMPuttySession(IPuttySession puttySession) {
-      _Initialize(puttySession);
       _InitializeCommands();
+      _Initialize(puttySession);
     }
 
     private void _Initialize(IPuttySession puttySession) {
       _PuttySession = puttySession;
       NotifyPropertyChanged(nameof(Name));
-      NotifyPropertyChanged(nameof(DisplayName));
+      NotifyPropertyChanged(nameof(CleanName));
       NotifyPropertyChanged(nameof(HostName));
       _PuttySession.OnStart += _PuttySession_OnStart;
       _PuttySession.OnExit += _PuttySession_OnExit;
@@ -77,26 +69,40 @@ namespace XPuttyMan {
       _PuttySession.Start();
     }
 
+    public void SetRunningProcess(IPuttySession puttySession) {
+      _PuttySession.SetRunningProcess(puttySession.PuttyProcess);
+      NotifyPropertyChanged(nameof(PID));
+      NotifyPropertyChanged(nameof(IsRunning));
+      NotifyPropertyChanged(nameof(PuttyCommandLine));
+      NotifyPropertyChanged(nameof(RunningIcon));
+    }
+
     private void _PuttySession_OnExit(object sender, EventArgs e) {
-      Log.Write($"Session {DisplayName} exited.");
+      Log.Write($"Session {CleanName} exited.");
       NotifyPropertyChanged(nameof(IsRunning));
       NotifyPropertyChanged(nameof(RunningIcon));
     }
 
     private void _PuttySession_OnStart(object sender, EventArgs e) {
-      Log.Write($"Starting session {DisplayName}");
+      Log.Write($"Starting session {CleanName}");
       NotifyPropertyChanged(nameof(IsRunning));
       NotifyPropertyChanged(nameof(RunningIcon));
     }
 
-    public static VMPuttySession Design {
+    public static VMPuttySession DesignVMPuttySession {
       get {
-        if ( _Design == null ) {
-          _Design = new VMPuttySession();
+        if ( _DesignVMPuttySession == null ) {
+          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
+            Port = 22,
+            HostName = "server.test.priv",
+            SSH_RemoteCommand = "tail -n -f 100 /var/log/syslog"
+          };
+          
+          _DesignVMPuttySession = new VMPuttySession(FakeSession);
         }
-        return _Design;
+        return _DesignVMPuttySession;
       }
     }
-    private static VMPuttySession _Design;
+    private static VMPuttySession _DesignVMPuttySession;
   }
 }

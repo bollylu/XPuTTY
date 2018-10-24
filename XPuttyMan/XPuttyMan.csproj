@@ -27,7 +27,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -219,8 +219,12 @@
     <Compile Include="Base classes\TRelayCommand.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\VMPuttySession.cs" />
+    <Compile Include="ViewModels\VMPuttySessionsList.cs" />
     <Compile Include="Views\ViewOneSession.xaml.cs">
       <DependentUpon>ViewOneSession.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ViewSessionsList.xaml.cs">
+      <DependentUpon>ViewSessionsList.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -235,6 +239,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\ViewOneSession.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewSessionsList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

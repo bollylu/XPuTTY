@@ -63,5 +63,6 @@ namespace XPuttyMan {
       Application.Current.Shutdown();
     }
     #endregion Menu
+
   }
 }

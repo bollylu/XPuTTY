@@ -25,36 +25,8 @@ namespace XPuttyMan {
 
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
 
-    public ObservableCollection<VMPuttySession> ObservableSessions { get; set; }
-    public ObservableCollection<VMPuttySession> ObservableCommandSessions { get; set; }
-
-    public VMPuttySession SelectedSession {
-      get {
-        if ( !ObservableSessions.Any() && _SelectedSession == null ) {
-          return new VMPuttySession(TPuttySession.Empty);
-        }
-        return _SelectedSession;
-      }
-      set {
-        _SelectedSession = value;
-        NotifyPropertyChanged(nameof(SelectedSession));
-      }
-    }
-    private VMPuttySession _SelectedSession;
-
-    public VMPuttySession SelectedCommandSession {
-      get {
-        if ( !ObservableCommandSessions.Any() && _SelectedCommandSession == null ) {
-          return new VMPuttySession(TPuttySession.Empty);
-        }
-        return _SelectedCommandSession;
-      }
-      set {
-        _SelectedCommandSession = value;
-        NotifyPropertyChanged(nameof(SelectedCommandSession));
-      }
-    }
-    private VMPuttySession _SelectedCommandSession;
+    public VMPuttySessionsList ObservableSessions { get; set; }
+    public VMPuttySessionsList ObservableCommandSessions { get; set; }
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() : base() {
@@ -63,8 +35,8 @@ namespace XPuttyMan {
     }
 
     private void _Initialize() {
-      ObservableSessions = new ObservableCollection<VMPuttySession>();
-      ObservableCommandSessions = new ObservableCollection<VMPuttySession>();
+      ObservableSessions = new VMPuttySessionsList();
+      ObservableCommandSessions = new VMPuttySessionsList();
       RefreshSessions();
     }
 
@@ -110,8 +82,8 @@ namespace XPuttyMan {
 
       TPuttySessionList Sessions = new TPuttySessionList();
       Sessions.ReadSessionsFromRegistry();
-      ObservableSessions.Clear();
-      ObservableCommandSessions.Clear();
+      ObservableSessions = new VMPuttySessionsList();
+      ObservableCommandSessions = new VMPuttySessionsList();
 
       NotifyInitProgressBar(Sessions.Content.Count);
       int i = 0;
@@ -157,14 +129,14 @@ namespace XPuttyMan {
       CommandRefreshSessions.NotifyCanExecuteChanged();
     }
 
-    public static MainViewModel Design {
+    public static MainViewModel DesignMainViewModel {
       get {
-        if ( _Design == null ) {
-          _Design = new MainViewModel();
+        if ( _DesignMainViewModel == null ) {
+          _DesignMainViewModel = new MainViewModel();
         }
-        return _Design;
+        return _DesignMainViewModel;
       }
     }
-    private static MainViewModel _Design;
+    private static MainViewModel _DesignMainViewModel;
   }
 }

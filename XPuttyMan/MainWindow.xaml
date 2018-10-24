@@ -4,8 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:bltoolswpfctrl="clr-namespace:BLTools.WPF.Controls;assembly=BLTools.WPF.Controls.45"
-        xmlns:libputty="clr-namespace:libxputty_std20;assembly=libxputty-std20"
         xmlns:local="clr-namespace:XPuttyMan"
+        xmlns:localViews="clr-namespace:XPuttyMan.Views"
         mc:Ignorable="d"
         Title="XPuttyMan"
         Height="800"
@@ -55,7 +55,7 @@
 
     </Menu>
 
-    <Grid d:DataContext="{Binding Source={x:Static local:MainViewModel.Design}}"
+    <Grid d:DataContext="{Binding Source={x:Static local:MainViewModel.DesignMainViewModel}}"
           Grid.Row="1">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
@@ -70,198 +70,14 @@
 
       <TabControl Grid.Row="1">
         <TabItem Header="Sessions">
-          <ItemsControl ItemsSource="{Binding Path=ObservableSessions}"
-                        Grid.Row="1"
-                        Margin="10">
-            <ItemsControl.Template>
-              <ControlTemplate TargetType="ItemsControl">
-                <ScrollViewer VerticalScrollBarVisibility="Visible">
-                  <ItemsPresenter />
-                </ScrollViewer>
-              </ControlTemplate>
-            </ItemsControl.Template>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <DataTemplate.Resources>
-                  <Style TargetType="TextBlock">
-                    <Setter Property="FontSize"
-                            Value="14" />
-                    <Setter Property="HorizontalAlignment"
-                            Value="Left" />
-                    <Setter Property="VerticalAlignment"
-                            Value="Center" />
-                  </Style>
-                  <Style TargetType="Image">
-                    <Setter Property="HorizontalAlignment"
-                            Value="Right" />
-                    <Setter Property="VerticalAlignment"
-                            Value="Center" />
-                  </Style>
-                </DataTemplate.Resources>
-                <Border BorderBrush="DarkBlue"
-                        BorderThickness="1"
-                        CornerRadius="5"
-                        Margin="2"
-                        Name="InnerBorder"
-                        d:DataContext="{Binding Source={x:Static local:VMPuttySession.Design}}">
-                  <Border.Resources>
-                    <Style TargetType="Grid">
-                      <Style.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-                          <Setter Property="Background"
-                                  Value="Yellow" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver"
-                                 Value="False">
-                          <Setter Property="Background"
-                                  Value="White" />
-                        </Trigger>
-                      </Style.Triggers>
-                    </Style>
-                    <Style TargetType="Image">
-                      <Style.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-                          <Setter Property="ToolTip"
-                                  Value="{Binding Path=RunningProcess}" />
-                        </Trigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Resources>
-                  <Grid Margin="2">
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="100" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Vertical"
-                                Grid.Column="0">
-                      <TextBlock Text="{Binding Path=DisplayName}"
-                                 Width="550"
-                                 FontWeight="Bold"
-                                 Margin="10,0,0,0" />
-                      <TextBlock Text="{Binding Path=HostName}"
-                                 Width="550"
-                                 Margin="20,2,0,5" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal"
-                                Grid.Column="1"
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Center">
-                      <Button Content="Start"
-                              Command="{Binding Path=CommandStartSession}"
-                              Margin="2"
-                              Padding="5,2,5,2" />
-                      <Image Source="{Binding Path=RunningIcon}"
-                             Width="32"
-                             Height="32"
-                             Margin="5,2,5,2"
-                             VerticalAlignment="Center" />
-                    </StackPanel>
-                  </Grid>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+          <localViews:ViewSessionsList DataContext="{Binding Path=ObservableSessions}" />
         </TabItem>
         <TabItem Header="Commands">
-          <ItemsControl ItemsSource="{Binding Path=ObservableCommandSessions}"
-                        Grid.Row="1"
-                        Margin="10">
-            <ItemsControl.Template>
-              <ControlTemplate TargetType="ItemsControl">
-                <ScrollViewer VerticalScrollBarVisibility="Visible">
-                  <ItemsPresenter />
-                </ScrollViewer>
-              </ControlTemplate>
-            </ItemsControl.Template>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <DataTemplate.Resources>
-                  <Style TargetType="TextBlock">
-                    <Setter Property="FontSize"
-                            Value="14" />
-                    <Setter Property="HorizontalAlignment"
-                            Value="Left" />
-                    <Setter Property="VerticalAlignment"
-                            Value="Center" />
-                  </Style>
-                  <Style TargetType="Image">
-                    <Setter Property="HorizontalAlignment"
-                            Value="Right" />
-                    <Setter Property="VerticalAlignment"
-                            Value="Center" />
-                  </Style>
-                </DataTemplate.Resources>
-                <Border BorderBrush="DarkBlue"
-                        BorderThickness="1"
-                        CornerRadius="5"
-                        Margin="2"
-                        Name="InnerBorder"
-                        d:DataContext="{Binding Source={x:Static local:VMPuttySession.Design}}">
-                  <Border.Resources>
-                    <Style TargetType="Grid">
-                      <Style.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-                          <Setter Property="Background"
-                                  Value="Yellow" />
-                        </Trigger>
-                        <Trigger Property="IsMouseOver"
-                                 Value="False">
-                          <Setter Property="Background"
-                                  Value="White" />
-                        </Trigger>
-                      </Style.Triggers>
-                    </Style>
-                    <Style TargetType="Image">
-                      <Style.Triggers>
-                        <Trigger Property="IsMouseOver"
-                                 Value="True">
-                          <Setter Property="ToolTip"
-                                  Value="{Binding Path=PuttyCommandLine}" />
-                        </Trigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Resources>
-                  <Grid Margin="2">
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="100" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Vertical"
-                                Grid.Column="0">
-                      <TextBlock Text="{Binding Path=DisplayName}"
-                                 Width="550"
-                                 FontWeight="Bold"
-                                 Margin="10,0,0,0" />
-                      <TextBlock Text="{Binding Path=HostName}"
-                                 Width="550"
-                                 Margin="20,2,0,5" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal"
-                                Grid.Column="1"
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Center">
-                      <Button Content="Start"
-                              Command="{Binding Path=CommandStartSession}"
-                              Margin="2"
-                              Padding="5,2,5,2" />
-                      <Image Source="{Binding Path=RunningIcon}"
-                             Width="32"
-                             Height="32"
-                             Margin="5,2,5,2"
-                             VerticalAlignment="Center" />
-                    </StackPanel>
-                  </Grid>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+          <localViews:ViewSessionsList DataContext="{Binding Path=ObservableCommandSessions}" />
         </TabItem>
       </TabControl>
-      
-      <TextBlock Text="{Binding Path=SelectedSession.DisplayName}"
+
+      <TextBlock Text="{Binding Path=SelectedSession.CleanName}"
                  Margin="10"
                  Grid.Row="2" />
 
