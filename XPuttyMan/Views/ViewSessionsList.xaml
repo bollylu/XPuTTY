@@ -5,27 +5,36 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:localViewModels="clr-namespace:XPuttyMan"
              xmlns:localViews="clr-namespace:XPuttyMan.Views"
-             
              mc:Ignorable="d">
 
-  
+
   <Grid DataContext="{Binding}"
-        d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
+        d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}"
+        Width="{Binding Source={RelativeSource AncestorType=TabControl, Mode=FindAncestor}, Path=Width}">
+
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
     <Grid.RowDefinitions>
       <RowDefinition Height="*" />
       <RowDefinition Height="30" />
     </Grid.RowDefinitions>
 
-    <ItemsControl ItemsSource="{Binding Path=PuttySessions}"
-                  Margin="10">
+    <ListView ItemsSource="{Binding Path=PuttySessions}"
+              Margin="10"
+              SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical"
+              SnapsToDevicePixels="True"
+              SelectedItem="{Binding Path=SelectedSession}"
+              SelectionMode="Single"
+              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-      <ItemsControl.Template>
-        <ControlTemplate TargetType="ItemsControl">
-          <ScrollViewer VerticalScrollBarVisibility="Visible">
-            <ItemsPresenter />
-          </ScrollViewer>
-        </ControlTemplate>
-      </ItemsControl.Template>
+      <ListView.ContextMenu>
+        <ContextMenu d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
+          <MenuItem Header="Export to file"
+                    Command="{Binding Path=CommandExport}" />
+        </ContextMenu>
+      </ListView.ContextMenu>
 
       <ItemsControl.ItemTemplate>
         <DataTemplate>
@@ -42,7 +51,7 @@
       </ItemsControl.ItemTemplate>
 
 
-    </ItemsControl>
+    </ListView>
 
     <TextBlock Text="{Binding Path=SelectedSession.CleanName}"
                Margin="5"

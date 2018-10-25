@@ -15,23 +15,14 @@
       <bltoolswpf:BoolToVisibilityConverter x:Key="BoolToVisibility" />
     </Grid.Resources>
 
-    <i:Interaction.Triggers>
-      <!-- this will call the associated commands on your viewmodel when the mouse enters/leaves the corresponding view in your itemscontrol, from there you can create the viewmodel functionality you'd like-->
-      <i:EventTrigger EventName="MouseEnter">
-        <i:InvokeCommandAction Command="{Binding CommandMouseOver}" />
-      </i:EventTrigger>
-      <i:EventTrigger EventName="MouseLeave">
-        <i:InvokeCommandAction Command="{Binding CommandMouseLeave}" />
-      </i:EventTrigger>
-    </i:Interaction.Triggers>
-
     <Border BorderBrush="DarkBlue"
             BorderThickness="1"
             CornerRadius="5"
             Margin="2"
             Name="InnerBorder"
             DataContext="{Binding}"
-            d:DataContext="{Binding Source={x:Static localViewModel:VMPuttySession.DesignVMPuttySession}}">
+            d:DataContext="{Binding Source={x:Static localViewModel:VMPuttySession.DesignVMPuttySession}}"
+            Width="{Binding Source={RelativeSource AncestorLevel=1, AncestorType=ListView,Mode=FindAncestor}, Path=Width}">
 
       <Grid Margin="2">
         <Grid.RowDefinitions>

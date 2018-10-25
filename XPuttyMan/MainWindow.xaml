@@ -9,8 +9,8 @@
         mc:Ignorable="d"
         Title="XPuttyMan"
         Height="800"
-        Width="725"
-        MaxWidth="725">
+        Width="750"
+        MinWidth="725">
 
   <Grid>
     <Grid.RowDefinitions>
