@@ -28,6 +28,8 @@ namespace XPuttyMan {
     public VMPuttySessionsList ObservableSessions { get; set; }
     public VMPuttySessionsList ObservableCommandSessions { get; set; }
 
+    public VMPuttySession SelectedSession => ObservableSessions.IsActive ? ObservableSessions.SelectedSession : ObservableCommandSessions.SelectedSession;
+
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() : base() {
       _InitializeCommands();
@@ -78,18 +80,19 @@ namespace XPuttyMan {
       Log.Write("Refreshing sessions...");
       NotifyExecutionProgress("Reading sessions...");
 
+      ObservableSessions = new VMPuttySessionsList();
+      ObservableCommandSessions = new VMPuttySessionsList();
+
       IEnumerable<IPuttySession> CurrentlyRunningSessions = TPuttySession.GetAllRunningSessions();
 
       TPuttySessionList Sessions = new TPuttySessionList();
       Sessions.ReadSessionsFromRegistry();
-      ObservableSessions = new VMPuttySessionsList();
-      ObservableCommandSessions = new VMPuttySessionsList();
 
-      NotifyInitProgressBar(Sessions.Content.Count);
+      NotifyInitProgressBar(Sessions.Items.Count);
       int i = 0;
       
       #region --- Sessions --------------------------------------------
-      foreach ( IPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH)
+      foreach ( IPuttySession SessionItem in Sessions.Items.Where(x => x.Protocol.IsSSH)
                                                              .Where(x => !string.IsNullOrWhiteSpace(((TPuttySessionSSH)x).HostName))
                                                              .Where(x => !x.Name.StartsWith("zzz")) ) {
         NotifyProgressBarNewValue(i++);
@@ -107,7 +110,7 @@ namespace XPuttyMan {
       #endregion --- Sessions --------------------------------------------
 
       #region --- Command sessions --------------------------------------------
-      foreach ( IPuttySession SessionItem in Sessions.Content.Where(x => x.Protocol.IsSSH)
+      foreach ( IPuttySession SessionItem in Sessions.Items.Where(x => x.Protocol.IsSSH)
                                                              .Where(x => !string.IsNullOrWhiteSpace(((TPuttySessionSSH)x).HostName))
                                                              .Where(x => x.Name.StartsWith("zzz")) ) {
         NotifyProgressBarNewValue(i++);

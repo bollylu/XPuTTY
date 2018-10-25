@@ -6,53 +6,55 @@ using System.Management;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using BLTools;
 using Microsoft.Win32;
 using static System.Management.ManagementObjectCollection;
 
 namespace libxputty_std20 {
-  public class TPuttySession : IPuttySession, IDisposable {
+  public class TPuttySession : IPuttySession, IDisposable, IToXml {
 
     #region --- Constants --------------------------------------------
-    internal const string REG_BASE = @"Software\SimonTatham\PuTTY\Sessions";
-    internal const string EXECUTABLE_PUTTY = "putty.exe";
-    private const int WATCH_DELAY_MS = 200;
-    public const int NO_PROCESS_PID = -1;
+    internal const string REG_KEYNAME_BASE = @"Software\SimonTatham\PuTTY\Sessions";
 
-    internal const string VAL_PROTOCOL_TYPE = "Protocol";
+    protected const string EXECUTABLE_PUTTY = "putty.exe";
+    protected const string EXECUTABLE_PLINK = "plink.exe";
+    protected const string EXECUTABLE_PSCP = "pscp.exe";
 
-    public const string VAL_PROTOCOL_SERIAL_LINE = "SerialLine";
-    public const string VAL_PROTOCOL_SERIAL_SPEED = "SerialSpeed";
-    public const string VAL_PROTOCOL_SERIAL_DATA_BITS = "SerialDataBits";
-    public const string VAL_PROTOCOL_SERIAL_PARITY = "SerialParity";
-    public const string VAL_PROTOCOL_SERIAL_STOP_BITS = "SerialStopHalfBits";
-    public const string VAL_PROTOCOL_SERIAL_FLOW_CONTROL = "SerialFlowControl";
+    protected const int WATCH_DELAY_MS = 200;
+    protected const int NO_PROCESS_PID = -1;
 
-    public const string VAL_HOSTNAME = "HostName";
-    public const string VAL_PORT = "PortNumber";
-    public const string VAL_SSH_REMOTE_COMMAND = "RemoteCommand";
+    internal const string REG_PROTOCOL_TYPE = "Protocol";
+
+    protected const string XML_THIS_ELEMENT = "Session";
+    protected const string XML_ATTRIBUTE_NAME = "Name";
+    protected const string XML_ATTRIBUTE_PROTOCOL = "Protocol";
+
     #endregion --- Constants --------------------------------------------
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string Name { get; set; }
     public string CleanName => Name.Replace("%20", " ");
-
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
-
-    public Process PuttyProcess { get; protected set; }
-    public bool IsRunning => PuttyProcess != null;
-    public int PID => PuttyProcess == null ? NO_PROCESS_PID : PuttyProcess.Id;
-    public string CommandLine => PuttyProcess == null ? "" : GetCommandLine();
-
     #endregion --- Public properties ---------------------------------------------------------------------------
+
+    public override string ToString() {
+      StringBuilder RetVal = new StringBuilder();
+      RetVal.Append($"Session {CleanName.PadRight(80, '.')} : ");
+      return RetVal.ToString();
+    }
+
+    public virtual XElement ToXml() {
+      XElement RetVal = new XElement(XML_THIS_ELEMENT);
+      RetVal.SetAttributeValue(XML_ATTRIBUTE_NAME, Name);
+      RetVal.SetAttributeValue(XML_ATTRIBUTE_PROTOCOL, Protocol);
+      return RetVal;
+    }
 
     #region --- Event handlers --------------------------------------------
     public event EventHandler OnStart;
     public event EventHandler OnExit;
     #endregion --- Event handlers --------------------------------------------
-
-    private Task WatchTask;
-    private CancellationTokenSource WatchTaskCancellation = new CancellationTokenSource();
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySession() {
@@ -70,12 +72,15 @@ namespace libxputty_std20 {
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    public void SetRunningProcess(Process process) {
-      PuttyProcess = process;
+    #region --- Registry interactions --------------------------------------------
+    public static RegistryKey GetRegistryKey(string keyName) {
+      string PuttySessionKeyName = $@"{REG_KEYNAME_BASE}\{keyName}";
+      return Registry.CurrentUser.OpenSubKey(PuttySessionKeyName);
     }
 
-    public void SetRunningProcess(IPuttySession puttySession) {
-      PuttyProcess = puttySession.PuttyProcess;
+    public static RegistryKey GetRegistryKeyRW(string keyName) {
+      string PuttySessionKeyName = $@"{REG_KEYNAME_BASE}\{keyName}";
+      return Registry.CurrentUser.CreateSubKey(PuttySessionKeyName, true);
     }
 
     public static TPuttyProtocol GetSessionProtocolFromRegistry(string sessionKeyName = "") {
@@ -85,57 +90,20 @@ namespace libxputty_std20 {
       }
       #endregion === Validate parameters ===
 
-      string PuttySessionKeyName = $@"{REG_BASE}\{sessionKeyName}";
+      string PuttySessionKeyName = $@"{REG_KEYNAME_BASE}\{sessionKeyName}";
       using ( RegistryKey PuttySessionKey = Registry.CurrentUser.OpenSubKey(PuttySessionKeyName) ) {
-        return PuttySessionKey.GetValue(VAL_PROTOCOL_TYPE, "") as string;
+        return PuttySessionKey.GetValue(REG_PROTOCOL_TYPE, "") as string;
       }
     }
 
-    public static IPuttySession GetSessionFromRegistry(string sessionKeyName = "") {
-      #region === Validate parameters ===
-      if ( string.IsNullOrWhiteSpace(sessionKeyName) ) {
-        return null;
-      }
-      #endregion === Validate parameters ===
-
-      string PuttySessionKeyName = $@"{REG_BASE}\{sessionKeyName}";
-
-      using ( RegistryKey PuttySessionKey = Registry.CurrentUser.OpenSubKey(PuttySessionKeyName) ) {
-
-        if ( GetSessionProtocolFromRegistry(sessionKeyName).IsSSH ) {
-          TPuttySessionSSH NewSessionSSH = new TPuttySessionSSH(sessionKeyName) {
-            HostName = PuttySessionKey.GetValue(VAL_HOSTNAME, "") as string,
-            Port = (int)PuttySessionKey.GetValue(VAL_PORT, 0),
-            SSH_RemoteCommand = PuttySessionKey.GetValue(VAL_SSH_REMOTE_COMMAND, "") as string
-          };
-          return NewSessionSSH;
-        }
-
-        if ( GetSessionProtocolFromRegistry(sessionKeyName).IsSerial ) {
-          TPuttySessionSerial NewSessionSerial = new TPuttySessionSerial(sessionKeyName) {
-            SerialLine = PuttySessionKey.GetValue(VAL_PROTOCOL_SERIAL_LINE, "") as string,
-            SerialSpeed = (int)PuttySessionKey.GetValue(VAL_PROTOCOL_SERIAL_SPEED, 0),
-            SerialParity = Convert.ToByte(PuttySessionKey.GetValue(VAL_PROTOCOL_SERIAL_PARITY, 0)),
-            SerialStopBits = Convert.ToByte(PuttySessionKey.GetValue(VAL_PROTOCOL_SERIAL_STOP_BITS, 0)),
-            SerialDataBits = Convert.ToByte(PuttySessionKey.GetValue(VAL_PROTOCOL_SERIAL_DATA_BITS, 0))
-          };
-          return NewSessionSerial;
-        }
-
-        if ( GetSessionProtocolFromRegistry(sessionKeyName).IsRLogin ) {
-          return TPuttySession.Empty;
-        }
-
-        if ( GetSessionProtocolFromRegistry(sessionKeyName).IsTelnet ) {
-          return TPuttySession.Empty;
-        }
-        if ( GetSessionProtocolFromRegistry(sessionKeyName).IsRaw ) {
-          return TPuttySession.Empty;
-        }
-
-        return TPuttySession.Empty;
-      }
+    public virtual IPuttySession LoadFromRegistry() {
+      return this;
     }
+
+    public virtual void SaveToRegistry() {
+
+    } 
+    #endregion --- Registry interactions --------------------------------------------
 
     public static IPuttySession Empty {
       get {
@@ -146,6 +114,15 @@ namespace libxputty_std20 {
       }
     }
     private static IPuttySession _Empty;
+
+    #region --- Windows processes --------------------------------------------
+    public Process PuttyProcess { get; protected set; }
+    public bool IsRunning => PuttyProcess != null;
+    public int PID => PuttyProcess == null ? NO_PROCESS_PID : PuttyProcess.Id;
+    public string CommandLine => PuttyProcess == null ? "" : GetCommandLine();
+
+    private Task WatchTask;
+    private CancellationTokenSource WatchTaskCancellation = new CancellationTokenSource();
 
     public virtual void Start() {
       if ( CheckIsRunning() ) {
@@ -204,6 +181,14 @@ namespace libxputty_std20 {
       }
     }
 
+    public void SetRunningProcess(Process process) {
+      PuttyProcess = process;
+    }
+
+    public void SetRunningProcess(IPuttySession puttySession) {
+      PuttyProcess = puttySession.PuttyProcess;
+    }
+
     public static IEnumerable<IPuttySession> GetAllRunningSessions() {
       using ( ManagementObjectSearcher WmiSearch = new ManagementObjectSearcher($"SELECT Name,CommandLine,ProcessId FROM Win32_Process WHERE Name=\"{EXECUTABLE_PUTTY}\"") ) {
         foreach ( ManagementObject ProcessItem in WmiSearch.Get() ) {
@@ -212,6 +197,7 @@ namespace libxputty_std20 {
           yield return RetVal;
         }
       }
-    }
+    } 
+    #endregion --- Windows processes -------------------------------------------- 
   }
 }

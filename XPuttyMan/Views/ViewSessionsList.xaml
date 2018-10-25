@@ -5,10 +5,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:localViewModels="clr-namespace:XPuttyMan"
              xmlns:localViews="clr-namespace:XPuttyMan.Views"
+             
              mc:Ignorable="d">
-  <Grid>
+
+  
+  <Grid DataContext="{Binding}"
+        d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="30" />
+    </Grid.RowDefinitions>
+
     <ItemsControl ItemsSource="{Binding Path=PuttySessions}"
-                  d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}"
                   Margin="10">
 
       <ItemsControl.Template>
@@ -20,13 +28,24 @@
       </ItemsControl.Template>
 
       <ItemsControl.ItemTemplate>
-
         <DataTemplate>
-          <localViews:ViewOneSession />
+          <localViews:ViewOneSession>
+            <localViews:ViewOneSession.ContextMenu>
+              <ContextMenu d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
+                <MenuItem Header="Export to file"
+                          Command="{Binding Path=CommandExport}" />
+              </ContextMenu>
+            </localViews:ViewOneSession.ContextMenu>
+          </localViews:ViewOneSession>
         </DataTemplate>
 
       </ItemsControl.ItemTemplate>
 
+
     </ItemsControl>
+
+    <TextBlock Text="{Binding Path=SelectedSession.CleanName}"
+               Margin="5"
+               Grid.Row="1" />
   </Grid>
 </UserControl>

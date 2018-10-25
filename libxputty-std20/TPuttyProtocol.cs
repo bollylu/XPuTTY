@@ -116,17 +116,17 @@ namespace libxputty_std20 {
 
       switch ( source._Value ) {
         case EPuttyProtocol.Unknown:
-          return "Unknown";
+          return "UNKNOWN";
         case EPuttyProtocol.SSH:
           return "SSH";
         case EPuttyProtocol.Serial:
-          return "Serial";
+          return "SERIAL";
         case EPuttyProtocol.Telnet:
-          return "Telnet";
+          return "TELNET";
         case EPuttyProtocol.Raw:
-          return "Raw";
+          return "RAW";
         case EPuttyProtocol.RLogin:
-          return "RLogin";
+          return "RLOGIN";
       }
       return default;
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Xml.Linq;
 
 namespace libxputty_std20 {
   public interface IPuttySession : IDisposable {
@@ -19,8 +20,12 @@ namespace libxputty_std20 {
 
     bool CheckIsRunning();
     void SetRunningProcess(Process process);
+    void SaveToRegistry();
+    IPuttySession LoadFromRegistry();
 
     event EventHandler OnStart;
     event EventHandler OnExit;
+
+    XElement ToXml();
   }
 }

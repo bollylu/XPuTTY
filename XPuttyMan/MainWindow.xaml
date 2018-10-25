@@ -60,7 +60,6 @@
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
-        <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
       <Button Command="{Binding Path=CommandRefreshSessions}"
@@ -76,10 +75,6 @@
           <localViews:ViewSessionsList DataContext="{Binding Path=ObservableCommandSessions}" />
         </TabItem>
       </TabControl>
-
-      <TextBlock Text="{Binding Path=SelectedSession.CleanName}"
-                 Margin="10"
-                 Grid.Row="2" />
 
     </Grid>
 

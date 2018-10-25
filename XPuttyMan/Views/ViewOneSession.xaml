@@ -5,10 +5,26 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:localViewModel="clr-namespace:XPuttyMan"
              xmlns:local="clr-namespace:XPuttyMan.Views"
+             xmlns:bltoolswpf="clr-namespace:BLTools.WPF;assembly=BLTools.WPF.45"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
   <Grid>
+    <Grid.Resources>
+      <bltoolswpf:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    </Grid.Resources>
+
+    <i:Interaction.Triggers>
+      <!-- this will call the associated commands on your viewmodel when the mouse enters/leaves the corresponding view in your itemscontrol, from there you can create the viewmodel functionality you'd like-->
+      <i:EventTrigger EventName="MouseEnter">
+        <i:InvokeCommandAction Command="{Binding CommandMouseOver}" />
+      </i:EventTrigger>
+      <i:EventTrigger EventName="MouseLeave">
+        <i:InvokeCommandAction Command="{Binding CommandMouseLeave}" />
+      </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <Border BorderBrush="DarkBlue"
             BorderThickness="1"
             CornerRadius="5"
@@ -17,36 +33,39 @@
             DataContext="{Binding}"
             d:DataContext="{Binding Source={x:Static localViewModel:VMPuttySession.DesignVMPuttySession}}">
 
-      <Border.Resources>
-        
-        <Style TargetType="Grid">
-          <Style.Triggers>
-            <Trigger Property="IsMouseOver"
-                     Value="True">
-              <Setter Property="Background"
-                      Value="Yellow" />
-            </Trigger>
-            <Trigger Property="IsMouseOver"
-                     Value="False">
-              <Setter Property="Background"
-                      Value="White" />
-            </Trigger>
-          </Style.Triggers>
-        </Style>
-
-      </Border.Resources>
-
       <Grid Margin="2">
         <Grid.RowDefinitions>
           <RowDefinition />
           <RowDefinition />
         </Grid.RowDefinitions>
-
-        <Grid Grid.Row="0" Name="CompleteSessionDisplay">
+        <Grid.Style>
+          <Style TargetType="Grid">
+            <Style.Triggers>
+              <Trigger Property="IsMouseOver"
+                       Value="True">
+                <Setter Property="Background"
+                        Value="Yellow" />
+              </Trigger>
+              <Trigger Property="IsMouseOver"
+                       Value="False">
+                <Setter Property="Background"
+                        Value="White" />
+              </Trigger>
+            </Style.Triggers>
+          </Style>
+        </Grid.Style>
+        <Grid Grid.Row="0">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="90" />
           </Grid.ColumnDefinitions>
+          <Grid.ContextMenu>
+            <ContextMenu>
+              <MenuItem Header="Edit remote command"
+                        Command="{Binding Path=CommandEditSessionRemoteCommand}"
+                        IsEnabled="{Binding Path=CanEditRemoteControl}" />
+            </ContextMenu>
+          </Grid.ContextMenu>
           <StackPanel Orientation="Vertical">
             <StackPanel.Resources>
               <Style TargetType="TextBlock">
@@ -68,7 +87,6 @@
 
           </StackPanel>
 
-
           <StackPanel Orientation="Horizontal"
                       Grid.Column="1"
                       Margin="5,0,0,0"
@@ -88,17 +106,26 @@
                 </Style.Triggers>
               </Style>
             </StackPanel.Resources>
-            <Button Content="Start"
-                    Command="{Binding Path=CommandStartSession}"
+            <Button Command="{Binding Path=CommandStartSession}"
                     Margin="2"
-                    Padding="5,2,5,2" />
-            <Image Source="{Binding Path=RunningIcon}"
-                   Width="32"
-                   Height="32"
-                   Margin="5,2,5,2"
-                   VerticalAlignment="Center" />
+                    Width="50"
+                    Height="50"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    Background="Transparent" BorderThickness="0"
+                    >
+              
+              <Button.Content>
+                <Image Source="{Binding Path=RunningIcon}"
+                       Width="48"
+                       Height="48"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center" />
+              </Button.Content>
+            </Button>
           </StackPanel>
-
 
         </Grid>
 
@@ -107,10 +134,12 @@
                 BorderThickness="1"
                 CornerRadius="5"
                 Margin="5"
-                Visibility="{Binding Path=IsRemoteCommandVisible}">
+                Visibility="{Binding Path=CanEditRemoteCommand, Converter={StaticResource BoolToVisibility}}">
           <ScrollViewer VerticalScrollBarVisibility="Auto">
             <TextBlock Text="{Binding Path=RemoteCommand}"
-                       Margin="5,2,5,2" TextWrapping="Wrap" />
+                       Margin="5,2,5,2"
+                       FontFamily="Consolas,Courier New"
+                       TextWrapping="Wrap" />
           </ScrollViewer>
         </Border>
 

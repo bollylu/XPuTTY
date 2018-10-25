@@ -14,8 +14,15 @@ namespace XPuttyMan {
 
     private IPuttySession _PuttySession;
 
+    public IPuttySession ReadOnlySession => _PuttySession;
+
     #region RelayCommand
+    public TRelayCommand CommandEditSessionRemoteCommand { get; private set; }
+    public TRelayCommand CommandEditSessionRemoteCommandOk { get; private set; }
+    public TRelayCommand CommandEditSessionRemoteCommandCancel { get; private set; }
     public TRelayCommand CommandStartSession { get; private set; }
+    public TRelayCommand CommandMouseOver { get; private set; }
+    public TRelayCommand CommandMouseLeave { get; private set; }
     #endregion RelayCommand
 
     public string Name => _PuttySession.Name ?? "";
@@ -28,12 +35,26 @@ namespace XPuttyMan {
         return "";
       }
     }
-    public string RemoteCommand => _PuttySession is TPuttySessionSSH PuttySessionSSH ? PuttySessionSSH.SSH_RemoteCommand : "";
-    public Visibility IsRemoteCommandVisible => RemoteCommand == "" ? Visibility.Collapsed : Visibility.Visible;
+    public string RemoteCommand {
+      get {
+        return _PuttySession is TPuttySessionSSH PuttySessionSSH ? PuttySessionSSH.RemoteCommand : "";
+      }
+      set {
+        if ( _PuttySession is TPuttySessionSSH PuttySessionSSH ) {
+          PuttySessionSSH.RemoteCommand = value;
+        }
+      }
+    }
+    public bool CanEditRemoteCommand => RemoteCommand != "";
+    public bool IsRemoteCommandInProgress { get; private set; }
     public bool IsRunning => _PuttySession.IsRunning;
     public string PuttyCommandLine => _PuttySession.CommandLine;
     public int PID => _PuttySession.PID;
-    public string RunningIcon => IsRunning ? App.GetPictureFullname("putty_icon") : "";
+    public string RunningIcon => IsRunning ? App.GetPictureFullname("putty_icon") : App.GetPictureFullname("connect_icon");
+
+    public bool IsSelected { get; set; }
+
+    private Views.WindowEditRemoteCommand EditRemoteCommandWindow;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public VMPuttySession() {
@@ -55,7 +76,12 @@ namespace XPuttyMan {
     }
 
     private void _InitializeCommands() {
-      CommandStartSession = new TRelayCommand(() => Start(), _ => { return true; });
+      CommandStartSession = new TRelayCommand(() => _Start(), _ => true);
+      CommandEditSessionRemoteCommand = new TRelayCommand(() => _EditRemoteCommand(), _ => !IsRunning && CanEditRemoteCommand);
+      CommandEditSessionRemoteCommandOk = new TRelayCommand(() => _EditRemoteCommandOk(), _ => true);
+      CommandEditSessionRemoteCommandCancel = new TRelayCommand(() => _EditRemoteCommandCancel(), _ => true);
+      CommandMouseOver = new TRelayCommand(() => _MouseOver(), _ => true);
+      CommandMouseLeave = new TRelayCommand(() => _MouseLeave(), _ => true);
     }
 
     public void Dispose() {
@@ -65,9 +91,47 @@ namespace XPuttyMan {
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    public void Start() {
+    private void _Start() {
       _PuttySession.Start();
     }
+
+    private string OldRemoteCommand;
+
+    private void _EditRemoteCommand() {
+      if ( !IsRemoteCommandInProgress ) {
+        EditRemoteCommandWindow = new Views.WindowEditRemoteCommand();
+        IsRemoteCommandInProgress = true;
+        OldRemoteCommand = RemoteCommand;
+        EditRemoteCommandWindow.DataContext = this;
+        EditRemoteCommandWindow.Show();
+      }
+    }
+
+    private void _EditRemoteCommandOk() {
+      EditRemoteCommandWindow.Close();
+      _PuttySession.SaveToRegistry();
+      NotifyPropertyChanged(nameof(RemoteCommand));
+      IsRemoteCommandInProgress = false;
+    }
+    private void _EditRemoteCommandCancel() {
+      RemoteCommand = OldRemoteCommand;
+      EditRemoteCommandWindow.Close();
+      IsRemoteCommandInProgress = false;
+    }
+
+    private void _MouseOver() {
+      IsSelected = true;
+      NotifyPropertyChanged(nameof(IsSelected));
+      //Log.Write($"Over session {CleanName}");
+    }
+
+    private void _MouseLeave() {
+      IsSelected = false;
+      NotifyPropertyChanged(nameof(IsSelected));
+      //Log.Write($"Leaving session {CleanName}");
+    }
+
+
 
     public void SetRunningProcess(IPuttySession puttySession) {
       _PuttySession.SetRunningProcess(puttySession.PuttyProcess);
@@ -95,14 +159,14 @@ namespace XPuttyMan {
           TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
             Port = 22,
             HostName = "server.test.priv",
-            SSH_RemoteCommand = "tail -n -f 100 /var/log/syslog"
+            RemoteCommand = "tail -n 100 -f /var/log/syslog"
           };
-          
           _DesignVMPuttySession = new VMPuttySession(FakeSession);
         }
         return _DesignVMPuttySession;
       }
     }
     private static VMPuttySession _DesignVMPuttySession;
+
   }
 }
