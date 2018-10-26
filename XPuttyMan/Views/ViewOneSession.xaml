@@ -22,7 +22,7 @@
             Name="InnerBorder"
             DataContext="{Binding}"
             d:DataContext="{Binding Source={x:Static localViewModel:VMPuttySession.DesignVMPuttySession}}"
-            Width="{Binding Source={RelativeSource AncestorLevel=1, AncestorType=ListView,Mode=FindAncestor}, Path=Width}">
+            SnapsToDevicePixels="True">
 
       <Grid Margin="2">
         <Grid.RowDefinitions>

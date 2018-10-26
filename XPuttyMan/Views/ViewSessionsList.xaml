@@ -9,8 +9,7 @@
 
 
   <Grid DataContext="{Binding}"
-        d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}"
-        Width="{Binding Source={RelativeSource AncestorType=TabControl, Mode=FindAncestor}, Path=Width}">
+        d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
 
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="*" />
@@ -23,7 +22,6 @@
 
     <ListView ItemsSource="{Binding Path=PuttySessions}"
               Margin="10"
-              SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical"
               SnapsToDevicePixels="True"
               SelectedItem="{Binding Path=SelectedSession}"
               SelectionMode="Single"
@@ -36,20 +34,18 @@
         </ContextMenu>
       </ListView.ContextMenu>
 
-      <ItemsControl.ItemTemplate>
+      <ListView.ItemTemplate>
         <DataTemplate>
-          <localViews:ViewOneSession>
-            <localViews:ViewOneSession.ContextMenu>
-              <ContextMenu d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
-                <MenuItem Header="Export to file"
-                          Command="{Binding Path=CommandExport}" />
-              </ContextMenu>
-            </localViews:ViewOneSession.ContextMenu>
-          </localViews:ViewOneSession>
+          <localViews:ViewOneSession />
         </DataTemplate>
+      </ListView.ItemTemplate>
 
-      </ItemsControl.ItemTemplate>
-
+      <ListView.ItemContainerStyle>
+        <Style TargetType="ListViewItem">
+          <Setter Property="HorizontalContentAlignment"
+                  Value="Stretch" />
+        </Style>
+      </ListView.ItemContainerStyle>
 
     </ListView>
 

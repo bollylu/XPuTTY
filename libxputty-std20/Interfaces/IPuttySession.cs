@@ -16,6 +16,8 @@ namespace libxputty_std20 {
     TPuttyProtocol Protocol { get; set; }
 
     void Start();
+    void StartPlink();
+
     void Stop();
 
     bool CheckIsRunning();

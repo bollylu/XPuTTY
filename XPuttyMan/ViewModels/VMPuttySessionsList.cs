@@ -94,10 +94,15 @@ namespace XPuttyMan {
       SFD.DefaultExt = ".xml";
       SFD.Title = "Select a filename to export your data";
       SFD.OverwritePrompt = true;
+      SFD.AddExtension = true;
+      SFD.DefaultExt = ".xml";
+      SFD.Filter = "XML files (.xml)|*.xml";
+
       if ( SFD.ShowDialog() == true ) {
         TPuttySessionList SessionsToSave = new TPuttySessionList(PuttySessions.Select(x => x.ReadOnlySession));
-        SessionsToSave.Export(SFD.SafeFileName);
+        SessionsToSave.Export(SFD.FileName);
       }
+
       NotifyExecutionCompleted("Done.");
       WorkInProgress = false;
     }

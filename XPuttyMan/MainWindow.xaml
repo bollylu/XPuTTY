@@ -72,7 +72,14 @@
           <localViews:ViewSessionsList DataContext="{Binding Path=ObservableSessions}" />
         </TabItem>
         <TabItem Header="Commands">
-          <localViews:ViewSessionsList DataContext="{Binding Path=ObservableCommandSessions}" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <localViews:ViewSessionsList Grid.Column="0" DataContext="{Binding Path=ObservableCommandSessions}"
+                                         SnapsToDevicePixels="True"
+                                         />
+          </Grid>
         </TabItem>
       </TabControl>
 

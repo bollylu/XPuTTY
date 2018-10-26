@@ -60,7 +60,9 @@ namespace libxputty_std20 {
       XElement RetVal = base.ToXml();
       RetVal.SetAttributeValue(XML_ATTRIBUTE_HOSTNAME, HostName);
       RetVal.SetAttributeValue(XML_ATTRIBUTE_PORT, Port);
-      RetVal.SetElementValue(XML_ATTRIBUTE_SSH_REMOTE_COMMAND, RemoteCommand);
+      if ( !string.IsNullOrWhiteSpace(RemoteCommand) ) {
+        RetVal.SetElementValue(XML_ATTRIBUTE_SSH_REMOTE_COMMAND, RemoteCommand);
+      }
       return RetVal;
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
@@ -93,6 +95,12 @@ namespace libxputty_std20 {
           Log.Write($"Unable to save value to registry key {SessionKey.Name} : {ex.Message}");
         }
       }
+    }
+
+    public async override void StartPlink() {
+      base.StartPlink();
+      await Task.Delay(500);
+      SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
   }
 }

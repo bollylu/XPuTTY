@@ -92,7 +92,11 @@ namespace XPuttyMan {
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     private void _Start() {
-      _PuttySession.Start();
+      if ( RemoteCommand != "" ) {
+        _PuttySession.StartPlink();
+      } else {
+        _PuttySession.Start();
+      }
     }
 
     private string OldRemoteCommand;

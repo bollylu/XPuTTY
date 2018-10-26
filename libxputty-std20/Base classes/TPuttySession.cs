@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -102,7 +103,7 @@ namespace libxputty_std20 {
 
     public virtual void SaveToRegistry() {
 
-    } 
+    }
     #endregion --- Registry interactions --------------------------------------------
 
     public static IPuttySession Empty {
@@ -163,6 +164,45 @@ namespace libxputty_std20 {
 
     }
 
+    public virtual void StartPlink() {
+      if ( CheckIsRunning() ) {
+        return;
+      }
+
+      PuttyProcess = new Process();
+      ProcessStartInfo StartInfo = new ProcessStartInfo {
+        FileName = EXECUTABLE_PLINK,
+        Arguments = $"{"\"" + CleanName + "\""}",
+        UseShellExecute = false
+      };
+      Log.Write($"Loading {StartInfo.Arguments} ...");
+
+      PuttyProcess.StartInfo = StartInfo;
+      PuttyProcess.Start();
+
+      if ( OnStart != null ) {
+        OnStart(this, EventArgs.Empty);
+      }
+
+      WatchTask = Task.Run(async () => {
+        while ( PID != NO_PROCESS_PID || WatchTaskCancellation.IsCancellationRequested ) {
+          try {
+            Process WatchedProcess = Process.GetProcessById(PID);
+            await Task.Delay(WATCH_DELAY_MS);
+          } catch {
+            PuttyProcess.Dispose();
+            PuttyProcess = null;
+          }
+        }
+        if ( PuttyProcess != null && WatchTaskCancellation.IsCancellationRequested ) {
+          PuttyProcess.Kill();
+        }
+        if ( OnExit != null ) {
+          OnExit(this, EventArgs.Empty);
+        }
+      }, WatchTaskCancellation.Token);
+
+    }
     public virtual void Stop() { }
 
     public bool CheckIsRunning() {
@@ -197,7 +237,18 @@ namespace libxputty_std20 {
           yield return RetVal;
         }
       }
-    } 
+    }
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowText(IntPtr hWnd, string windowName);
+
+    protected void SetProcessTitle(string title = "") {
+      if ( PuttyProcess != null ) {
+        IntPtr handle = PuttyProcess.MainWindowHandle;
+        SetWindowText(handle, title);
+      }
+    }
+
     #endregion --- Windows processes -------------------------------------------- 
   }
 }
