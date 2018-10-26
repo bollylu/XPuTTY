@@ -14,6 +14,9 @@ namespace libxputty_std20 {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public List<IPuttySession> Items { get; } = new List<IPuttySession>();
+
+    public int Count => Items.Count;
+
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region Private variables

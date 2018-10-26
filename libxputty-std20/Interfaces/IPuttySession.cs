@@ -11,7 +11,7 @@ namespace libxputty_std20 {
     int PID { get; }
     string CommandLine { get; }
     bool IsRunning { get; }
-    Process PuttyProcess { get; }
+    TRunProcess PuttyProcess { get; }
 
     TPuttyProtocol Protocol { get; set; }
 
@@ -20,8 +20,6 @@ namespace libxputty_std20 {
 
     void Stop();
 
-    bool CheckIsRunning();
-    void SetRunningProcess(Process process);
     void SaveToRegistry();
     IPuttySession LoadFromRegistry();
 

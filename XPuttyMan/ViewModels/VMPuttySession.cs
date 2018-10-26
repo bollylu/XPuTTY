@@ -65,6 +65,14 @@ namespace XPuttyMan {
       _InitializeCommands();
       _Initialize(puttySession);
     }
+    private void _InitializeCommands() {
+      CommandStartSession = new TRelayCommand(() => _Start(), _ => true);
+      CommandEditSessionRemoteCommand = new TRelayCommand(() => _EditRemoteCommand(), _ => !IsRunning && CanEditRemoteCommand);
+      CommandEditSessionRemoteCommandOk = new TRelayCommand(() => _EditRemoteCommandOk(), _ => true);
+      CommandEditSessionRemoteCommandCancel = new TRelayCommand(() => _EditRemoteCommandCancel(), _ => true);
+      CommandMouseOver = new TRelayCommand(() => _MouseOver(), _ => true);
+      CommandMouseLeave = new TRelayCommand(() => _MouseLeave(), _ => true);
+    }
 
     private void _Initialize(IPuttySession puttySession) {
       _PuttySession = puttySession;
@@ -75,15 +83,7 @@ namespace XPuttyMan {
       _PuttySession.OnExit += _PuttySession_OnExit;
     }
 
-    private void _InitializeCommands() {
-      CommandStartSession = new TRelayCommand(() => _Start(), _ => true);
-      CommandEditSessionRemoteCommand = new TRelayCommand(() => _EditRemoteCommand(), _ => !IsRunning && CanEditRemoteCommand);
-      CommandEditSessionRemoteCommandOk = new TRelayCommand(() => _EditRemoteCommandOk(), _ => true);
-      CommandEditSessionRemoteCommandCancel = new TRelayCommand(() => _EditRemoteCommandCancel(), _ => true);
-      CommandMouseOver = new TRelayCommand(() => _MouseOver(), _ => true);
-      CommandMouseLeave = new TRelayCommand(() => _MouseLeave(), _ => true);
-    }
-
+    
     public void Dispose() {
       _PuttySession.OnStart -= _PuttySession_OnStart;
       _PuttySession.OnExit -= _PuttySession_OnExit;
@@ -134,17 +134,7 @@ namespace XPuttyMan {
       NotifyPropertyChanged(nameof(IsSelected));
       //Log.Write($"Leaving session {CleanName}");
     }
-
-
-
-    public void SetRunningProcess(IPuttySession puttySession) {
-      _PuttySession.SetRunningProcess(puttySession.PuttyProcess);
-      NotifyPropertyChanged(nameof(PID));
-      NotifyPropertyChanged(nameof(IsRunning));
-      NotifyPropertyChanged(nameof(PuttyCommandLine));
-      NotifyPropertyChanged(nameof(RunningIcon));
-    }
-
+    
     private void _PuttySession_OnExit(object sender, EventArgs e) {
       Log.Write($"Session {CleanName} exited.");
       NotifyPropertyChanged(nameof(IsRunning));
@@ -172,5 +162,8 @@ namespace XPuttyMan {
     }
     private static VMPuttySession _DesignVMPuttySession;
 
+    public void AssignProcess(Process process) {
+      _PuttySession.PuttyProcess.AssignProcess(process);
+    }
   }
 }
