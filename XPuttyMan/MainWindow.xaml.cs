@@ -24,13 +24,14 @@ namespace XPuttyMan {
     /// <summary>
     /// public global reference to the main window
     /// </summary>
-    public static MainWindow Self;
+    //public static MainWindow Self;
     public static NetworkCredential CurrentUserCredential;
     public MainViewModel MainItem;
+    public static bool DataIsDirty = false;
     #endregion Public static variables
 
     public MainWindow() {
-      Self = this;
+      //Self = this;
       InitializeComponent();
       MVVMBase.OnExecutionStatus += (o, e) => {
         stsBar.SetStatusLeft(e.Value);
@@ -62,6 +63,7 @@ namespace XPuttyMan {
     private void MnuFileQuit_Click(object sender, RoutedEventArgs e) {
       Application.Current.Shutdown();
     }
+
     #endregion Menu
 
     

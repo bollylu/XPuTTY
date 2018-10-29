@@ -27,6 +27,10 @@ namespace XPuttyMan {
 
     public string Name => _PuttySession.Name ?? "";
     public string CleanName => Name.Replace("%20", " ");
+    public string GroupSection => $"{CleanName.Before('/')}";
+    public string DisplayGroupSection => GroupSection == "" ? "<unnamed section>" : $"{CleanName.Before('/')}";
+    public string DisplayName => CleanName.Contains('/') ? CleanName.After(GroupSection).After('/') : CleanName.After(GroupSection);
+
     public string HostName {
       get {
         if ( _PuttySession is TPuttySessionSSH PuttySessionSSH ) {
@@ -42,6 +46,7 @@ namespace XPuttyMan {
       set {
         if ( _PuttySession is TPuttySessionSSH PuttySessionSSH ) {
           PuttySessionSSH.RemoteCommand = value;
+          MainWindow.DataIsDirty = true;
         }
       }
     }
@@ -83,7 +88,7 @@ namespace XPuttyMan {
       _PuttySession.OnExit += _PuttySession_OnExit;
     }
 
-    
+
     public void Dispose() {
       _PuttySession.OnStart -= _PuttySession_OnStart;
       _PuttySession.OnExit -= _PuttySession_OnExit;
@@ -132,9 +137,8 @@ namespace XPuttyMan {
     private void _MouseLeave() {
       IsSelected = false;
       NotifyPropertyChanged(nameof(IsSelected));
-      //Log.Write($"Leaving session {CleanName}");
     }
-    
+
     private void _PuttySession_OnExit(object sender, EventArgs e) {
       Log.Write($"Session {CleanName} exited.");
       NotifyPropertyChanged(nameof(IsRunning));
@@ -147,10 +151,11 @@ namespace XPuttyMan {
       NotifyPropertyChanged(nameof(RunningIcon));
     }
 
+    #region --- For design time --------------------------------------------
     public static VMPuttySession DesignVMPuttySession {
       get {
         if ( _DesignVMPuttySession == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
+          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Group/Fake session") {
             Port = 22,
             HostName = "server.test.priv",
             RemoteCommand = "tail -n 100 -f /var/log/syslog"
@@ -161,6 +166,22 @@ namespace XPuttyMan {
       }
     }
     private static VMPuttySession _DesignVMPuttySession;
+
+    public static VMPuttySession DesignVMPuttySession2 {
+      get {
+        if ( _DesignVMPuttySession2 == null ) {
+          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Other/Other session") {
+            Port = 22,
+            HostName = "server2.test.priv",
+            RemoteCommand = "tail -n 200 -f /var/log/syslog"
+          };
+          _DesignVMPuttySession2 = new VMPuttySession(FakeSession);
+        }
+        return _DesignVMPuttySession2;
+      }
+    }
+    private static VMPuttySession _DesignVMPuttySession2; 
+    #endregion --- For design time --------------------------------------------
 
     public void AssignProcess(Process process) {
       _PuttySession.PuttyProcess.AssignProcess(process);

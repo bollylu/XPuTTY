@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.Text;
@@ -19,7 +20,9 @@ namespace libxputty_std20 {
     public const string REG_KEYNAME_BASE = @"Software\SimonTatham\PuTTY\Sessions";
 
     public const string EXECUTABLE_PUTTY = "putty.exe";
+    public static string EXECUTABLE_PUTTY_WITHOUT_EXTENSION = Path.GetFileNameWithoutExtension(EXECUTABLE_PUTTY);
     public const string EXECUTABLE_PLINK = "plink.exe";
+    public static string EXECUTABLE_PLINK_WITHOUT_EXTENSION = Path.GetFileNameWithoutExtension(EXECUTABLE_PLINK);
     public const string EXECUTABLE_PSCP = "pscp.exe";
 
     internal const string REG_PROTOCOL_TYPE = "Protocol";
@@ -168,5 +171,15 @@ namespace libxputty_std20 {
       }
     }
     #endregion --- Windows processes -------------------------------------------- 
+
+    public static IEnumerable<Process> GetAllPuttyProcess() {
+      foreach(Process ProcessItem in Process.GetProcessesByName(EXECUTABLE_PUTTY_WITHOUT_EXTENSION)) {
+        yield return ProcessItem;
+      }
+      foreach ( Process ProcessItem in Process.GetProcessesByName(EXECUTABLE_PLINK_WITHOUT_EXTENSION) ) {
+        yield return ProcessItem;
+      }
+      yield break;
+    }
   }
 }

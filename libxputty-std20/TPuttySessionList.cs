@@ -8,7 +8,7 @@ using BLTools;
 using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySessionList {
+  public class TPuttySessionList:IToXml {
 
     internal const string XML_THIS_ELEMENT = "Sessions";
 
@@ -49,7 +49,9 @@ namespace libxputty_std20 {
 
     public XElement ToXml() {
       XElement RetVal = new XElement(XML_THIS_ELEMENT);
-
+      foreach ( IPuttySession PuttySessionItem in Items ) {
+        RetVal.Add(PuttySessionItem.ToXml());
+      }
       return RetVal;
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
@@ -91,31 +93,31 @@ namespace libxputty_std20 {
 
       lock ( Lock_Content ) {
         Items.Clear();
-        foreach ( (string SessionName, string SessionProtocol) SessionItem in SessionsWithProtocol ) {
+        foreach ( (string SessionNameItem, string SessionProtocolItem) in SessionsWithProtocol ) {
 
           IPuttySession NewSession;
-          if ( SessionItem.SessionProtocol == TPuttyProtocol.SSH ) {
-            NewSession = new TPuttySessionSSH(SessionItem.SessionName);
+          if ( SessionProtocolItem == TPuttyProtocol.SSH ) {
+            NewSession = new TPuttySessionSSH(SessionNameItem);
             Items.Add(NewSession.LoadFromRegistry());
             continue;
           }
-          if ( SessionItem.SessionProtocol == TPuttyProtocol.Serial ) {
-            NewSession = new TPuttySessionSerial(SessionItem.SessionName);
+          if ( SessionProtocolItem == TPuttyProtocol.Serial ) {
+            NewSession = new TPuttySessionSerial(SessionNameItem);
             Items.Add(NewSession.LoadFromRegistry());
             continue;
           }
-          if ( SessionItem.SessionProtocol == TPuttyProtocol.Telnet ) {
-            NewSession = new TPuttySessionTelnet(SessionItem.SessionName);
+          if ( SessionProtocolItem == TPuttyProtocol.Telnet ) {
+            NewSession = new TPuttySessionTelnet(SessionNameItem);
             Items.Add(NewSession.LoadFromRegistry());
             continue;
           }
-          if ( SessionItem.SessionProtocol == TPuttyProtocol.RLogin ) {
-            NewSession = new TPuttySessionRLogin(SessionItem.SessionName);
+          if ( SessionProtocolItem == TPuttyProtocol.RLogin ) {
+            NewSession = new TPuttySessionRLogin(SessionNameItem);
             Items.Add(NewSession.LoadFromRegistry());
             continue;
           }
-          if ( SessionItem.SessionProtocol == TPuttyProtocol.Raw ) {
-            NewSession = new TPuttySessionRaw(SessionItem.SessionName);
+          if ( SessionProtocolItem == TPuttyProtocol.Raw ) {
+            NewSession = new TPuttySessionRaw(SessionNameItem);
             Items.Add(NewSession.LoadFromRegistry());
             continue;
           }
@@ -137,16 +139,14 @@ namespace libxputty_std20 {
       }
     }
 
-    public void Export(string filename) {
+    public void ExportToXml(string filename) {
       if (string.IsNullOrWhiteSpace(filename)) {
         return;
       }
 
       XDocument ExportFile = new XDocument(new XDeclaration("1.0", Encoding.UTF8.EncodingName, "yes"));
-      XElement Root = new XElement(XML_THIS_ELEMENT);
-      foreach(IPuttySession PuttySessionItem in Items) {
-        Root.Add(PuttySessionItem.ToXml());
-      }
+      XElement Root = new XElement("Root");
+      Root.Add(this.ToXml());
       ExportFile.Add(Root);
       try {
         ExportFile.Save(filename);

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using BLTools;
 using BLTools.MVVM;
 using libxputty_std20;
@@ -14,27 +15,14 @@ namespace XPuttyMan {
 
     public ObservableCollection<VMPuttySession> PuttySessions { get; private set; } = new ObservableCollection<VMPuttySession>();
 
+    public CollectionView PuttySessionsView { get; private set; }
+
     #region RelayCommand
-    public TRelayCommand CommandReadFromFile { get; private set; }
-    public TRelayCommand CommandExport { get; private set; }
-    public TRelayCommand CommandImport { get; private set; }
     #endregion RelayCommand
 
     public bool IsActive { get; set; }
 
-    public VMPuttySession SelectedSession {
-      get {
-        if ( !PuttySessions.Any() && _SelectedSession == null ) {
-          return new VMPuttySession(TPuttySession.Empty);
-        }
-        return _SelectedSession;
-      }
-      set {
-        _SelectedSession = value;
-        NotifyPropertyChanged(nameof(SelectedSession));
-      }
-    }
-    private VMPuttySession _SelectedSession;
+    public IEnumerable<VMPuttySession> SelectedSessions => PuttySessions.Where(x => x.IsSelected);
 
     public int Count => PuttySessions.Count;
 
@@ -50,14 +38,15 @@ namespace XPuttyMan {
     }
 
     private void _InitializeCommands() {
-      CommandReadFromFile = new TRelayCommand(() => _ReadFromFile(), _ => true);
-      CommandExport = new TRelayCommand(() => _Export(), _ => true);
-      CommandImport = new TRelayCommand(() => _Import(), _ => true);
-
     }
 
     private void _Initialize(IEnumerable<VMPuttySession> vmPuttySessions) {
       Clear();
+      PuttySessionsView = (CollectionView)CollectionViewSource.GetDefaultView(PuttySessions);
+      if ( PuttySessionsView.CanGroup ) {
+        PropertyGroupDescription GroupDescription = new PropertyGroupDescription("GroupSection");
+        PuttySessionsView.GroupDescriptions.Add(GroupDescription);
+      }
     }
 
     public void Dispose() {
@@ -67,61 +56,25 @@ namespace XPuttyMan {
 
     public void Add(VMPuttySession vmPuttySession) {
       PuttySessions.Add(vmPuttySession);
-      vmPuttySession.PropertyChanged += VmPuttySession_PropertyChanged;
       NotifyPropertyChanged(nameof(Count));
     }
 
-    private void VmPuttySession_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e) {
-      SelectedSession = PuttySessions.FirstOrDefault(x => x.IsSelected);
-      NotifyPropertyChanged(nameof(SelectedSession));
-    }
-
     public void Clear() {
-      foreach ( VMPuttySession PuttySessionItem in PuttySessions ) {
-        PuttySessionItem.PropertyChanged -= VmPuttySession_PropertyChanged;
-      }
       PuttySessions.Clear();
       NotifyPropertyChanged(nameof(Count));
     }
 
-    private void _ReadFromFile() { }
-    private void _Export() {
-      WorkInProgress = true;
-      Log.Write("Refreshing sessions...");
-      NotifyExecutionProgress("Exporting sessions...");
-
-      SaveFileDialog SFD = new SaveFileDialog();
-      SFD.DefaultExt = ".xml";
-      SFD.Title = "Select a filename to export your data";
-      SFD.OverwritePrompt = true;
-      SFD.AddExtension = true;
-      SFD.DefaultExt = ".xml";
-      SFD.Filter = "XML files (.xml)|*.xml";
-
-      if ( SFD.ShowDialog() == true ) {
-        TPuttySessionList SessionsToSave = new TPuttySessionList(PuttySessions.Select(x => x.ReadOnlySession));
-        SessionsToSave.Export(SFD.FileName);
-      }
-
-      NotifyExecutionCompleted("Done.");
-      WorkInProgress = false;
-    }
-
-    private void _Import() { }
-
-
-
     public static VMPuttySessionsList DesignVMPuttySessionsList {
       get {
-        if ( _DesignVMPuttySessionList == null ) {
-          _DesignVMPuttySessionList = new VMPuttySessionsList();
-          _DesignVMPuttySessionList.Add(VMPuttySession.DesignVMPuttySession);
-          _DesignVMPuttySessionList.Add(VMPuttySession.DesignVMPuttySession);
+        if ( _DesignVMPuttySessionsList == null ) {
+          _DesignVMPuttySessionsList = new VMPuttySessionsList();
+          _DesignVMPuttySessionsList.Add(VMPuttySession.DesignVMPuttySession);
+          _DesignVMPuttySessionsList.Add(VMPuttySession.DesignVMPuttySession2);
         }
-        return _DesignVMPuttySessionList;
+        return _DesignVMPuttySessionsList;
       }
     }
-    private static VMPuttySessionsList _DesignVMPuttySessionList;
+    private static VMPuttySessionsList _DesignVMPuttySessionsList;
 
 
   }

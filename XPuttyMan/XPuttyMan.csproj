@@ -27,7 +27,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -324,6 +324,28 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Pictures\connect_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Pictures\cluster.png" />
+    <Resource Include="Pictures\ExpanderDown.png" />
+    <Resource Include="Pictures\ExpanderUp.png" />
+    <Resource Include="Pictures\FileOpen.png" />
+    <Resource Include="Pictures\FileQuit.png" />
+    <Resource Include="Pictures\folder.png" />
+    <Resource Include="Pictures\Help.png" />
+    <Resource Include="Pictures\refresh.png" />
+    <Resource Include="Pictures\resource-disk.png" />
+    <Resource Include="Pictures\resource-ip.png" />
+    <Resource Include="Pictures\resource-service.png" />
+    <Resource Include="Pictures\restart.png" />
+    <Resource Include="Pictures\role.png" />
+    <Resource Include="Pictures\server.png" />
+    <Resource Include="Pictures\serverRDS.png" />
+    <Resource Include="Pictures\service.png" />
+    <Resource Include="Pictures\ServicesManager.ico" />
+    <Resource Include="Pictures\TVMCluster.png" />
+    <Resource Include="Pictures\TVMClusterResource.png" />
+    <Resource Include="Pictures\ViewConsole.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

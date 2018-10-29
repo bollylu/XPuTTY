@@ -13,16 +13,24 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace XPuttyMan.Views
-{
-    /// <summary>
-    /// Interaction logic for ViewSessionsList.xaml
-    /// </summary>
-    public partial class ViewSessionsList : UserControl
-    {
-        public ViewSessionsList()
-        {
-            InitializeComponent();
-        }
+namespace XPuttyMan.Views {
+  /// <summary>
+  /// Interaction logic for ViewSessionsList.xaml
+  /// </summary>
+  public partial class ViewSessionsList : UserControl {
+    public ViewSessionsList() {
+      InitializeComponent();
     }
+
+
+    private void DataTemplate_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+      foreach ( VMPuttySession SessionItem in e.AddedItems ) {
+        SessionItem.IsSelected = true;
+      }
+      foreach ( VMPuttySession SessionItem in e.RemovedItems ) {
+        SessionItem.IsSelected = false;
+      }
+      e.Handled = true;
+    }
+  }
 }

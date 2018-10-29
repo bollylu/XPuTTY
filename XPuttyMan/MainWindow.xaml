@@ -24,13 +24,56 @@
           HorizontalAlignment="Stretch"
           Name="mnuMain"
           VerticalAlignment="Top">
-      <MenuItem Header="File"
-                Name="mnuFile">
-        <MenuItem Name="mnuFileOpen"
-                  Header="Open" />
+
+      <MenuItem Header="File">
+        <MenuItem Header="Open sessions from registry" Command="">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Open sessions XML data file">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Open sessions JSON data file">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
+        <MenuItem Header="Save sessions file">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
+        <MenuItem Header="Save sessions into registry">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Save sessions XML data file">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Save sessions JSON data file">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
         <MenuItem Name="mnuFileQuit"
                   Header="Quit"
-                  Click="MnuFileQuit_Click" />
+                  Click="MnuFileQuit_Click">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileQuitPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
       </MenuItem>
       <MenuItem Header="View"
                 Name="mnuView">
@@ -39,6 +82,15 @@
       <MenuItem Header="Tools"
                 Name="mnuTools">
 
+        <MenuItem Name="mnuToolsExportAll"
+                  Header="Export all"
+                  Command="{Binding Path=CommandToolsExportAll}">
+        </MenuItem>
+        <MenuItem Name="mnuToolsExportSelectedItems"
+                  Header="Export selected items"
+                  Command="{Binding Path=CommandToolsExportSelected}">
+        </MenuItem>
+        <Separator />
         <MenuItem Name="mnuToolsOptions"
                   Header="Options">
         </MenuItem>
@@ -47,7 +99,11 @@
                 Name="mnuHelp">
         <MenuItem Name="mnuHelpContact"
                   Header="Contact"
-                  Command="{Binding Path=CommandHelpAboutContact}" />
+                  Command="{Binding Path=CommandHelpContact}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=ContactPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
         <MenuItem Name="mnuHelpAbout"
                   Header="About"
                   Command="{Binding Path=CommandHelpAbout}" />
@@ -76,9 +132,9 @@
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <localViews:ViewSessionsList Grid.Column="0" DataContext="{Binding Path=ObservableCommandSessions}"
-                                         SnapsToDevicePixels="True"
-                                         />
+            <localViews:ViewSessionsList Grid.Column="0"
+                                         DataContext="{Binding Path=ObservableCommandSessions}"
+                                         SnapsToDevicePixels="True" />
           </Grid>
         </TabItem>
       </TabControl>
