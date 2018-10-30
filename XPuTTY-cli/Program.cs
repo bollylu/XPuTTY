@@ -4,6 +4,7 @@ using System.Linq;
 using BLTools;
 using BLTools.ConsoleExtension;
 using libxputty_std20;
+using libxputty_std20.Interfaces;
 
 namespace XPuTTY_cli {
   internal class Program {

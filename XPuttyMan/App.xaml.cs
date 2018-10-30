@@ -10,7 +10,7 @@ using System.Windows;
 using BLTools;
 using BLTools.Debugging;
 
-namespace XPuttyMan {
+namespace EasyPutty {
   /// <summary>
   /// Interaction logic for App.xaml
   /// </summary>

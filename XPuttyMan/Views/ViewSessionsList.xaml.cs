@@ -12,8 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using EasyPutty.ViewModels;
 
-namespace XPuttyMan.Views {
+namespace EasyPutty.Views {
   /// <summary>
   /// Interaction logic for ViewSessionsList.xaml
   /// </summary>

@@ -1,30 +1,21 @@
-﻿using EasyPutty.Base;
-using BLTools;
+﻿using BLTools;
 using BLTools.Encryption;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Management.Automation;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using libxputty_std20.Interfaces;
 
-namespace EasyPutty {
-  public class TCredential : TEasyPuttyBase, IToXml, IDisposable, ICredential {
+namespace libxputty_std20 {
+  public class TCredential : TPuttyBase, IDisposable, ICredential {
 
-    /// <summary>
-    /// Set this to true to view additional debug message
-    /// </summary>
-    public static bool IsDebug = false;
 
     #region XML contants
-    public static XName XML_THIS_ELEMENT {
-      get {
-        return GetXName("Credential");
-      }
-    }
+    public static XName XML_THIS_ELEMENT => GetXName("Credential");
     public const string XML_ATTRIBUTE_USERNAME = "Username";
     public const string XML_ATTRIBUTE_XMLSECURE = "Secure";
     public const string XML_ATTRIBUTE_PASSWORD = "Password";
@@ -43,9 +34,9 @@ namespace EasyPutty {
           return Username;
         }
         if (Username.Contains(@"\")) {
-          return Username.Left(Username.IndexOf(@"\"));
+          return Username.Before(@"\");
         }
-        return Username.Left(Username.IndexOf("@"));
+        return Username.After("@");
       }
     }
     public string UsernameWithoutDomain {
@@ -57,9 +48,9 @@ namespace EasyPutty {
           return "";
         }
         if (Username.Contains(@"\")) {
-          return Username.Substring(Username.IndexOf(@"\") + 1);
+          return Username.After(@"\");
         }
-        return Username.Substring(Username.IndexOf("@") + 1);
+        return Username.Before("@");
       }
     }
 
@@ -96,29 +87,24 @@ namespace EasyPutty {
       }
     }
 
-    public bool HasValue {
-      get {
-        return !string.IsNullOrWhiteSpace(Username);
-      }
-    }
+    public bool HasValue => !string.IsNullOrWhiteSpace(Username);
     public bool Inherited {
       get {
         
         if (HasValue) {
           return false;
         }
+
         if (Parent == null) {
           return false;
         }
 
-        ICredentialContainer ParentContainer = Parent.Parent as ICredentialContainer;
-
-        if (ParentContainer == null) {
+        if ( !(Parent.Parent is ICredentialContainer ParentContainer) ) {
           return false;
         }
 
         if (ParentContainer.Credential.HasValue) {
-          NotifyExecutionProgress($"Credential is coming from Parent => {ParentContainer.GetType().Name}:{ParentName}");
+          Log.Write($"Credential is coming from Parent => {ParentContainer.GetType().Name}:{ParentName}");
           return true;
         }
 
@@ -128,22 +114,21 @@ namespace EasyPutty {
 
     public string ParentName {
       get {
-        if (Parent is IName) {
-          IName ParentWithName = Parent as IName;
+        if (Parent is IName ParentWithName) {
           return ParentWithName.Name;
         }
         return "";
       }
     }
 
-    public PSCredential PsCredential {
-      get {
-        if (string.IsNullOrWhiteSpace(Username)) {
-          return null;
-        }
-        return new PSCredential(Username, SecurePassword);
-      }
-    }
+    //public PSCredential PsCredential {
+    //  get {
+    //    if (string.IsNullOrWhiteSpace(Username)) {
+    //      return null;
+    //    }
+    //    return new PSCredential(Username, SecurePassword);
+    //  }
+    //}
     #endregion Public properties
 
     #region Constructor(s)
@@ -151,34 +136,46 @@ namespace EasyPutty {
       XmlSecure = false;
       EncryptionKey = "";
     }
-    public TCredential(string username, string password, bool xmlSecure = true) : this() {
+    public TCredential(string username, string password, bool xmlSecure = true) {
       Username = username;
       SecurePassword = password.ConvertToSecureString();
       XmlSecure = xmlSecure;
+      EncryptionKey = "";
     }
-    public TCredential(string username, SecureString password, bool xmlSecure = true) : this() {
+    public TCredential(string username, SecureString password, bool xmlSecure = true) {
       Username = username;
       SecurePassword = password;
       XmlSecure = xmlSecure;
+      EncryptionKey = "";
     }
-    public TCredential(ICredential credential) : this() {
+    public TCredential(ICredential credential) {
       if (credential == null) {
         return;
       }
       Username = credential.Username ?? "";
       SecurePassword = credential.SecurePassword;
       XmlSecure = credential.XmlSecure;
+      EncryptionKey = "";
     }
-    public TCredential(XElement credential, IParent parent) : this() {
+    public TCredential(ICredential credential, IParent parent) {
+      if ( credential == null ) {
+        return;
+      }
+      Username = credential.Username ?? "";
+      SecurePassword = credential.SecurePassword;
+      XmlSecure = credential.XmlSecure;
+      EncryptionKey = "";
+      Parent = parent;
+    }
+    public TCredential(XElement credential, IParent parent) {
       #region Validate parameters
       if (credential == null || !credential.HasAttributes) {
-        Trace.WriteLineIf(IsDebug, "Unable to create TCredential from XML : XElement is empty or invalid");
+        Log.Write("Unable to create TCredential from XML : XElement is empty or invalid", ErrorLevel.Error);
         return;
       }
       #endregion Validate parameters
 
       Parent = parent;
-      NotifyExecutionProgress($"Creating Credential for {ParentName}");
       Username = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_USERNAME, "");
       XmlSecure = credential.SafeReadAttribute<bool>(XML_ATTRIBUTE_XMLSECURE, false);
 
@@ -193,7 +190,7 @@ namespace EasyPutty {
         try {
           SecurePassword = PasswordFromXElement.DecryptFromBase64(EncryptionKey).ConvertToSecureString();
         } catch (Exception ex) {
-          NotifyExecutionError($"Problem with decryption of the password {PasswordFromXElement} : {ex.Message}", ErrorLevel.Error);
+          Log.Write($"Problem with decryption of the password {PasswordFromXElement} : {ex.Message}", ErrorLevel.Error);
           SecurePassword = "".ConvertToSecureString();
         }
       } else {
@@ -201,10 +198,10 @@ namespace EasyPutty {
       }
 
     }
-    public TCredential(XElement credential, string encryptionKey = "") : this() {
+    public TCredential(XElement credential, string encryptionKey = "") {
       #region Validate parameters
       if (credential == null || !credential.HasAttributes) {
-        Trace.WriteLineIf(IsDebug, "Unable to create TCredential from XML : XElement is empty or invalid");
+        Log.Write("Unable to create TCredential from XML : XElement is empty or invalid", ErrorLevel.Error);
         return;
       }
       #endregion Validate parameters
@@ -217,12 +214,9 @@ namespace EasyPutty {
       string PasswordFromXElement = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_PASSWORD, "");
       if (XmlSecure) {
         try {
-          //NotifyExecutionProgress("Decrypting Credential");
-          //NotifyExecutionProgress($"EncryptionKey is [{EncryptionKey.ToString()}]");
           SecurePassword = PasswordFromXElement.DecryptFromBase64(EncryptionKey).ConvertToSecureString();
-          //NotifyExecutionProgress($"SecurePassword is {SecurePassword.ConvertToUnsecureString()}");
         } catch (Exception ex) {
-          Trace.WriteLine(string.Format("Problem with decryption of the password {0} : {1}", PasswordFromXElement, ex.Message), Severity.Error);
+          Log.Write($"Problem with decryption of the password {PasswordFromXElement} : {ex.Message}", ErrorLevel.Error);
           SecurePassword = "".ConvertToSecureString();
         }
       } else {
@@ -231,7 +225,7 @@ namespace EasyPutty {
 
     }
 
-    public new void Dispose() {
+    public override void Dispose() {
       if (SecurePassword != null) {
         SecurePassword.Dispose();
       }
@@ -240,8 +234,7 @@ namespace EasyPutty {
 
     #region Converters
     public override XElement ToXml() {
-      NotifyExecutionProgress("Local Credential ToXml");
-      XElement RetVal = base.ToXml(XML_THIS_ELEMENT);
+      XElement RetVal = new XElement(XML_THIS_ELEMENT);
       if (Inherited) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_INHERITED, Inherited);
       } else {
@@ -249,8 +242,6 @@ namespace EasyPutty {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_XMLSECURE, XmlSecure);
         if (SecurePassword != null) {
           if (XmlSecure) {
-            //NotifyExecutionProgress($"SecurePassword is {SecurePassword.ConvertToUnsecureString()}");
-            //NotifyExecutionProgress($"EncryptionKey is [{EncryptionKey.ToString()}]");
             RetVal.SetAttributeValue(XML_ATTRIBUTE_PASSWORD, SecurePassword.ConvertToUnsecureString().EncryptToBase64(EncryptionKey));
           } else {
             RetVal.SetAttributeValue(XML_ATTRIBUTE_PASSWORD, SecurePassword.ConvertToUnsecureString());

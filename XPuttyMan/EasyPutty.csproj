@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C3512F02-414E-493B-8C3C-4E790751BD23}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>XPuttyMan</RootNamespace>
-    <AssemblyName>XPuttyMan</AssemblyName>
+    <RootNamespace>EasyPutty</RootNamespace>
+    <AssemblyName>EasyPutty</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -229,28 +229,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Base classes\TEasyPuttyBase.cs" />
+    <Compile Include="ViewModels\TVMEasyPuttyBase.cs" />
     <Compile Include="Base classes\TGroup.cs" />
-    <Compile Include="Base classes\TParentBase.cs" />
     <Compile Include="Base classes\TRelayCommand.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="Interfaces\ICredential.cs" />
-    <Compile Include="Interfaces\ICredentialContainer.cs" />
-    <Compile Include="Interfaces\IName.cs" />
-    <Compile Include="Interfaces\IParent.cs" />
-    <Compile Include="Interfaces\ISupportContact.cs" />
-    <Compile Include="Interfaces\ISupportContactContainer.cs" />
-    <Compile Include="TCredential.cs" />
-    <Compile Include="TExternalProcess.cs" />
-    <Compile Include="TSupportContact.cs" />
-    <Compile Include="TSupportContactCollection.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\TSupportContactWPF.cs" />
-    <Compile Include="ViewModels\TVMBase.cs" />
     <Compile Include="ViewModels\TVMSupportContact.cs" />
     <Compile Include="ViewModels\TVMSupportContacts.cs" />
     <Compile Include="ViewModels\VMPuttySession.cs" />
     <Compile Include="ViewModels\VMPuttySessionsList.cs" />
+    <Compile Include="Views\DisplaySupportInformationControl.xaml.cs">
+      <DependentUpon>DisplaySupportInformationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PopupDisplaySupportContact.xaml.cs">
+      <DependentUpon>PopupDisplaySupportContact.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ViewOneSession.xaml.cs">
       <DependentUpon>ViewOneSession.xaml</DependentUpon>
     </Compile>
@@ -272,6 +265,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\DisplaySupportInformationControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PopupDisplaySupportContact.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\ViewOneSession.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -369,7 +370,11 @@
     <Resource Include="Pictures\TVMClusterResource.png" />
     <Resource Include="Pictures\ViewConsole.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Models\" />
+    <Folder Include="Tools\" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Pictures\FileSave.png" />
   </ItemGroup>

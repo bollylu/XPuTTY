@@ -1,58 +1,98 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Diagnostics;
+using System.Windows;
+using BLTools.MVVM;
+using libxputty_std20;
+using libxputty_std20.Interfaces;
+using EasyPutty.Views;
 
-namespace ServicesManager {
-  public class TVMSupportContact : TVMBase, ISupportContact {
+namespace EasyPutty.ViewModels {
+  public class TVMSupportContact : MVVMBase {
 
-    //public override ISupportContact SupportContactData {
-    //  get {
-    //    if (_Data is ISupportContact) {
-    //      return _Data as ISupportContact;
-    //    }
-    //    return null;
-    //  }
-    //}
+    #region --- Relay commands --------------------------------------------
+    public TRelayCommand NavigateToCommand { get; set; }
+    public TRelayCommand MailToCommand { get; set; }
+    #endregion --- Relay commands --------------------------------------------
 
-    public string SupportMessage {
+    private ISupportContact _SupportContact;
+
+    public Visibility UrlVisibility {
       get {
-        if (SupportContact != null) {
-          return SupportContact.SupportMessage;
-        }
-        return "";
+        return string.IsNullOrWhiteSpace(_SupportContact.HelpUri) ? Visibility.Collapsed : Visibility.Visible;
+      }
+    }
+    public Visibility MessageVisibility {
+      get {
+        return string.IsNullOrWhiteSpace(_SupportContact.Message) ? Visibility.Collapsed : Visibility.Visible;
+      }
+    }
+    public Visibility PhoneVisibility {
+      get {
+        return string.IsNullOrWhiteSpace(_SupportContact.Phone) ? Visibility.Collapsed : Visibility.Visible;
+      }
+    }
+    public Visibility EmailVisibility {
+      get {
+        return string.IsNullOrWhiteSpace(_SupportContact.Email) ? Visibility.Collapsed : Visibility.Visible;
       }
     }
 
-    #region Constructor(s)
-    public TVMSupportContact() {
+    public string Description => _SupportContact.Description;
+    public string Message => _SupportContact.Message;
+    public string HelpUri => _SupportContact.HelpUri;
+    public string Email => _SupportContact.Email;
+    public string Phone => _SupportContact.Phone;
 
+    #region --- Constructor(s) ---------------------------------------------------------------------------------
+    public TVMSupportContact() : base() {
+      InitializeCommands();
     }
 
-    public TVMSupportContact(ISupportContact supportContact) {
-      _Data = supportContact;
+    public TVMSupportContact(ISupportContact supportContact) : base() {
+      _SupportContact = supportContact;
+      InitializeCommands();
+    }
+    #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    } 
-    #endregion Constructor(s)
+    protected void InitializeCommands() {
+      NavigateToCommand = new TRelayCommand(() => {
+        Process LaunchProcess = new Process {
+          StartInfo = new ProcessStartInfo(_SupportContact.HelpUri)
+        };
+        try {
+          LaunchProcess.Start();
+        } catch { }
+      }
+      , _ => true);
+
+      MailToCommand = new TRelayCommand(() => {
+        Process LaunchProcess = new Process();
+        string MailTo = _SupportContact.Email.ToLower().StartsWith("mailto:") ? _SupportContact.Email : $"mailto:{_SupportContact.Email}";
+        LaunchProcess.StartInfo = new ProcessStartInfo(MailTo);
+        try {
+          LaunchProcess.Start();
+        } catch { }
+      }
+      , _ => true);
+    }
 
     public void DisplaySupportMessage() {
-      if (SupportContact != null) {
-        SupportContact.DisplaySupportMessage();
-      }
+      PopupDisplaySupportContact Popup = new PopupDisplaySupportContact {
+        Title = _SupportContact.Description,
+        DataContext = this
+      };
+      Popup.ShowDialog();
     }
 
-    public override string Picture {
-      get {
-        return App.GetPictureFullname("help");
-      }
-    }
 
-    public ISupportContact SupportContact {
+    public static TVMSupportContact FakeSupportContact {
       get {
-        throw new NotImplementedException();
+        if ( _FakeSupportContact == null ) {
+          
+          _FakeSupportContact = new TVMSupportContact(TSupportContact.Demo);
+        }
+        return _FakeSupportContact;
       }
     }
+    private static TVMSupportContact _FakeSupportContact;
   }
 }

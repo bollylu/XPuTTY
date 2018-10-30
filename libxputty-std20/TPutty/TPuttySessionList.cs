@@ -6,9 +6,10 @@ using System.Text;
 using System.Xml.Linq;
 using BLTools;
 using Microsoft.Win32;
+using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionList:IToXml {
+  public class TPuttySessionList : IToXml {
 
     internal const string XML_THIS_ELEMENT = "Sessions";
 
@@ -26,7 +27,7 @@ namespace libxputty_std20 {
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionList() { }
     public TPuttySessionList(IEnumerable<IPuttySession> sessions) {
-      foreach(IPuttySession PuttySessionItem in sessions) {
+      foreach ( IPuttySession PuttySessionItem in sessions ) {
         Add(PuttySessionItem);
       }
     }
@@ -140,7 +141,7 @@ namespace libxputty_std20 {
     }
 
     public void ExportToXml(string filename) {
-      if (string.IsNullOrWhiteSpace(filename)) {
+      if ( string.IsNullOrWhiteSpace(filename) ) {
         return;
       }
 
@@ -150,7 +151,7 @@ namespace libxputty_std20 {
       ExportFile.Add(Root);
       try {
         ExportFile.Save(filename);
-      } catch (Exception ex) {
+      } catch ( Exception ex ) {
         Log.Write($"Unable to export sessions in XML file {filename} : {ex.Message}");
       }
 

@@ -1,13 +1,14 @@
-﻿using BLTools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BLTools;
 
-namespace XPuttyMan {
-  public interface ISupportContact {
+namespace libxputty_std20.Interfaces {
+  public interface ISupportContact : IDisposable, IToXml {
+
     string SupportMessage { get; }
     string Name { get; }
     string Description { get; }

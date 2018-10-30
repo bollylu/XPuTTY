@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="XPuttyMan.Views.ViewOneSession"
+﻿<UserControl x:Class="EasyPutty.Views.ViewOneSession"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:localViewModel="clr-namespace:XPuttyMan"
-             xmlns:local="clr-namespace:XPuttyMan.Views"
+             xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
+             xmlns:localViews="clr-namespace:EasyPutty.Views"
              xmlns:bltoolswpf="clr-namespace:BLTools.WPF;assembly=BLTools.WPF.45"
              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              mc:Ignorable="d"
@@ -21,7 +21,7 @@
             Margin="2"
             Name="InnerBorder"
             DataContext="{Binding}"
-            d:DataContext="{Binding Source={x:Static localViewModel:VMPuttySession.DesignVMPuttySession}}"
+            d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySession.DesignVMPuttySession}}"
             SnapsToDevicePixels="True">
 
       <Grid Margin="2">

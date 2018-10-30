@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XPuttyMan {
+namespace libxputty_std20.Interfaces {
   public interface IName {
     string Name { get; }
     string Description { get; set; }

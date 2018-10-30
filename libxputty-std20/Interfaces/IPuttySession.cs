@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
+using BLTools;
 
-namespace libxputty_std20 {
-  public interface IPuttySession : IDisposable {
+namespace libxputty_std20.Interfaces {
+  public interface IPuttySession : IDisposable, IToXml {
     string Name { get; set; }
     string CleanName { get; }
     int PID { get; }
@@ -25,7 +26,5 @@ namespace libxputty_std20 {
 
     event EventHandler OnStart;
     event EventHandler OnExit;
-
-    XElement ToXml();
   }
 }

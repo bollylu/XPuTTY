@@ -2,19 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Management;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using BLTools;
-using libxputty_std20.DllImports;
 using Microsoft.Win32;
-using static System.Management.ManagementObjectCollection;
+using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySession : IPuttySession, IDisposable, IToXml {
+  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer {
 
     #region --- Constants --------------------------------------------
     public const string REG_KEYNAME_BASE = @"Software\SimonTatham\PuTTY\Sessions";
@@ -126,6 +121,8 @@ namespace libxputty_std20 {
     public bool IsRunning => PuttyProcess.IsRunning;
     public int PID => PuttyProcess.PID;
     public string CommandLine => TRunProcess.GetCommandLine(PID);
+
+    public ISupportContact SupportContact => throw new NotImplementedException();
 
     public virtual void Start() {
       ProcessStartInfo StartInfo = new ProcessStartInfo {

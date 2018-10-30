@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XPuttyMan {
+namespace libxputty_std20.Interfaces {
   public interface ICredentialContainer {
     ICredential Credential { get; }
     void SetLocalCredential(ICredential credential);

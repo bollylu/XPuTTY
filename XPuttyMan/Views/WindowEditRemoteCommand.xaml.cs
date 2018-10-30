@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace XPuttyMan.Views {
+namespace EasyPutty.Views {
   /// <summary>
   /// Interaction logic for WindowEditRemoteCommand.xaml
   /// </summary>

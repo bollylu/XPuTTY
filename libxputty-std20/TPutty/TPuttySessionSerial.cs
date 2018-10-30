@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BLTools;
 using Microsoft.Win32;
+using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
   public class TPuttySessionSerial : TPuttySession, IDisposable {

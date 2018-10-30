@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XPuttyMan {
+namespace libxputty_std20.Interfaces {
   public interface ISupportContactContainer {
-    TSupportContactCollection SupportContacts { get; }
+    ISupportContact SupportContact { get; }
   }
 }

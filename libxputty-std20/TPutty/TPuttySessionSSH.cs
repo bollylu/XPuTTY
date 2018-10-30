@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using BLTools;
 using Microsoft.Win32;
+using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
   public class TPuttySessionSSH : TPuttySession, IDisposable {

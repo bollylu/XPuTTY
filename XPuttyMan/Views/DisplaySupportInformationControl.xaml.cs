@@ -13,16 +13,13 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace EasyPutty.Views
-{
-    /// <summary>
-    /// Interaction logic for ViewOneSession.xaml
-    /// </summary>
-    public partial class ViewOneSession : UserControl
-    {
-        public ViewOneSession()
-        {
-            InitializeComponent();
-        }
+namespace EasyPutty.Views {
+  /// <summary>
+  /// Interaction logic for DisplaySupportInformationControl.xaml
+  /// </summary>
+  public partial class DisplaySupportInformationControl : UserControl {
+    public DisplaySupportInformationControl() {
+      InitializeComponent();
     }
+  }
 }

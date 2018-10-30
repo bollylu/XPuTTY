@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace XPuttyMan {
+namespace EasyPutty {
   public class TRelayCommand : ICommand { 
     private readonly Action _ExecuteAction;
     protected Predicate<object> _CanExecute;

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BLTools;
 
-namespace XPuttyMan {
+namespace EasyPutty {
   public static class Helpers {
     public static SplitArgs ReadAppArgs() {
       if ( ApplicationDeployment.IsNetworkDeployed ) {

@@ -10,7 +10,7 @@ using BLTools.MVVM;
 using libxputty_std20;
 using Microsoft.Win32;
 
-namespace XPuttyMan {
+namespace EasyPutty.ViewModels {
   public class VMPuttySessionsList : MVVMBase, IDisposable {
 
     public ObservableCollection<VMPuttySession> PuttySessions { get; private set; } = new ObservableCollection<VMPuttySession>();

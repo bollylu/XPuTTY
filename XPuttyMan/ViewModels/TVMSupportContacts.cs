@@ -3,47 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BLTools.MVVM;
+using EasyPutty.ViewModels;
+using EasyPutty.Views;
+using libxputty_std20;
+using libxputty_std20.Interfaces;
 
-namespace ServicesManager {
-  public class TVMSupportContacts {
+namespace EasyPutty {
+  public class TVMSupportContacts : MVVMBase {
 
-    private TSupportContactCollection _ContactsData { get; set; }
+    private List<TVMSupportContact> _SupportContacts { get; } = new List<TVMSupportContact>();
 
 
-    public IList<TSupportContactWPF> Items {
-      get {
-        return _Items;
-      }
-    }
-    private readonly IList<TSupportContactWPF> _Items;
-
-    public TVMSupportContacts() {
-      _Items = new List<TSupportContactWPF>();
-    }
+    public TVMSupportContacts() : base() { }
 
     public TVMSupportContacts(TSupportContactCollection contacts) : this() {
-      if (contacts == null) {
+      if ( contacts == null ) {
         return;
       }
-      _ContactsData = contacts;
-      foreach (ISupportContact ContactItem in contacts.Items) {
-        Items.Add(new TSupportContactWPF(ContactItem));
+
+      foreach ( ISupportContact ContactItem in contacts.Items ) {
+        _SupportContacts.Add(new TVMSupportContact(ContactItem));
       }
     }
 
     public TVMSupportContacts(ISupportContactContainer contactContainer) : this() {
-      if (contactContainer == null) {
+      if ( contactContainer == null ) {
         return;
       }
-      _ContactsData = contactContainer.SupportContacts;
-      foreach (ISupportContact ContactItem in contactContainer.SupportContacts.Items) {
-        Items.Add(new TSupportContactWPF(ContactItem));
-      }
+
     }
 
     public void DisplaySupportMessage() {
-      PopupDisplaySupportContact Popup = new PopupDisplaySupportContact();
-      Popup.DataContext = this;
+      PopupDisplaySupportContact Popup = new PopupDisplaySupportContact {
+        DataContext = this
+      };
       Popup.ShowDialog();
     }
 

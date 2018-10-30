@@ -11,10 +11,11 @@ using System.Windows;
 using BLTools;
 using BLTools.MVVM;
 using libxputty_std20;
+using libxputty_std20.Interfaces;
 using Microsoft.Win32;
 
-namespace XPuttyMan {
-  public class MainViewModel : MVVMBase {
+namespace EasyPutty.ViewModels {
+  public class MainViewModel : TVMEasyPuttyBase {
 
     #region RelayCommand
     public TRelayCommand CommandFileNew { get; private set; }
@@ -80,7 +81,7 @@ namespace XPuttyMan {
       _Initialize();
     }
 
-    private void _Initialize() {
+    protected override void _Initialize() {
       ObservableSessions = new VMPuttySessionsList();
       ObservableCommandSessions = new VMPuttySessionsList();
       _RefreshSessionsFromRegistry();
@@ -167,8 +168,8 @@ namespace XPuttyMan {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.PuttySessions.Select(x => x.ReadOnlySession));
-        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.PuttySessions.Select(x => x.ReadOnlySession));
+        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.PuttySessions.Select(x => x.PuttySession));
+        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.PuttySessions.Select(x => x.PuttySession));
         TPuttySessionList AllSessionsToSave = new TPuttySessionList(SessionsToSave.Items.Union(CommandSessionsToSave.Items));
         AllSessionsToSave.ExportToXml(SFD.FileName);
       }
@@ -225,8 +226,8 @@ namespace XPuttyMan {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.PuttySessions.Select(x => x.ReadOnlySession));
-        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.PuttySessions.Select(x => x.ReadOnlySession));
+        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.PuttySessions.Select(x => x.PuttySession));
+        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.PuttySessions.Select(x => x.PuttySession));
         TPuttySessionList AllSessionsToSave = new TPuttySessionList(SessionsToSave.Items.Union(CommandSessionsToSave.Items));
         AllSessionsToSave.ExportToXml(SFD.FileName);
       }
@@ -249,8 +250,8 @@ namespace XPuttyMan {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.SelectedSessions.Select(x => x.ReadOnlySession));
-        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.SelectedSessions.Select(x => x.ReadOnlySession));
+        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.SelectedSessions.Select(x => x.PuttySession));
+        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.SelectedSessions.Select(x => x.PuttySession));
         TPuttySessionList AllSessionsToSave = new TPuttySessionList(SessionsToSave.Items.Union(CommandSessionsToSave.Items));
         AllSessionsToSave.ExportToXml(SFD.FileName);
       }
