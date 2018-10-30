@@ -17,6 +17,8 @@ namespace XPuttyMan {
   public class MainViewModel : MVVMBase {
 
     #region RelayCommand
+    public TRelayCommand CommandFileNew { get; private set; }
+
     public TRelayCommand CommandFileOpenRegistry { get; private set; }
     public TRelayCommand CommandFileOpenXml { get; private set; }
     public TRelayCommand CommandFileOpenJson { get; private set; }
@@ -35,18 +37,45 @@ namespace XPuttyMan {
     public TRelayCommand CommandToolsExportSelected { get; private set; }
     #endregion RelayCommand
 
+    public string ApplicationTitle {
+      get {
+        return _ApplicationTitle;
+      }
+      set {
+        _ApplicationTitle = value;
+        NotifyPropertyChanged(nameof(ApplicationTitle));
+      }
+    }
+    private string _ApplicationTitle;
+
+    public int TabSelectedIndex {
+      get {
+        return _TabSelectedIndex;
+      }
+      set {
+        _TabSelectedIndex = value;
+        NotifyPropertyChanged(nameof(TabSelectedIndex));
+      }
+    }
+    private int _TabSelectedIndex;
+
+    #region --- Pictures --------------------------------------------
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
     public string FileOpenPicture => App.GetPictureFullname("FileOpen");
+    public string FileSavePicture => App.GetPictureFullname("FileSave");
     public string FileQuitPicture => App.GetPictureFullname("FileQuit");
-    public string ContactPicture => App.GetPictureFullname("help");
+    public string ContactPicture => App.GetPictureFullname("help"); 
+    #endregion --- Pictures --------------------------------------------
 
     public VMPuttySessionsList ObservableSessions { get; set; }
     public VMPuttySessionsList ObservableCommandSessions { get; set; }
 
-    private readonly string DataSourceName;
+    private string DataSourceName;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() : base() {
+      ApplicationTitle = "EasyPutty";
+      NotifyPropertyChanged(nameof(_ApplicationTitle));
       _InitializeCommands();
       _Initialize();
     }
@@ -58,6 +87,8 @@ namespace XPuttyMan {
     }
 
     private void _InitializeCommands() {
+      CommandFileNew = new TRelayCommand(() => _FileNew(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
+
       CommandFileOpenRegistry = new TRelayCommand(() => _FileOpenRegistry(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
       CommandFileOpenXml = new TRelayCommand(() => _FileOpenXml(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
       CommandFileOpenJson = new TRelayCommand(() => _FileOpenJson(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
@@ -77,6 +108,15 @@ namespace XPuttyMan {
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Menu --------------------------------------------
+    private void _FileNew() {
+      MainWindow.DataIsDirty = false;
+      DataSourceName = "";
+      ObservableSessions = new VMPuttySessionsList();
+      NotifyPropertyChanged(nameof(ObservableSessions));
+      ObservableCommandSessions = new VMPuttySessionsList();
+      NotifyPropertyChanged(nameof(ObservableCommandSessions));
+      TabSelectedIndex = -1;
+    }
     private void _FileOpenXml() {
       OpenFileDialog OFD = new OpenFileDialog {
         Title = "Select new sessions file",

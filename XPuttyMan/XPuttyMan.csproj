@@ -19,15 +19,18 @@
     <PublishUrl>I:\AppsDeployment\xPuttyMan\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <UpdateUrl>http://localhost/XPuttyMan/</UpdateUrl>
+    <ProductName>EasyPutty</ProductName>
+    <PublisherName>Luc Bolly</PublisherName>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>9</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -114,6 +117,7 @@
     <Reference Include="System.Data.SqlClient, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Data.SqlClient.4.5.1\lib\net461\System.Data.SqlClient.dll</HintPath>
     </Reference>
+    <Reference Include="System.Deployment" />
     <Reference Include="System.Diagnostics.EventLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.EventLog.4.5.0\lib\net461\System.Diagnostics.EventLog.dll</HintPath>
     </Reference>
@@ -225,8 +229,26 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Base classes\TEasyPuttyBase.cs" />
+    <Compile Include="Base classes\TGroup.cs" />
+    <Compile Include="Base classes\TParentBase.cs" />
     <Compile Include="Base classes\TRelayCommand.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="Interfaces\ICredential.cs" />
+    <Compile Include="Interfaces\ICredentialContainer.cs" />
+    <Compile Include="Interfaces\IName.cs" />
+    <Compile Include="Interfaces\IParent.cs" />
+    <Compile Include="Interfaces\ISupportContact.cs" />
+    <Compile Include="Interfaces\ISupportContactContainer.cs" />
+    <Compile Include="TCredential.cs" />
+    <Compile Include="TExternalProcess.cs" />
+    <Compile Include="TSupportContact.cs" />
+    <Compile Include="TSupportContactCollection.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\TSupportContactWPF.cs" />
+    <Compile Include="ViewModels\TVMBase.cs" />
+    <Compile Include="ViewModels\TVMSupportContact.cs" />
+    <Compile Include="ViewModels\TVMSupportContacts.cs" />
     <Compile Include="ViewModels\VMPuttySession.cs" />
     <Compile Include="ViewModels\VMPuttySessionsList.cs" />
     <Compile Include="Views\ViewOneSession.xaml.cs">
@@ -346,6 +368,10 @@
     <Resource Include="Pictures\TVMCluster.png" />
     <Resource Include="Pictures\TVMClusterResource.png" />
     <Resource Include="Pictures\ViewConsole.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Pictures\FileSave.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

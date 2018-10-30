@@ -7,11 +7,16 @@
         xmlns:local="clr-namespace:XPuttyMan"
         xmlns:localViews="clr-namespace:XPuttyMan.Views"
         mc:Ignorable="d"
-        Title="XPuttyMan"
+        Title="{Binding Path=ApplicationTitle}"
         Height="800"
         Width="750"
-        MinWidth="725">
+        MinWidth="725"
+        d:DataContext="{Binding Source=FakeMainViewModel}">
 
+  <Window.Resources>
+    <local:MainViewModel x:Key="FakeMainWiewModel" />
+  </Window.Resources>
+  
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -26,6 +31,14 @@
           VerticalAlignment="Top">
 
       <MenuItem Header="File">
+        <MenuItem Header="New sessions file"
+                  Command="{Binding Path=CommandFileNew}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
         <MenuItem Header="Open sessions from registry" Command="">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileOpenPicture}" />
@@ -45,24 +58,24 @@
 
         <MenuItem Header="Save sessions file">
           <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
+            <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
         <Separator />
 
         <MenuItem Header="Save sessions into registry">
           <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
+            <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
         <MenuItem Header="Save sessions XML data file">
           <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
+            <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
         <MenuItem Header="Save sessions JSON data file">
           <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
+            <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
         <Separator />
