@@ -28,7 +28,7 @@ namespace libxputty_std20 {
         return;
       }
       foreach ( ISupportContact ContactItem in contacts ) {
-        AddItem(ContactItem);
+        Add(ContactItem);
       }
       Initialize();
     }
@@ -39,7 +39,7 @@ namespace libxputty_std20 {
         return;
       }
       foreach ( XElement ContactItem in contacts.Elements(TSupportContact.XML_THIS_ELEMENT) ) {
-        AddItem(new TSupportContact(ContactItem));
+        Add(new TSupportContact(ContactItem));
       }
       Initialize();
     }
@@ -50,7 +50,7 @@ namespace libxputty_std20 {
         return;
       }
       foreach ( XElement ContactItem in contacts ) {
-        AddItem(new TSupportContact(ContactItem));
+        Add(new TSupportContact(ContactItem));
       }
       Initialize();
     }
@@ -61,7 +61,7 @@ namespace libxputty_std20 {
         return;
       }
       foreach ( ISupportContact ContactItem in contacts.Items ) {
-        AddItem(new TSupportContact(ContactItem));
+        Add(new TSupportContact(ContactItem));
       }
       Initialize();
     }
@@ -76,7 +76,7 @@ namespace libxputty_std20 {
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    private void AddItem(ISupportContact contact) {
+    public void Add(ISupportContact contact) {
       Items.Add(contact);
     }
 

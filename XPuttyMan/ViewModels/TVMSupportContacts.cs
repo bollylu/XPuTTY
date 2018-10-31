@@ -9,11 +9,10 @@ using EasyPutty.Views;
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
-namespace EasyPutty {
-  public class TVMSupportContacts : MVVMBase {
+namespace EasyPutty.ViewModels {
+  public class TVMSupportContacts : TVMEasyPuttyBase {
 
-    private List<TVMSupportContact> _SupportContacts { get; } = new List<TVMSupportContact>();
-
+    public List<TVMSupportContact> Items { get; } = new List<TVMSupportContact>();
 
     public TVMSupportContacts() : base() { }
 
@@ -23,7 +22,7 @@ namespace EasyPutty {
       }
 
       foreach ( ISupportContact ContactItem in contacts.Items ) {
-        _SupportContacts.Add(new TVMSupportContact(ContactItem));
+        Items.Add(new TVMSupportContact(ContactItem));
       }
     }
 
@@ -41,5 +40,18 @@ namespace EasyPutty {
       Popup.ShowDialog();
     }
 
+
+    public static TVMSupportContacts Demo {
+      get {
+        if (_Demo==null) {
+          TSupportContactCollection SupportContacts = new TSupportContactCollection();
+          SupportContacts.Add(TSupportContact.Demo1);
+          SupportContacts.Add(TSupportContact.Demo2);
+          _Demo = new TVMSupportContacts(SupportContacts);
+        }
+        return _Demo;
+      }
+    }
+    private static TVMSupportContacts _Demo;
   }
 }

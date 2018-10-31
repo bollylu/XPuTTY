@@ -3,76 +3,59 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:localViewModels="clr-namespace:EasyPutty"
+             xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
              xmlns:localViews="clr-namespace:EasyPutty.Views"
              mc:Ignorable="d">
 
 
   <Grid DataContext="{Binding}"
-        d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
+        d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsList.DesignVMPuttySessionsList}}">
 
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*" />
-      <RowDefinition Height="30" />
-    </Grid.RowDefinitions>
-
-    
-      <ListView ItemsSource="{Binding Path=PuttySessions, Mode=OneWay}"
-                Margin="10"
-                SnapsToDevicePixels="True"
-                SelectionMode="Extended"
-                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                BorderThickness="0"
+    <ListView ItemsSource="{Binding Path=PuttySessions, Mode=OneWay}"
+              Margin="10"
+              SnapsToDevicePixels="True"
+              SelectionMode="Extended"
+              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+              BorderThickness="0"
               Selector.SelectionChanged="DataTemplate_SelectionChanged">
 
-        
-        <ListView.GroupStyle>
-          <GroupStyle>
-            <GroupStyle.HeaderTemplate>
-              <DataTemplate>
-                <StackPanel Orientation="Horizontal">
-                  <TextBlock FontSize="18"
-                             FontWeight="Bold"
-                             Margin="0,10,0,2"
-                             Text="{Binding Path=Name}" />
-                  <TextBlock FontSize="18"
-                             FontWeight="Bold"
-                             Margin="0,10,0,2"
-                             Text="{Binding Path=ItemCount, StringFormat=' ({0})'}" />
-                </StackPanel>
-              </DataTemplate>
-            </GroupStyle.HeaderTemplate>
-          </GroupStyle>
-        </ListView.GroupStyle>
+      <ListView.GroupStyle>
+        <GroupStyle>
+          <GroupStyle.HeaderTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal">
+                <TextBlock FontSize="18"
+                           FontWeight="Bold"
+                           Margin="0,10,0,2"
+                           Text="{Binding Path=Name}" />
+                <TextBlock FontSize="18"
+                           FontWeight="Bold"
+                           Margin="0,10,0,2"
+                           Text="{Binding Path=ItemCount, StringFormat=' ({0})'}" />
+              </StackPanel>
+            </DataTemplate>
+          </GroupStyle.HeaderTemplate>
+        </GroupStyle>
+      </ListView.GroupStyle>
 
-        <!--<ListView.ContextMenu>
-        <ContextMenu d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySessionsList.DesignVMPuttySessionsList}}">
-          <MenuItem Header="Export to file"
-                    Command="{Binding Path=CommandExport}" />
-        </ContextMenu>
-      </ListView.ContextMenu>-->
+      <ListView.ItemTemplate>
+        <DataTemplate>
+          <localViews:ViewOneSession />
+        </DataTemplate>
+      </ListView.ItemTemplate>
 
-        <ListView.ItemTemplate>
-          <DataTemplate >
-            <localViews:ViewOneSession />
-          </DataTemplate>
-        </ListView.ItemTemplate>
+      <ListView.ItemContainerStyle>
+        <Style TargetType="ListViewItem">
+          <Setter Property="HorizontalContentAlignment"
+                  Value="Stretch" />
+        </Style>
+      </ListView.ItemContainerStyle>
 
-        <ListView.ItemContainerStyle>
-          <Style TargetType="ListViewItem">
-            <Setter Property="HorizontalContentAlignment"
-                    Value="Stretch" />
-          </Style>
-        </ListView.ItemContainerStyle>
+    </ListView>
 
-      </ListView>
-
-    <!--<TextBlock Text="{Binding Path=SelectedSession.CleanName}"
-               Margin="5"
-               Grid.Row="1" />-->
   </Grid>
 </UserControl>

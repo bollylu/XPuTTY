@@ -88,7 +88,7 @@ namespace EasyPutty.ViewModels {
       get {
         if ( _FakeSupportContact == null ) {
           
-          _FakeSupportContact = new TVMSupportContact(TSupportContact.Demo);
+          _FakeSupportContact = new TVMSupportContact(TSupportContact.Demo1);
         }
         return _FakeSupportContact;
       }

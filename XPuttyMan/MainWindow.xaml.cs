@@ -26,10 +26,11 @@ namespace EasyPutty {
     /// public global reference to the main window
     /// </summary>
     //public static MainWindow Self;
-    public static NetworkCredential CurrentUserCredential;
-    public MainViewModel MainItem;
+    
     public static bool DataIsDirty = false;
     #endregion Public static variables
+
+    public MainViewModel MainItem;
 
     public MainWindow() {
       //Self = this;

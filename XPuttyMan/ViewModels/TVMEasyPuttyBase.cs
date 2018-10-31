@@ -81,10 +81,12 @@ namespace EasyPutty.ViewModels {
 
     #region Constructor(s)
     public TVMEasyPuttyBase() : base() {
+      _InitializeCommands();
       _Initialize();
     }
 
     public TVMEasyPuttyBase(object data) : base() {
+      _InitializeCommands();
       _Data = data;
       _Initialize();
     }
@@ -98,8 +100,8 @@ namespace EasyPutty.ViewModels {
       Parent = vmEasyPutty.Parent;
     }
 
-    protected virtual void _Initialize() {
-    }
+    protected virtual void _InitializeCommands() { }
+    protected virtual void _Initialize() {}
     #endregion Constructor(s)
 
     #region Converters

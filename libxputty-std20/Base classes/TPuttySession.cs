@@ -9,7 +9,7 @@ using Microsoft.Win32;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer {
+  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IName {
 
     #region --- Constants --------------------------------------------
     public const string REG_KEYNAME_BASE = @"Software\SimonTatham\PuTTY\Sessions";
@@ -27,8 +27,13 @@ namespace libxputty_std20 {
     protected const string XML_ATTRIBUTE_PROTOCOL = "Protocol";
     #endregion --- Constants --------------------------------------------
 
-    #region --- Public properties ------------------------------------------------------------------------------
+    #region --- IName --------------------------------------------
     public string Name { get; set; }
+    public string Description { get; set; }
+    public string Comment { get; set; }
+    #endregion --- IName --------------------------------------------
+
+    #region --- Public properties ------------------------------------------------------------------------------
     public string CleanName => Name.Replace("%20", " ");
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
     #endregion --- Public properties ---------------------------------------------------------------------------
@@ -123,6 +128,8 @@ namespace libxputty_std20 {
     public string CommandLine => TRunProcess.GetCommandLine(PID);
 
     public ISupportContact SupportContact => throw new NotImplementedException();
+
+    
 
     public virtual void Start() {
       ProcessStartInfo StartInfo = new ProcessStartInfo {

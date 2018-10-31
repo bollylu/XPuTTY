@@ -23,12 +23,11 @@ namespace EasyPutty.Views {
       InitializeComponent();
     }
 
-
     private void DataTemplate_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-      foreach ( VMPuttySession SessionItem in e.AddedItems ) {
+      foreach ( TVMPuttySession SessionItem in e.AddedItems ) {
         SessionItem.IsSelected = true;
       }
-      foreach ( VMPuttySession SessionItem in e.RemovedItems ) {
+      foreach ( TVMPuttySession SessionItem in e.RemovedItems ) {
         SessionItem.IsSelected = false;
       }
       e.Handled = true;

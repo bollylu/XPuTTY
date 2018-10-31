@@ -236,8 +236,8 @@
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\TVMSupportContact.cs" />
     <Compile Include="ViewModels\TVMSupportContacts.cs" />
-    <Compile Include="ViewModels\VMPuttySession.cs" />
-    <Compile Include="ViewModels\VMPuttySessionsList.cs" />
+    <Compile Include="ViewModels\TVMPuttySession.cs" />
+    <Compile Include="ViewModels\TVMPuttySessionsList.cs" />
     <Compile Include="Views\DisplaySupportInformationControl.xaml.cs">
       <DependentUpon>DisplaySupportInformationControl.xaml</DependentUpon>
     </Compile>

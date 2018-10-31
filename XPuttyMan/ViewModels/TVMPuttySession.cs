@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+
 using BLTools;
-using BLTools.MVVM;
+
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
 namespace EasyPutty.ViewModels {
-  public sealed class VMPuttySession : TVMEasyPuttyBase {
+  public sealed class TVMPuttySession : TVMEasyPuttyBase {
 
     public IPuttySession PuttySession => _Data as IPuttySession;
 
@@ -60,11 +57,11 @@ namespace EasyPutty.ViewModels {
     private Views.WindowEditRemoteCommand EditRemoteCommandWindow;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public VMPuttySession(IPuttySession puttySession) : base(puttySession) {
+    public TVMPuttySession(IPuttySession puttySession) : base(puttySession) {
       _InitializeCommands();
       _Initialize();
     }
-    private void _InitializeCommands() {
+    protected override void _InitializeCommands() {
       CommandStartSession = new TRelayCommand(() => _Start(), _ => true);
       CommandEditSessionRemoteCommand = new TRelayCommand(() => _EditRemoteCommand(), _ => !IsRunning && CanEditRemoteCommand);
       CommandEditSessionRemoteCommandOk = new TRelayCommand(() => _EditRemoteCommandOk(), _ => true);
@@ -145,7 +142,7 @@ namespace EasyPutty.ViewModels {
     }
 
     #region --- For design time --------------------------------------------
-    public static VMPuttySession DesignVMPuttySession {
+    public static TVMPuttySession DesignVMPuttySession {
       get {
         if ( _DesignVMPuttySession == null ) {
           TPuttySessionSSH FakeSession = new TPuttySessionSSH("Group/Fake session") {
@@ -153,14 +150,14 @@ namespace EasyPutty.ViewModels {
             HostName = "server.test.priv",
             RemoteCommand = "tail -n 100 -f /var/log/syslog"
           };
-          _DesignVMPuttySession = new VMPuttySession(FakeSession);
+          _DesignVMPuttySession = new TVMPuttySession(FakeSession);
         }
         return _DesignVMPuttySession;
       }
     }
-    private static VMPuttySession _DesignVMPuttySession;
+    private static TVMPuttySession _DesignVMPuttySession;
 
-    public static VMPuttySession DesignVMPuttySession2 {
+    public static TVMPuttySession DesignVMPuttySession2 {
       get {
         if ( _DesignVMPuttySession2 == null ) {
           TPuttySessionSSH FakeSession = new TPuttySessionSSH("Other/Other session") {
@@ -168,12 +165,12 @@ namespace EasyPutty.ViewModels {
             HostName = "server2.test.priv",
             RemoteCommand = "tail -n 200 -f /var/log/syslog"
           };
-          _DesignVMPuttySession2 = new VMPuttySession(FakeSession);
+          _DesignVMPuttySession2 = new TVMPuttySession(FakeSession);
         }
         return _DesignVMPuttySession2;
       }
     }
-    private static VMPuttySession _DesignVMPuttySession2; 
+    private static TVMPuttySession _DesignVMPuttySession2;
     #endregion --- For design time --------------------------------------------
 
     public void AssignProcess(Process process) {

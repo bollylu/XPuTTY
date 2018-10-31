@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using BLTools;
 
 namespace libxputty_std20.Interfaces {
-  public interface IPuttySession : IDisposable, IToXml {
+  public interface IPuttySession : IDisposable {
     string Name { get; set; }
     string CleanName { get; }
     int PID { get; }
@@ -26,5 +26,7 @@ namespace libxputty_std20.Interfaces {
 
     event EventHandler OnStart;
     event EventHandler OnExit;
+
+    XElement ToXml();
   }
 }

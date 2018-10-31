@@ -15,20 +15,19 @@
         Width="auto"
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch">
-    <Grid.Resources>
-      <DataTemplate x:Key="SupportContactTemplate"
-                    DataType="local:TSupportContactWPF">
-        <localViews:DisplaySupportInformationControl DataContext="{Binding}"
-                                                Margin="0,0,0,10" />
-      </DataTemplate>
-    </Grid.Resources>
 
     <ScrollViewer Grid.Row="1"
                   HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto">
       <ItemsControl ItemsSource="{Binding Path=Items, Mode=OneWay}"
-                    d:DataContext="{Binding Source={x:Static locaViewModels:TVMSupportContact.FakeSupportContact}}"
-                    ItemTemplate="{StaticResource SupportContactTemplate}">
+                    d:DataContext="{Binding Source={x:Static locaViewModels:TVMSupportContacts.Demo}}"
+                    >
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <localViews:DisplaySupportInformationControl DataContext="{Binding}"
+                                                         Margin="0,0,0,10" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
       </ItemsControl>
     </ScrollViewer>
   </Grid>

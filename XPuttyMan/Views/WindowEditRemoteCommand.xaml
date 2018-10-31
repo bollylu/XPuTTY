@@ -11,7 +11,7 @@
         Height="450"
         Width="800"
         DataContext="{Binding}"
-        d:DataContext="{Binding Source={x:Static localViewModels:VMPuttySession.DesignVMPuttySession}}"
+        d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySession}}"
         WindowStyle="SingleBorderWindow"
         WindowStartupLocation="CenterOwner">
 

@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using BLTools;
@@ -25,6 +26,7 @@ namespace EasyPutty {
     public const string DEFAULT_CONFIG = "config.xml";
 
     public static SplitArgs Args;
+    public static NetworkCredential CurrentUserCredential;
 
     private void Application_Exit(object sender, ExitEventArgs e) {
       ApplicationInfo.ApplicationStop();
@@ -35,9 +37,9 @@ namespace EasyPutty {
 
       Trace.AutoFlush = true;
 
-      TraceFactory.DefaultLogLocation = @"c:\logs\xputtyman";
-      TraceFactory.AddTraceDefaultLogFilename();
+      SetLogDestination();
       ApplicationInfo.ApplicationStart();
+      CurrentUserCredential = CredentialCache.DefaultNetworkCredentials;
     }
 
     public static string GetPictureFullname(string name = "default") {

@@ -134,21 +134,38 @@ namespace libxputty_std20 {
       return RetVal.ToString();
     }
 
-    public static TSupportContact Demo {
+    public static TSupportContact Demo1 {
       get {
-        if ( _Demo == null ) {
-          _Demo = new TSupportContact() {
-            Name = "Demo",
-            Message = "Please contact support",
-            Comment = "Little comment",
-            Description = "How would I describe this ?",
-            Email = "user@domain.net",
+        if ( _Demo1 == null ) {
+          _Demo1 = new TSupportContact() {
+            Name = "Demo1",
+            Message = "Please contact your responsible",
+            Comment = "When the system is going slow",
+            Description = "Malfunction",
+            Email = "user.boss@domain.net",
             Phone = "+32-456-789321951"
           };
         }
-        return _Demo;
+        return _Demo1;
       }
     }
-    private static TSupportContact _Demo;
+    private static TSupportContact _Demo1;
+
+    public static TSupportContact Demo2 {
+      get {
+        if ( _Demo2 == null ) {
+          _Demo2 = new TSupportContact() {
+            Name = "Demo2",
+            Message = "Please contact technical support if you are low on RAM",
+            Comment = "Do not abuse, RAM is expensive",
+            Description = "Technical support",
+            Email = "user.technical@domain.net",
+            Phone = "+32-456-789321952"
+          };
+        }
+        return _Demo2;
+      }
+    }
+    private static TSupportContact _Demo2;
   }
 }

@@ -10,10 +10,10 @@
         Title="{Binding Path=ApplicationTitle}"
         Height="800"
         Width="750"
-        MinWidth="725"
-        d:DataContext="{Binding Source=FakeMainViewModel}">
+        MinWidth="725">
 
-  <Grid>
+  <Grid DataContext="{Binding}"
+        d:DataContext="{Binding Source={x:Static localViewModels:MainViewModel.DesignMainViewModel}}">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
@@ -35,7 +35,8 @@
         </MenuItem>
         <Separator />
 
-        <MenuItem Header="Open sessions from registry" Command="">
+        <MenuItem Header="Open sessions from registry"
+                  Command="{Binding Path=CommandFileOpenRegistry}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileOpenPicture}" />
           </MenuItem.Icon>
@@ -120,34 +121,33 @@
 
     </Menu>
 
-    <Grid d:DataContext="{Binding Source={x:Static localViewModels:MainViewModel.DesignMainViewModel}}"
-          Grid.Row="1">
+    <Grid Grid.Row="1">
       <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
 
-      <Button Command="{Binding Path=CommandRefreshSessions}"
-              Content="Refresh"
-              Margin="10"
-              Grid.Row="0" />
-
-      <TabControl Grid.Row="1">
-        <TabItem Header="Sessions">
-          <localViews:ViewSessionsList DataContext="{Binding Path=ObservableSessions}" />
-        </TabItem>
-        <TabItem Header="Commands">
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <localViews:ViewSessionsList Grid.Column="0"
-                                         DataContext="{Binding Path=ObservableCommandSessions}"
+      <TabControl Grid.Row="1"
+                  ItemsSource="{Binding Path=SessionsTabs, Mode=OneWay}"
+                  SelectedIndex="{Binding Path=TabSelectedIndex}"
+                  Margin="10">
+        
+        <TabControl.ContentTemplate>
+          <DataTemplate>
+            <localViews:ViewSessionsList DataContext="{Binding}"
                                          SnapsToDevicePixels="True" />
-          </Grid>
-        </TabItem>
+          </DataTemplate>
+        </TabControl.ContentTemplate>
+        
+        <TabControl.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Path=Header, Mode=OneWay}" />
+              <TextBlock Text="{Binding Path=Count, StringFormat=' ({0})', TargetNullValue='', Mode=OneWay}" />
+            </StackPanel>
+          </DataTemplate>
+        </TabControl.ItemTemplate>
+        
       </TabControl>
-
     </Grid>
 
     <bltoolswpfctrl:ExtendedStatusBar x:Name="stsBar"

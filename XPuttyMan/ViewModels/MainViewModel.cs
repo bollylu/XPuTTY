@@ -6,12 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+
 using BLTools;
-using BLTools.MVVM;
+
 using libxputty_std20;
 using libxputty_std20.Interfaces;
+
 using Microsoft.Win32;
 
 namespace EasyPutty.ViewModels {
@@ -32,7 +33,6 @@ namespace EasyPutty.ViewModels {
 
     public TRelayCommand CommandHelpContact { get; private set; }
     public TRelayCommand CommandHelpAbout { get; private set; }
-    public TRelayCommand CommandRefreshSessions { get; private set; }
     public TRelayCommand CommandStartSession { get; private set; }
     public TRelayCommand CommandToolsExportAll { get; private set; }
     public TRelayCommand CommandToolsExportSelected { get; private set; }
@@ -40,7 +40,7 @@ namespace EasyPutty.ViewModels {
 
     public string ApplicationTitle {
       get {
-        return _ApplicationTitle;
+        return $"{_ApplicationTitleBase} : {_ApplicationTitle} : {_DataSourceName}";
       }
       set {
         _ApplicationTitle = value;
@@ -48,6 +48,8 @@ namespace EasyPutty.ViewModels {
       }
     }
     private string _ApplicationTitle;
+
+    private readonly string _ApplicationTitleBase = "EasyPutty v0.1";
 
     public int TabSelectedIndex {
       get {
@@ -65,29 +67,26 @@ namespace EasyPutty.ViewModels {
     public string FileOpenPicture => App.GetPictureFullname("FileOpen");
     public string FileSavePicture => App.GetPictureFullname("FileSave");
     public string FileQuitPicture => App.GetPictureFullname("FileQuit");
-    public string ContactPicture => App.GetPictureFullname("help"); 
+    public string ContactPicture => App.GetPictureFullname("help");
     #endregion --- Pictures --------------------------------------------
 
-    public VMPuttySessionsList ObservableSessions { get; set; }
-    public VMPuttySessionsList ObservableCommandSessions { get; set; }
+    public ObservableCollection<TVMPuttySessionsList> SessionsTabs { get; set; } = new ObservableCollection<TVMPuttySessionsList>();
 
-    private string DataSourceName;
+    private string _DataSourceName;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() : base() {
-      ApplicationTitle = "EasyPutty";
-      NotifyPropertyChanged(nameof(_ApplicationTitle));
       _InitializeCommands();
       _Initialize();
     }
 
     protected override void _Initialize() {
-      ObservableSessions = new VMPuttySessionsList();
-      ObservableCommandSessions = new VMPuttySessionsList();
-      _RefreshSessionsFromRegistry();
+      if ( App.CurrentUserCredential != null ) {
+        ApplicationTitle = $@"{App.CurrentUserCredential.Domain ?? ""}\{App.CurrentUserCredential.UserName}";
+      }
     }
 
-    private void _InitializeCommands() {
+    protected override void _InitializeCommands() {
       CommandFileNew = new TRelayCommand(() => _FileNew(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
 
       CommandFileOpenRegistry = new TRelayCommand(() => _FileOpenRegistry(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
@@ -102,7 +101,6 @@ namespace EasyPutty.ViewModels {
 
       CommandHelpContact = new TRelayCommand(() => _HelpContact(), _ => { return true; });
       CommandHelpAbout = new TRelayCommand(() => _HelpAbout(), _ => { return true; });
-      CommandRefreshSessions = new TRelayCommand(() => _RefreshSessionsFromRegistry(), _ => { return !WorkInProgress; });
       CommandToolsExportAll = new TRelayCommand(() => _ExportAll(), _ => { return !WorkInProgress; });
       CommandToolsExportSelected = new TRelayCommand(() => _ExportSelected(), _ => { return !WorkInProgress; });
     }
@@ -111,11 +109,8 @@ namespace EasyPutty.ViewModels {
     #region --- Menu --------------------------------------------
     private void _FileNew() {
       MainWindow.DataIsDirty = false;
-      DataSourceName = "";
-      ObservableSessions = new VMPuttySessionsList();
-      NotifyPropertyChanged(nameof(ObservableSessions));
-      ObservableCommandSessions = new VMPuttySessionsList();
-      NotifyPropertyChanged(nameof(ObservableCommandSessions));
+      _DataSourceName = "";
+      SessionsTabs.Clear();
       TabSelectedIndex = -1;
     }
     private void _FileOpenXml() {
@@ -147,6 +142,25 @@ namespace EasyPutty.ViewModels {
       }
     }
     private void _FileOpenRegistry() {
+      WorkInProgress = true;
+      _DataSourceName = $"reg://HKCU/{TPuttySession.REG_KEYNAME_BASE.Replace('\\', '/')}";
+      NotifyPropertyChanged(nameof(ApplicationTitle));
+      CommandFileOpenRegistry.NotifyCanExecuteChanged();
+      Log.Write("Refreshing sessions from registry ...");
+      NotifyExecutionProgress("Reading sessions ...");
+
+      TPuttySessionList Sessions = new TPuttySessionList();
+      Sessions.ReadSessionsFromRegistry();
+
+      SessionsTabs.Clear();
+      SessionsTabs.Add(_CreateAndRecoverSessions("Sessions", Sessions, TPuttyProtocol.SSH, x => !x.Name.StartsWith("#CMD/")));
+      SessionsTabs.Add(_CreateAndRecoverSessions("Commands", Sessions, TPuttyProtocol.SSH, x => x.Name.StartsWith("#CMD/")));
+      TabSelectedIndex = 0;
+      //NotifyPropertyChanged(nameof(SessionsTabs));
+      NotifyExecutionStatus($"{SessionsTabs.Sum(x => x.Count)} session(s)");
+      Log.Write("Refresh done.");
+      WorkInProgress = false;
+      CommandFileOpenRegistry.NotifyCanExecuteChanged();
     }
 
     private void _FileSave() {
@@ -168,10 +182,8 @@ namespace EasyPutty.ViewModels {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.PuttySessions.Select(x => x.PuttySession));
-        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.PuttySessions.Select(x => x.PuttySession));
-        TPuttySessionList AllSessionsToSave = new TPuttySessionList(SessionsToSave.Items.Union(CommandSessionsToSave.Items));
-        AllSessionsToSave.ExportToXml(SFD.FileName);
+        TPuttySessionList SessionsToSave = new TPuttySessionList(SessionsTabs.SelectMany(x => x.PuttySessions).Select(x => x.PuttySession));
+        SessionsToSave.ExportToXml(SFD.FileName);
       }
 
       NotifyExecutionCompleted("Done.");
@@ -226,10 +238,8 @@ namespace EasyPutty.ViewModels {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.PuttySessions.Select(x => x.PuttySession));
-        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.PuttySessions.Select(x => x.PuttySession));
-        TPuttySessionList AllSessionsToSave = new TPuttySessionList(SessionsToSave.Items.Union(CommandSessionsToSave.Items));
-        AllSessionsToSave.ExportToXml(SFD.FileName);
+        TPuttySessionList SessionsToSave = new TPuttySessionList(SessionsTabs.SelectMany(x => x.PuttySessions).Select(x => x.PuttySession));
+        SessionsToSave.ExportToXml(SFD.FileName);
       }
 
       NotifyExecutionCompleted("Done.");
@@ -250,45 +260,23 @@ namespace EasyPutty.ViewModels {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        TPuttySessionList SessionsToSave = new TPuttySessionList(ObservableSessions.SelectedSessions.Select(x => x.PuttySession));
-        TPuttySessionList CommandSessionsToSave = new TPuttySessionList(ObservableCommandSessions.SelectedSessions.Select(x => x.PuttySession));
-        TPuttySessionList AllSessionsToSave = new TPuttySessionList(SessionsToSave.Items.Union(CommandSessionsToSave.Items));
-        AllSessionsToSave.ExportToXml(SFD.FileName);
+        TPuttySessionList SessionsToSave = new TPuttySessionList(SessionsTabs.SelectMany(x => x.PuttySessions).Where(x => x.IsSelected).Select(x => x.PuttySession));
+        SessionsToSave.ExportToXml(SFD.FileName);
       }
 
       NotifyExecutionCompleted("Done.");
       WorkInProgress = false;
     }
 
-    private void _RefreshSessionsFromRegistry() {
-
-      WorkInProgress = true;
-      CommandRefreshSessions.NotifyCanExecuteChanged();
-      Log.Write("Refreshing sessions...");
-      NotifyExecutionProgress("Reading sessions...");
-
-      TPuttySessionList Sessions = new TPuttySessionList();
-      Sessions.ReadSessionsFromRegistry();
-
-      ObservableSessions = _CreateAndRecoverSessions(Sessions, TPuttyProtocol.SSH, x => !x.Name.StartsWith("#CMD/"));
-      ObservableCommandSessions = _CreateAndRecoverSessions(Sessions, TPuttyProtocol.SSH, x => x.Name.StartsWith("#CMD/"));
-
-      NotifyExecutionStatus($"{ObservableSessions.Count + ObservableCommandSessions.Count} session(s)");
-      Log.Write("Refresh done.");
-      WorkInProgress = false;
-      CommandRefreshSessions.NotifyCanExecuteChanged();
-
-    }
-
-    private VMPuttySessionsList _CreateAndRecoverSessions(TPuttySessionList sessions, TPuttyProtocol protocol, Func<IPuttySession, bool> predicate) {
+    private TVMPuttySessionsList _CreateAndRecoverSessions(string header, TPuttySessionList sessions, TPuttyProtocol protocol, Func<IPuttySession, bool> predicate) {
       if ( sessions == null ) {
         return null;
       }
 
-      VMPuttySessionsList RetVal = new VMPuttySessionsList();
+      TVMPuttySessionsList RetVal = new TVMPuttySessionsList(header);
 
       if ( !sessions.Items.Any() ) {
-        return new VMPuttySessionsList();
+        return new TVMPuttySessionsList();
       }
 
       IEnumerable<Process> CurrentlyRunningSessions = TPuttySession.GetAllPuttyProcess();
@@ -299,8 +287,8 @@ namespace EasyPutty.ViewModels {
 
         Process RunningSession = CurrentlyRunningSessions.FirstOrDefault(x => TRunProcess.GetCommandLine(x.Id).EndsWith($"\"{SessionItem.CleanName}\""));
 
-        VMPuttySession NewPuttySessionVM;
-        NewPuttySessionVM = new VMPuttySession(SessionItem);
+        TVMPuttySession NewPuttySessionVM;
+        NewPuttySessionVM = new TVMPuttySession(SessionItem);
         if ( RunningSession != null ) {
           NewPuttySessionVM.AssignProcess(RunningSession);
         }

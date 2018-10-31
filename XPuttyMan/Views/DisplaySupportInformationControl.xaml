@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
-             xmlns:libxputty="clr-namespace:libxputty_std20;assembly=libxputty-std20"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300">
