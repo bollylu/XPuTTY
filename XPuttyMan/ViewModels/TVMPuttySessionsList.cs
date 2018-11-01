@@ -31,19 +31,20 @@ namespace EasyPutty.ViewModels {
     public int Count => PuttySessions.Count;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TVMPuttySessionsList(string header = "") {
+    public TVMPuttySessionsList(string header = "") : base() {
       Header = header;
-      _InitializeCommands();
       _Initialize(new List<TVMPuttySession>());
     }
 
-    public TVMPuttySessionsList(string header, IEnumerable<TVMPuttySession> vmPuttySessions) {
+    public TVMPuttySessionsList(string header, IEnumerable<TVMPuttySession> vmPuttySessions) : base() {
       Header = header;
-      _InitializeCommands();
       _Initialize(vmPuttySessions);
     }
 
     protected override void _InitializeCommands() {
+    }
+
+    protected override void _Initialize() {
     }
 
     protected void _Initialize(IEnumerable<TVMPuttySession> vmPuttySessions) {
@@ -57,6 +58,7 @@ namespace EasyPutty.ViewModels {
 
     public override void Dispose() {
       Clear();
+      Dispose(true);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 

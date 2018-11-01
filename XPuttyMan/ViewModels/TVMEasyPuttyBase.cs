@@ -91,8 +91,7 @@ namespace EasyPutty.ViewModels {
       _Initialize();
     }
 
-
-    public TVMEasyPuttyBase(TVMEasyPuttyBase vmEasyPutty) {
+    public TVMEasyPuttyBase(TVMEasyPuttyBase vmEasyPutty) : base() {
       if ( vmEasyPutty == null ) {
         return;
       }
@@ -100,8 +99,8 @@ namespace EasyPutty.ViewModels {
       Parent = vmEasyPutty.Parent;
     }
 
-    protected virtual void _InitializeCommands() { }
-    protected virtual void _Initialize() {}
+    protected abstract void _InitializeCommands();
+    protected abstract void _Initialize();
     #endregion Constructor(s)
 
     #region Converters
@@ -126,7 +125,7 @@ namespace EasyPutty.ViewModels {
     protected virtual void Dispose(bool disposing) {
       if ( !disposedValue ) {
         if ( disposing ) {
-          // TODO: dispose managed state (managed objects).
+          _Data = null;
         }
 
         Parent = null;
@@ -135,11 +134,12 @@ namespace EasyPutty.ViewModels {
     }
 
     // This code added to correctly implement the disposable pattern.
-    public virtual void Dispose() {
-      // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-      Dispose(true);
+    public abstract void Dispose();
+    //  {
+    //  // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+    //  Dispose(true);
 
-    }
+    //}
     #endregion IDisposable Support
 
   }

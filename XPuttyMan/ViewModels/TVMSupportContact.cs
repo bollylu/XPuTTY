@@ -44,12 +44,10 @@ namespace EasyPutty.ViewModels {
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TVMSupportContact() : base() {
-      InitializeCommands();
     }
 
     public TVMSupportContact(ISupportContact supportContact) : base() {
       _SupportContact = supportContact;
-      InitializeCommands();
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 

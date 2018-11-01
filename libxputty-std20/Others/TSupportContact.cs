@@ -33,16 +33,9 @@ namespace libxputty_std20 {
     #endregion Public properties
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TSupportContact() {
-      Name = DEFAULT_NAME;
-      Description = DEFAULT_DESCRIPTION;
-      Email = DEFAULT_EMAIL;
-      Phone = DEFAULT_PHONE;
-      HelpUri = DEFAULT_URI;
-      Message = DEFAULT_MESSAGE;
-    }
+    public TSupportContact() : base() { }
 
-    public TSupportContact(ISupportContact contact) : this() {
+    public TSupportContact(ISupportContact contact) : base() {
       Name = contact.Name;
       Description = contact.Description;
       Email = contact.Email;
@@ -51,7 +44,7 @@ namespace libxputty_std20 {
       Message = contact.Message;
     }
 
-    public TSupportContact(XElement contact) : this() {
+    public TSupportContact(XElement contact) : base() {
       #region Validate parameters
       if ( contact == null || !contact.HasAttributes ) {
         Trace.WriteLine($"Unable to create {this.GetType().Name} from XML : XElement is empty or invalid");
@@ -64,6 +57,15 @@ namespace libxputty_std20 {
       Phone = contact.SafeReadAttribute<string>(XML_ATTRIBUTE_PHONE, DEFAULT_PHONE);
       HelpUri = contact.SafeReadAttribute<string>(XML_ATTRIBUTE_URI, DEFAULT_URI);
       Message = contact.SafeReadElementValue<string>(XML_ELEMENT_MESSAGE, DEFAULT_MESSAGE);
+    }
+
+    protected override void _Initialize() {
+      Name = DEFAULT_NAME;
+      Description = DEFAULT_DESCRIPTION;
+      Email = DEFAULT_EMAIL;
+      Phone = DEFAULT_PHONE;
+      HelpUri = DEFAULT_URI;
+      Message = DEFAULT_MESSAGE;
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -133,6 +135,8 @@ namespace libxputty_std20 {
       RetVal.AppendLine("<BR/>");
       return RetVal.ToString();
     }
+
+   
 
     public static TSupportContact Demo1 {
       get {

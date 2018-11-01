@@ -5,11 +5,12 @@ using System.IO;
 using System.Text;
 using System.Xml.Linq;
 using BLTools;
-using Microsoft.Win32;
+using BLTools.Json;
 using libxputty_std20.Interfaces;
+using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IName {
+  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IName, IToJson, IToXml {
 
     #region --- Constants --------------------------------------------
     public const string REG_KEYNAME_BASE = @"Software\SimonTatham\PuTTY\Sessions";
@@ -25,6 +26,10 @@ namespace libxputty_std20 {
     protected const string XML_THIS_ELEMENT = "Session";
     protected const string XML_ATTRIBUTE_NAME = "Name";
     protected const string XML_ATTRIBUTE_PROTOCOL = "Protocol";
+
+    public const string JSON_THIS_ELEMENT = "Session";
+    public const string JSON_NAME = "Name";
+    public const string JSON_PROTOCOL = "Protocol";
     #endregion --- Constants --------------------------------------------
 
     #region --- IName --------------------------------------------
@@ -51,6 +56,17 @@ namespace libxputty_std20 {
       RetVal.SetAttributeValue(XML_ATTRIBUTE_PROTOCOL, Protocol);
       return RetVal;
     }
+
+    public virtual IJsonValue ToJson() {
+      JsonObject RetVal = new JsonObject {
+        { JSON_THIS_ELEMENT, new JsonObject {
+            { JSON_NAME, Json.JsonEncode(Name) },
+            { JSON_PROTOCOL, Protocol }
+          }
+        }
+      };
+      return RetVal;
+    }
     #endregion --- Converters -------------------------------------------------------------------------------------
 
     #region --- Event handlers --------------------------------------------
@@ -61,14 +77,12 @@ namespace libxputty_std20 {
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySession() {
       Name = "<no name>";
-      PuttyProcess = new TRunProcess();
       PuttyProcess.OnExit += PuttyProcess_OnExit;
       PuttyProcess.OnStart += PuttyProcess_OnStart;
 
     }
     public TPuttySession(string name) {
       Name = name;
-      PuttyProcess = new TRunProcess();
       PuttyProcess.OnExit += PuttyProcess_OnExit;
       PuttyProcess.OnStart += PuttyProcess_OnStart;
     }
@@ -122,14 +136,12 @@ namespace libxputty_std20 {
     private static IPuttySession _Empty;
 
     #region --- Windows processes --------------------------------------------
-    public TRunProcess PuttyProcess { get; protected set; }
+    public TRunProcess PuttyProcess { get; protected set; } = new TRunProcess();
     public bool IsRunning => PuttyProcess.IsRunning;
     public int PID => PuttyProcess.PID;
     public string CommandLine => TRunProcess.GetCommandLine(PID);
 
     public ISupportContact SupportContact => throw new NotImplementedException();
-
-    
 
     public virtual void Start() {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
@@ -177,7 +189,7 @@ namespace libxputty_std20 {
     #endregion --- Windows processes -------------------------------------------- 
 
     public static IEnumerable<Process> GetAllPuttyProcess() {
-      foreach(Process ProcessItem in Process.GetProcessesByName(EXECUTABLE_PUTTY_WITHOUT_EXTENSION)) {
+      foreach ( Process ProcessItem in Process.GetProcessesByName(EXECUTABLE_PUTTY_WITHOUT_EXTENSION) ) {
         yield return ProcessItem;
       }
       foreach ( Process ProcessItem in Process.GetProcessesByName(EXECUTABLE_PLINK_WITHOUT_EXTENSION) ) {

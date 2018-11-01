@@ -1,18 +1,16 @@
-﻿using BLTools;
-using BLTools.Encryption;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
 using System.Linq;
 using System.Security;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+
+using BLTools;
+using BLTools.Encryption;
+
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
   public class TCredential : TPuttyBase, IDisposable, ICredential {
-
 
     #region XML contants
     public static XName XML_THIS_ELEMENT => GetXName("Credential");
@@ -27,13 +25,13 @@ namespace libxputty_std20 {
 
     public string Domain {
       get {
-        if (string.IsNullOrWhiteSpace(Username)) {
+        if ( string.IsNullOrWhiteSpace(Username) ) {
           return "";
         }
-        if (!Username.Contains(@"\") && !Username.Contains("@")) {
+        if ( !Username.Contains(@"\") && !Username.Contains("@") ) {
           return Username;
         }
-        if (Username.Contains(@"\")) {
+        if ( Username.Contains(@"\") ) {
           return Username.Before(@"\");
         }
         return Username.After("@");
@@ -41,13 +39,13 @@ namespace libxputty_std20 {
     }
     public string UsernameWithoutDomain {
       get {
-        if (string.IsNullOrWhiteSpace(Username)) {
+        if ( string.IsNullOrWhiteSpace(Username) ) {
           return "";
         }
-        if (!Username.Contains(@"\") && !Username.Contains("@")) {
+        if ( !Username.Contains(@"\") && !Username.Contains("@") ) {
           return "";
         }
-        if (Username.Contains(@"\")) {
+        if ( Username.Contains(@"\") ) {
           return Username.After(@"\");
         }
         return Username.Before("@");
@@ -57,7 +55,7 @@ namespace libxputty_std20 {
     private bool _XmlSecure;
     public bool XmlSecure {
       get {
-        if (Inherited) {
+        if ( Inherited ) {
           return true;
         }
         return _XmlSecure;
@@ -73,13 +71,13 @@ namespace libxputty_std20 {
 
     public string EncryptionKey {
       private get {
-        if (!string.IsNullOrWhiteSpace(_EncryptionKey)) {
+        if ( !string.IsNullOrWhiteSpace(_EncryptionKey) ) {
           return _EncryptionKey;
         }
         return MakeKey(ParentName);
       }
       set {
-        if (!string.IsNullOrWhiteSpace(value)) {
+        if ( !string.IsNullOrWhiteSpace(value) ) {
           _EncryptionKey = MakeKey(value);
         } else {
           _EncryptionKey = MakeKey(ParentName);
@@ -90,12 +88,12 @@ namespace libxputty_std20 {
     public bool HasValue => !string.IsNullOrWhiteSpace(Username);
     public bool Inherited {
       get {
-        
-        if (HasValue) {
+
+        if ( HasValue ) {
           return false;
         }
 
-        if (Parent == null) {
+        if ( Parent == null ) {
           return false;
         }
 
@@ -103,7 +101,7 @@ namespace libxputty_std20 {
           return false;
         }
 
-        if (ParentContainer.Credential.HasValue) {
+        if ( ParentContainer.Credential.HasValue ) {
           Log.Write($"Credential is coming from Parent => {ParentContainer.GetType().Name}:{ParentName}");
           return true;
         }
@@ -114,7 +112,7 @@ namespace libxputty_std20 {
 
     public string ParentName {
       get {
-        if (Parent is IName ParentWithName) {
+        if ( Parent is IName ParentWithName ) {
           return ParentWithName.Name;
         }
         return "";
@@ -132,24 +130,24 @@ namespace libxputty_std20 {
     #endregion Public properties
 
     #region Constructor(s)
-    public TCredential() {
+    public TCredential() : base() {
       XmlSecure = false;
       EncryptionKey = "";
     }
-    public TCredential(string username, string password, bool xmlSecure = true) {
+    public TCredential(string username, string password, bool xmlSecure = true) : base() {
       Username = username;
       SecurePassword = password.ConvertToSecureString();
       XmlSecure = xmlSecure;
       EncryptionKey = "";
     }
-    public TCredential(string username, SecureString password, bool xmlSecure = true) {
+    public TCredential(string username, SecureString password, bool xmlSecure = true) : base() {
       Username = username;
       SecurePassword = password;
       XmlSecure = xmlSecure;
       EncryptionKey = "";
     }
-    public TCredential(ICredential credential) {
-      if (credential == null) {
+    public TCredential(ICredential credential) : base() {
+      if ( credential == null ) {
         return;
       }
       Username = credential.Username ?? "";
@@ -157,7 +155,7 @@ namespace libxputty_std20 {
       XmlSecure = credential.XmlSecure;
       EncryptionKey = "";
     }
-    public TCredential(ICredential credential, IParent parent) {
+    public TCredential(ICredential credential, IParent parent) : base() {
       if ( credential == null ) {
         return;
       }
@@ -167,9 +165,9 @@ namespace libxputty_std20 {
       EncryptionKey = "";
       Parent = parent;
     }
-    public TCredential(XElement credential, IParent parent) {
+    public TCredential(XElement credential, IParent parent) : base() {
       #region Validate parameters
-      if (credential == null || !credential.HasAttributes) {
+      if ( credential == null || !credential.HasAttributes ) {
         Log.Write("Unable to create TCredential from XML : XElement is empty or invalid", ErrorLevel.Error);
         return;
       }
@@ -179,17 +177,17 @@ namespace libxputty_std20 {
       Username = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_USERNAME, "");
       XmlSecure = credential.SafeReadAttribute<bool>(XML_ATTRIBUTE_XMLSECURE, false);
 
-      if (parent == null || !(parent is IName)) {
+      if ( parent == null || !(parent is IName) ) {
         EncryptionKey = "";
       } else {
         EncryptionKey = MakeKey(((IName)parent).Name);
       }
 
       string PasswordFromXElement = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_PASSWORD, "");
-      if (XmlSecure) {
+      if ( XmlSecure ) {
         try {
           SecurePassword = PasswordFromXElement.DecryptFromBase64(EncryptionKey).ConvertToSecureString();
-        } catch (Exception ex) {
+        } catch ( Exception ex ) {
           Log.Write($"Problem with decryption of the password {PasswordFromXElement} : {ex.Message}", ErrorLevel.Error);
           SecurePassword = "".ConvertToSecureString();
         }
@@ -198,24 +196,24 @@ namespace libxputty_std20 {
       }
 
     }
-    public TCredential(XElement credential, string encryptionKey = "") {
+    public TCredential(XElement credential, string encryptionKey = "") : base() {
       #region Validate parameters
-      if (credential == null || !credential.HasAttributes) {
+      if ( credential == null || !credential.HasAttributes ) {
         Log.Write("Unable to create TCredential from XML : XElement is empty or invalid", ErrorLevel.Error);
         return;
       }
       #endregion Validate parameters
       Username = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_USERNAME, "");
-      if (encryptionKey != "") {
+      if ( encryptionKey != "" ) {
         EncryptionKey = encryptionKey;
       }
       XmlSecure = credential.SafeReadAttribute<bool>(XML_ATTRIBUTE_XMLSECURE, false);
 
       string PasswordFromXElement = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_PASSWORD, "");
-      if (XmlSecure) {
+      if ( XmlSecure ) {
         try {
           SecurePassword = PasswordFromXElement.DecryptFromBase64(EncryptionKey).ConvertToSecureString();
-        } catch (Exception ex) {
+        } catch ( Exception ex ) {
           Log.Write($"Problem with decryption of the password {PasswordFromXElement} : {ex.Message}", ErrorLevel.Error);
           SecurePassword = "".ConvertToSecureString();
         }
@@ -225,8 +223,10 @@ namespace libxputty_std20 {
 
     }
 
+    protected override void _Initialize() { }
+
     public override void Dispose() {
-      if (SecurePassword != null) {
+      if ( SecurePassword != null ) {
         SecurePassword.Dispose();
       }
     }
@@ -235,13 +235,13 @@ namespace libxputty_std20 {
     #region Converters
     public override XElement ToXml() {
       XElement RetVal = new XElement(XML_THIS_ELEMENT);
-      if (Inherited) {
+      if ( Inherited ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_INHERITED, Inherited);
       } else {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_USERNAME, Username);
         RetVal.SetAttributeValue(XML_ATTRIBUTE_XMLSECURE, XmlSecure);
-        if (SecurePassword != null) {
-          if (XmlSecure) {
+        if ( SecurePassword != null ) {
+          if ( XmlSecure ) {
             RetVal.SetAttributeValue(XML_ATTRIBUTE_PASSWORD, SecurePassword.ConvertToUnsecureString().EncryptToBase64(EncryptionKey));
           } else {
             RetVal.SetAttributeValue(XML_ATTRIBUTE_PASSWORD, SecurePassword.ConvertToUnsecureString());
@@ -253,11 +253,11 @@ namespace libxputty_std20 {
 
     public override string ToString() {
       StringBuilder RetVal = new StringBuilder();
-      if (Inherited) {
+      if ( Inherited ) {
         RetVal.Append("(Inherited)");
       } else {
         RetVal.Append(Username);
-        if (!XmlSecure) {
+        if ( !XmlSecure ) {
           RetVal.AppendFormat(", {0}", SecurePassword.ConvertToUnsecureString());
         } else {
           RetVal.AppendFormat(", {0}", SecurePassword.ConvertToUnsecureString().EncryptToBase64(EncryptionKey));
@@ -290,7 +290,7 @@ namespace libxputty_std20 {
     }
 
     private string MakeKey(string source) {
-      if (source == null) {
+      if ( source == null ) {
         return "";
       }
       return new string(source.Reverse().ToArray());

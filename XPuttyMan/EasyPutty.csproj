@@ -232,7 +232,7 @@
     <Compile Include="ViewModels\TVMEasyPuttyBase.cs" />
     <Compile Include="Base classes\TGroup.cs" />
     <Compile Include="Base classes\TRelayCommand.cs" />
-    <Compile Include="Helpers.cs" />
+    <Compile Include="Tools\Helpers.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\TVMSupportContact.cs" />
     <Compile Include="ViewModels\TVMSupportContacts.cs" />
@@ -373,7 +373,6 @@
   <ItemGroup>
     <Folder Include="Interfaces\" />
     <Folder Include="Models\" />
-    <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Pictures\FileSave.png" />

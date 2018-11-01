@@ -57,17 +57,17 @@ namespace libxputty_std20 {
     /// <summary>
     /// Name of the item
     /// </summary>
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
 
     /// <summary>
     /// Description of the item
     /// </summary>
-    public string Description { get; set; }
+    public string Description { get; set; } = "";
 
     /// <summary>
     /// A comment
     /// </summary>
-    public string Comment { get; set; }
+    public string Comment { get; set; } = "";
     #endregion --- IName --------------------------------------------
 
     /// <summary>
@@ -107,17 +107,7 @@ namespace libxputty_std20 {
       LocalCredential = puttyBase.LocalCredential;
     }
 
-    protected virtual void _Initialize() {
-      if ( Name == null ) {
-        Name = "";
-      }
-      if ( Description == null ) {
-        Description = "";
-      }
-      if ( Comment == null ) {
-        Comment = "";
-      }
-    } 
+    protected abstract void _Initialize();
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region ICredentialContainer

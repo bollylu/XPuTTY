@@ -76,13 +76,15 @@ namespace EasyPutty.ViewModels {
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() : base() {
-      _InitializeCommands();
-      _Initialize();
     }
 
     protected override void _Initialize() {
       if ( App.CurrentUserCredential != null ) {
-        ApplicationTitle = $@"{App.CurrentUserCredential.Domain ?? ""}\{App.CurrentUserCredential.UserName}";
+        ApplicationTitle = App.AppUsername;
+      }
+      if (App.AppIsStartingUp) {
+        App.AppIsStartingUp = false;
+        _FileOpenRegistry();
       }
     }
 
@@ -103,6 +105,10 @@ namespace EasyPutty.ViewModels {
       CommandHelpAbout = new TRelayCommand(() => _HelpAbout(), _ => { return true; });
       CommandToolsExportAll = new TRelayCommand(() => _ExportAll(), _ => { return !WorkInProgress; });
       CommandToolsExportSelected = new TRelayCommand(() => _ExportSelected(), _ => { return !WorkInProgress; });
+    }
+
+    public override void Dispose() {
+      Dispose(true);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -191,20 +197,26 @@ namespace EasyPutty.ViewModels {
       WorkInProgress = false;
     }
     private void _FileSaveJson() {
-      OpenFileDialog OFD = new OpenFileDialog {
-        Title = "Select new sessions file",
-        Filter = "Parameter file|*.json",
-        CheckFileExists = true,
-        CheckPathExists = true,
-        AddExtension = true,
+      WorkInProgress = true;
+      Log.Write("Saving all sessions to Json...");
+
+      SaveFileDialog SFD = new SaveFileDialog {
         DefaultExt = ".json",
-        ValidateNames = true
+        Title = "Select a filename to export your data",
+        OverwritePrompt = true,
+        AddExtension = true
       };
-      if ( OFD.ShowDialog() != true ) {
-        return;
+      SFD.DefaultExt = ".json";
+      SFD.Filter = "JSON files (.json)|*.json";
+
+      if ( SFD.ShowDialog() == true ) {
+        TPuttySessionList SessionsToSave = new TPuttySessionList(SessionsTabs.SelectMany(x => x.PuttySessions).Select(x => x.PuttySession));
+        SessionsToSave.ExportToJson(SFD.FileName);
       }
 
+      NotifyExecutionCompleted("Done.");
       MainWindow.DataIsDirty = false;
+      WorkInProgress = false;
     }
     private void _FileSaveRegistry() {
       MainWindow.DataIsDirty = false;

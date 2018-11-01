@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using BLTools;
-using Microsoft.Win32;
+using BLTools.Json;
+
 using libxputty_std20.Interfaces;
+
+using Microsoft.Win32;
 
 namespace libxputty_std20 {
   public class TPuttySessionSSH : TPuttySession, IDisposable {
@@ -20,6 +20,10 @@ namespace libxputty_std20 {
     protected const string XML_ATTRIBUTE_HOSTNAME = "HostName";
     protected const string XML_ATTRIBUTE_PORT = "PortNumber";
     protected const string XML_ATTRIBUTE_SSH_REMOTE_COMMAND = "RemoteCommand";
+
+    protected const string JSON_HOSTNAME = "HostName";
+    protected const string JSON_PORT = "PortNumber";
+    protected const string JSON_SSH_REMOTE_COMMAND = "RemoteCommand";
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -66,6 +70,17 @@ namespace libxputty_std20 {
       }
       return RetVal;
     }
+
+    public override IJsonValue ToJson() {
+      JsonObject RetVal = base.ToJson() as JsonObject;
+      JsonObject Session = RetVal.SafeGetValueFirst<JsonObject>(TPuttySession.JSON_THIS_ELEMENT);
+      Session.Add(JSON_HOSTNAME, HostName);
+      Session.Add(JSON_PORT, Port);
+      Session.Add(JSON_SSH_REMOTE_COMMAND, Convert.ToBase64String(RemoteCommand.ToByteArray()));
+      RetVal.Clear();
+      RetVal.Add(TPuttySession.JSON_THIS_ELEMENT, Session);
+      return RetVal;
+    }
     #endregion --- Converters -------------------------------------------------------------------------------------
 
     public override IPuttySession LoadFromRegistry() {
@@ -92,7 +107,7 @@ namespace libxputty_std20 {
           SessionKey.SetValue(REG_HOSTNAME, HostName);
           SessionKey.SetValue(REG_PORT, Port);
           SessionKey.Close();
-        } catch (Exception ex) {
+        } catch ( Exception ex ) {
           Log.Write($"Unable to save value to registry key {SessionKey.Name} : {ex.Message}");
         }
       }

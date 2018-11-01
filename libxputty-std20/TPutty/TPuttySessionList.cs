@@ -7,11 +7,15 @@ using System.Xml.Linq;
 using BLTools;
 using Microsoft.Win32;
 using libxputty_std20.Interfaces;
+using BLTools.Json;
+using System.IO;
 
 namespace libxputty_std20 {
-  public class TPuttySessionList : IToXml {
+  public class TPuttySessionList : IToXml, IToJson {
 
     internal const string XML_THIS_ELEMENT = "Sessions";
+
+    internal const string JSON_THIS_ELEMENT = "Sessions";
 
     #region --- Public properties ------------------------------------------------------------------------------
     public List<IPuttySession> Items { get; } = new List<IPuttySession>();
@@ -53,6 +57,17 @@ namespace libxputty_std20 {
       foreach ( IPuttySession PuttySessionItem in Items ) {
         RetVal.Add(PuttySessionItem.ToXml());
       }
+      return RetVal;
+    }
+
+    public  IJsonValue ToJson() {
+      JsonArray Content = new JsonArray();
+      foreach(IPuttySession PuttySessionItem in Items) {
+        Content.Add(PuttySessionItem.ToJson());
+      }
+      JsonObject RetVal = new JsonObject() {
+        {JSON_THIS_ELEMENT, Content }
+      };
       return RetVal;
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
@@ -155,6 +170,25 @@ namespace libxputty_std20 {
         Log.Write($"Unable to export sessions in XML file {filename} : {ex.Message}");
       }
 
+    }
+
+    public void ExportToJson(string filename) {
+      if ( string.IsNullOrWhiteSpace(filename) ) {
+        return;
+      }
+
+      JsonObject JsonToSave = this.ToJson() as JsonObject;
+      try {
+        File.WriteAllText(filename, JsonToSave.RenderAsString(true, 2));
+      } catch ( Exception ex ) {
+        Log.Write($"Unable to export sessions in JSON file {filename} : {ex.Message}");
+      }
+
+    }
+
+    public string ExportToJson() {
+      JsonObject JsonToSave = this.ToJson() as JsonObject;
+      return JsonToSave.RenderAsString(true, 2);
     }
   }
 }

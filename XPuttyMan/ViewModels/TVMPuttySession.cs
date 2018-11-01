@@ -17,8 +17,6 @@ namespace EasyPutty.ViewModels {
     public TRelayCommand CommandEditSessionRemoteCommandOk { get; private set; }
     public TRelayCommand CommandEditSessionRemoteCommandCancel { get; private set; }
     public TRelayCommand CommandStartSession { get; private set; }
-    public TRelayCommand CommandMouseOver { get; private set; }
-    public TRelayCommand CommandMouseLeave { get; private set; }
     #endregion RelayCommand
 
     public string CleanName => Name.Replace("%20", " ");
@@ -58,16 +56,12 @@ namespace EasyPutty.ViewModels {
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TVMPuttySession(IPuttySession puttySession) : base(puttySession) {
-      _InitializeCommands();
-      _Initialize();
     }
     protected override void _InitializeCommands() {
       CommandStartSession = new TRelayCommand(() => _Start(), _ => true);
       CommandEditSessionRemoteCommand = new TRelayCommand(() => _EditRemoteCommand(), _ => !IsRunning && CanEditRemoteCommand);
       CommandEditSessionRemoteCommandOk = new TRelayCommand(() => _EditRemoteCommandOk(), _ => true);
       CommandEditSessionRemoteCommandCancel = new TRelayCommand(() => _EditRemoteCommandCancel(), _ => true);
-      CommandMouseOver = new TRelayCommand(() => _MouseOver(), _ => true);
-      CommandMouseLeave = new TRelayCommand(() => _MouseLeave(), _ => true);
     }
 
     protected override void _Initialize() {
@@ -82,7 +76,7 @@ namespace EasyPutty.ViewModels {
       PuttySession.OnStart -= _PuttySession_OnStart;
       PuttySession.OnExit -= _PuttySession_OnExit;
       PuttySession.Dispose();
-      base.Dispose();
+      Dispose(true);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -116,17 +110,6 @@ namespace EasyPutty.ViewModels {
       RemoteCommand = OldRemoteCommand;
       EditRemoteCommandWindow.Close();
       IsRemoteCommandInProgress = false;
-    }
-
-    private void _MouseOver() {
-      IsSelected = true;
-      NotifyPropertyChanged(nameof(IsSelected));
-      //Log.Write($"Over session {CleanName}");
-    }
-
-    private void _MouseLeave() {
-      IsSelected = false;
-      NotifyPropertyChanged(nameof(IsSelected));
     }
 
     private void _PuttySession_OnExit(object sender, EventArgs e) {

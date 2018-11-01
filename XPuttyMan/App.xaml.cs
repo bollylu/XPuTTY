@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using System.Windows;
+
 using BLTools;
 using BLTools.Debugging;
 
@@ -21,12 +18,15 @@ namespace EasyPutty {
     public const string PARAM_LOGBASE = "logbase";
     public const string PARAM_CONFIG = "config";
 
-    public const string DEFAULT_PROD_LOGBASE = @"c:\Logs";
-    public const string DEFAULT_DEV_LOGBASE = @"c:\Logs";
+    public const string DEFAULT_PROD_LOGBASE = @"c:\Logs\EasyPutty";
+    public const string DEFAULT_DEV_LOGBASE = @"c:\Logs\EasyPutty";
     public const string DEFAULT_CONFIG = "config.xml";
 
     public static SplitArgs Args;
     public static NetworkCredential CurrentUserCredential;
+    public static string AppUsername => string.IsNullOrWhiteSpace(Environment.UserDomainName) ? Environment.UserName : $@"{Environment.UserDomainName}\{Environment.UserName}";
+
+    public static bool AppIsStartingUp = true;
 
     private void Application_Exit(object sender, ExitEventArgs e) {
       ApplicationInfo.ApplicationStop();

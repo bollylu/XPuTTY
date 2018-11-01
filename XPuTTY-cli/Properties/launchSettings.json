@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "XPuTTY-cli": {
+      "commandName": "Project",
+      "commandLineArgs": "/cmd=list"
+    }
+  }
+}

@@ -130,14 +130,14 @@
                   ItemsSource="{Binding Path=SessionsTabs, Mode=OneWay}"
                   SelectedIndex="{Binding Path=TabSelectedIndex}"
                   Margin="10">
-        
+
         <TabControl.ContentTemplate>
           <DataTemplate>
-            <localViews:ViewSessionsList DataContext="{Binding}"
-                                         SnapsToDevicePixels="True" />
+                <localViews:ViewSessionsList DataContext="{Binding}"
+                                             SnapsToDevicePixels="True" />
           </DataTemplate>
         </TabControl.ContentTemplate>
-        
+
         <TabControl.ItemTemplate>
           <DataTemplate>
             <StackPanel Orientation="Horizontal">
@@ -146,7 +146,7 @@
             </StackPanel>
           </DataTemplate>
         </TabControl.ItemTemplate>
-        
+
       </TabControl>
     </Grid>
 

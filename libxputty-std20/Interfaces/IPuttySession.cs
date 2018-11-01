@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
 using BLTools;
+using BLTools.Json;
 
 namespace libxputty_std20.Interfaces {
   public interface IPuttySession : IDisposable {
@@ -28,5 +29,6 @@ namespace libxputty_std20.Interfaces {
     event EventHandler OnExit;
 
     XElement ToXml();
+    IJsonValue ToJson();
   }
 }

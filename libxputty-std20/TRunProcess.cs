@@ -55,8 +55,7 @@ namespace libxputty_std20 {
 
       _Process = new Process();
       if ( IsDebug ) {
-        Log.Write($"Process = {StartInfo.FileName}");
-        Log.Write($"Parameters = {StartInfo.Arguments}");
+        Log.Write($"Process = {StartInfo.FileName}, Args = {StartInfo.Arguments}");
       }
 
       _Process.StartInfo = StartInfo;

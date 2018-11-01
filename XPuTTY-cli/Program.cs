@@ -39,7 +39,7 @@ namespace XPuTTY_cli {
 
         switch ( Command ) {
           case CMD_LIST:
-            Console.WriteLine(Sessions.ToString());
+            Console.WriteLine(Sessions.ExportToJson());
             NeedRunning = false;
             break;
 

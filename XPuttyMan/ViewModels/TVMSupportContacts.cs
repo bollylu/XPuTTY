@@ -14,24 +14,35 @@ namespace EasyPutty.ViewModels {
 
     public List<TVMSupportContact> Items { get; } = new List<TVMSupportContact>();
 
+    #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TVMSupportContacts() : base() { }
 
-    public TVMSupportContacts(TSupportContactCollection contacts) : this() {
+    public TVMSupportContacts(TSupportContactCollection contacts) : base() {
       if ( contacts == null ) {
         return;
       }
-
       foreach ( ISupportContact ContactItem in contacts.Items ) {
         Items.Add(new TVMSupportContact(ContactItem));
       }
     }
 
-    public TVMSupportContacts(ISupportContactContainer contactContainer) : this() {
+    public TVMSupportContacts(ISupportContactContainer contactContainer) : base() {
       if ( contactContainer == null ) {
         return;
       }
-
     }
+
+    protected override void _InitializeCommands() {
+    }
+
+    protected override void _Initialize() {
+    }
+
+    public override void Dispose() {
+      Items.Clear();
+      Dispose(true);
+    }
+    #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     public void DisplaySupportMessage() {
       PopupDisplaySupportContact Popup = new PopupDisplaySupportContact {
@@ -40,6 +51,7 @@ namespace EasyPutty.ViewModels {
       Popup.ShowDialog();
     }
 
+    
 
     public static TVMSupportContacts Demo {
       get {

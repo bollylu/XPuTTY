@@ -19,55 +19,47 @@ namespace libxputty_std20 {
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TSupportContactCollection() : base() {
-      Initialize();
     }
 
     public TSupportContactCollection(IEnumerable<ISupportContact> contacts) : base() {
       if ( contacts == null ) {
-        Initialize();
         return;
       }
       foreach ( ISupportContact ContactItem in contacts ) {
         Add(ContactItem);
       }
-      Initialize();
     }
 
-    public TSupportContactCollection(XElement contacts) {
+    public TSupportContactCollection(XElement contacts) : base() {
       if ( contacts == null || !contacts.Elements(TSupportContact.XML_THIS_ELEMENT).Any() ) {
-        Initialize();
         return;
       }
       foreach ( XElement ContactItem in contacts.Elements(TSupportContact.XML_THIS_ELEMENT) ) {
         Add(new TSupportContact(ContactItem));
       }
-      Initialize();
     }
 
     public TSupportContactCollection(IEnumerable<XElement> contacts) : base() {
       if ( contacts == null ) {
-        Initialize();
         return;
       }
       foreach ( XElement ContactItem in contacts ) {
         Add(new TSupportContact(ContactItem));
       }
-      Initialize();
     }
 
     public TSupportContactCollection(TSupportContactCollection contacts) : base() {
       if ( contacts == null ) {
-        Initialize();
         return;
       }
       foreach ( ISupportContact ContactItem in contacts.Items ) {
         Add(new TSupportContact(ContactItem));
       }
-      Initialize();
     }
 
-    protected void Initialize() {
+    protected override void _Initialize() {
     }
+
     public override void Dispose() {
       foreach ( ISupportContact SupportContactItem in Items ) {
         SupportContactItem.Dispose();
