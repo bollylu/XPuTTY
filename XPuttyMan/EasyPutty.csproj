@@ -79,17 +79,17 @@
     <ApplicationIcon>xputtyman.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BLTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BLTools.4.5.2\lib\netstandard2.0\BLTools.dll</HintPath>
+    <Reference Include="BLTools.45, Version=3.45.1.39146, Culture=neutral, PublicKeyToken=42a294c809db3b02, processorArchitecture=MSIL">
+      <HintPath>..\packages\BLTools.45.3.45.1\lib\net45\BLTools.45.dll</HintPath>
     </Reference>
-    <Reference Include="BLTools.WPF.45, Version=3.45.6430.24658, Culture=neutral, PublicKeyToken=42a294c809db3b02, processorArchitecture=MSIL">
-      <HintPath>..\packages\BLTools.WPF.45.3.45.0\lib\net45\BLTools.WPF.45.dll</HintPath>
+    <Reference Include="BLTools.45.Json, Version=3.45.1.39165, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BLTools.45.Json.3.45.1\lib\net45\BLTools.45.Json.dll</HintPath>
     </Reference>
-    <Reference Include="BLTools.WPF.Controls.45, Version=3.45.6430.24659, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\BLTools.WPF.Controls.45.3.45.0\lib\net45\BLTools.WPF.Controls.45.dll</HintPath>
+    <Reference Include="BLTools.WPF.45, Version=3.45.1.38671, Culture=neutral, PublicKeyToken=42a294c809db3b02, processorArchitecture=MSIL">
+      <HintPath>..\packages\BLTools.WPF.45.20181102.4.0\lib\net45\BLTools.WPF.45.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
+    <Reference Include="BLTools.WPF.Controls.45, Version=3.45.1.38672, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BLTools.WPF.Controls.45.20181102.4.0\lib\net45\BLTools.WPF.Controls.45.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Win32.Registry, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Registry.4.5.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
@@ -208,9 +208,6 @@
       <HintPath>..\packages\System.Threading.AccessControl.4.5.0\lib\net461\System.Threading.AccessControl.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions" />
-    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -234,21 +231,28 @@
     <Compile Include="Base classes\TRelayCommand.cs" />
     <Compile Include="Tools\Helpers.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\TVMPuttySessionGroup.cs" />
     <Compile Include="ViewModels\TVMSupportContact.cs" />
     <Compile Include="ViewModels\TVMSupportContacts.cs" />
     <Compile Include="ViewModels\TVMPuttySession.cs" />
-    <Compile Include="ViewModels\TVMPuttySessionsList.cs" />
+    <Compile Include="ViewModels\TVMPuttySessionsGroupWithView.cs" />
     <Compile Include="Views\DisplaySupportInformationControl.xaml.cs">
       <DependentUpon>DisplaySupportInformationControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PopupDisplaySupportContact.xaml.cs">
       <DependentUpon>PopupDisplaySupportContact.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ViewGroupLevel1ByTabs.xaml.cs">
+      <DependentUpon>ViewGroupLevel1ByTabs.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ViewOneSession.xaml.cs">
       <DependentUpon>ViewOneSession.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ViewSessionsList.xaml.cs">
-      <DependentUpon>ViewSessionsList.xaml</DependentUpon>
+    <Compile Include="Views\ViewGroupLevel2ByTabs.xaml.cs">
+      <DependentUpon>ViewGroupLevel2ByTabs.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ViewSessionsBySectionsWithExpander.xaml.cs">
+      <DependentUpon>ViewSessionsBySectionsWithExpander.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\WindowEditRemoteCommand.xaml.cs">
       <DependentUpon>WindowEditRemoteCommand.xaml</DependentUpon>
@@ -273,11 +277,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\ViewGroupLevel1ByTabs.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ViewOneSession.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ViewSessionsList.xaml">
+    <Page Include="Views\ViewGroupLevel2ByTabs.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewSessionsBySectionsWithExpander.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

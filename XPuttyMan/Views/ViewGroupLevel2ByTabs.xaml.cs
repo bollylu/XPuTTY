@@ -10,16 +10,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace EasyPutty.Views {
   /// <summary>
-  /// Interaction logic for WindowEditRemoteCommand.xaml
+  /// Interaction logic for ViewSection.xaml
   /// </summary>
-  public partial class WindowEditRemoteCommand : Window {
-    public WindowEditRemoteCommand() {
+  public partial class ViewGroupLevel2ByTabs : UserControl {
+    public ViewGroupLevel2ByTabs() {
       InitializeComponent();
-      MainWindow.DataIsDirty = true;
     }
   }
 }

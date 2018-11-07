@@ -97,6 +97,7 @@ namespace EasyPutty.ViewModels {
       }
       _Data = vmEasyPutty._Data;
       Parent = vmEasyPutty.Parent;
+      _Initialize();
     }
 
     protected abstract void _InitializeCommands();

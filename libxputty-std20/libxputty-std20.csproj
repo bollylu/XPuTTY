@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BLTools" Version="4.5.2" />
-    <PackageReference Include="BLTools.Json.dns.20" Version="4.5.2" />
+    <Compile Remove="TPutty\TPuttySessionList.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BLTools.45" Version="3.45.1" />
+    <PackageReference Include="BLTools.45.Json" Version="3.45.1" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="2.0.1" />
   </ItemGroup>
 

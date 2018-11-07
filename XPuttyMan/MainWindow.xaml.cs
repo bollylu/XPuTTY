@@ -39,6 +39,10 @@ namespace EasyPutty {
         stsBar.SetStatusLeft(e.Value);
       };
 
+      MVVMBase.OnExecutionCompleted += (o, e) => {
+        stsBar.SetStatusRight(e.Message);
+      };
+
       MVVMBase.OnExecutionProgress += (o, e) => {
         stsBar.SetStatusRight(e.Message);
       };

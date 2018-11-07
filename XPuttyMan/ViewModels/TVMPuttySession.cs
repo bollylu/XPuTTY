@@ -19,10 +19,50 @@ namespace EasyPutty.ViewModels {
     public TRelayCommand CommandStartSession { get; private set; }
     #endregion RelayCommand
 
-    public string CleanName => Name.Replace("%20", " ");
-    public string GroupSection => $"{CleanName.Before('/')}";
-    public string DisplayGroupSection => GroupSection == "" ? "<unnamed section>" : $"{CleanName.Before('/')}";
-    public string DisplayName => CleanName.Contains('/') ? CleanName.After(GroupSection).After('/') : CleanName.After(GroupSection);
+    public string CleanName => PuttySession == null ? "" : PuttySession.CleanName;
+
+    public string DisplayName => CleanName.Replace($"[{GroupLevel1}]", "").Replace($"[{GroupLevel2}]", "").Replace($"{{{Section}}}", "");
+
+    public string GroupLevel1 {
+      get {
+        if ( string.IsNullOrWhiteSpace(_GroupLevel1) ) {
+          _GroupLevel1 = PuttySession == null ? "" : PuttySession.GroupLevel1;
+        }
+        return _GroupLevel1;
+      }
+      set {
+        _GroupLevel1 = value;
+        NotifyPropertyChanged(nameof(GroupLevel1));
+      }
+    }
+    private string _GroupLevel1;
+    public string GroupLevel2 {
+      get {
+        if ( string.IsNullOrWhiteSpace(_GroupLevel2) ) {
+          _GroupLevel2 = PuttySession == null ? "" : PuttySession.GroupLevel2;
+        }
+        return _GroupLevel2;
+      }
+      set {
+        _GroupLevel2 = value;
+        NotifyPropertyChanged(nameof(GroupLevel2));
+      }
+    }
+    private string _GroupLevel2;
+
+    public string Section {
+      get {
+        if ( string.IsNullOrWhiteSpace(_Section) ) {
+          _Section = PuttySession == null ? "" : PuttySession.Section;
+        }
+        return _Section;
+      }
+      set {
+        _Section = value;
+        NotifyPropertyChanged(nameof(Section));
+      }
+    }
+    private string _Section;
 
     public string HostName {
       get {
@@ -102,7 +142,7 @@ namespace EasyPutty.ViewModels {
 
     private void _EditRemoteCommandOk() {
       EditRemoteCommandWindow.Close();
-      PuttySession.SaveToRegistry();
+      //PuttySession.SaveToRegistry();
       NotifyPropertyChanged(nameof(RemoteCommand));
       IsRemoteCommandInProgress = false;
     }
@@ -128,7 +168,10 @@ namespace EasyPutty.ViewModels {
     public static TVMPuttySession DesignVMPuttySession {
       get {
         if ( _DesignVMPuttySession == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Group/Fake session") {
+          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
+            GroupLevel1 = "Sharenet",
+            GroupLevel2 = "CMD",
+            Section = "LAN",
             Port = 22,
             HostName = "server.test.priv",
             RemoteCommand = "tail -n 100 -f /var/log/syslog"
@@ -143,7 +186,10 @@ namespace EasyPutty.ViewModels {
     public static TVMPuttySession DesignVMPuttySession2 {
       get {
         if ( _DesignVMPuttySession2 == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Other/Other session") {
+          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Other session") {
+            GroupLevel1 = "Sharenet",
+            GroupLevel2 = "CMD",
+            Section = "DMZ",
             Port = 22,
             HostName = "server2.test.priv",
             RemoteCommand = "tail -n 200 -f /var/log/syslog"

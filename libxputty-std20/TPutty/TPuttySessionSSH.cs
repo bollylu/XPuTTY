@@ -11,19 +11,17 @@ using libxputty_std20.Interfaces;
 using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySessionSSH : TPuttySession, IDisposable {
+  public class TPuttySessionSSH : TPuttySession {
 
+    #region --- Constants --------------------------------------------
     protected const string REG_HOSTNAME = "HostName";
     protected const string REG_PORT = "PortNumber";
     protected const string REG_SSH_REMOTE_COMMAND = "RemoteCommand";
 
-    protected const string XML_ATTRIBUTE_HOSTNAME = "HostName";
-    protected const string XML_ATTRIBUTE_PORT = "PortNumber";
-    protected const string XML_ATTRIBUTE_SSH_REMOTE_COMMAND = "RemoteCommand";
-
     protected const string JSON_HOSTNAME = "HostName";
     protected const string JSON_PORT = "PortNumber";
-    protected const string JSON_SSH_REMOTE_COMMAND = "RemoteCommand";
+    protected const string JSON_SSH_REMOTE_COMMAND = "RemoteCommand"; 
+    #endregion --- Constants --------------------------------------------
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -61,16 +59,6 @@ namespace libxputty_std20 {
       return RetVal.ToString();
     }
 
-    public override XElement ToXml() {
-      XElement RetVal = base.ToXml();
-      RetVal.SetAttributeValue(XML_ATTRIBUTE_HOSTNAME, HostName);
-      RetVal.SetAttributeValue(XML_ATTRIBUTE_PORT, Port);
-      if ( !string.IsNullOrWhiteSpace(RemoteCommand) ) {
-        RetVal.SetElementValue(XML_ATTRIBUTE_SSH_REMOTE_COMMAND, RemoteCommand);
-      }
-      return RetVal;
-    }
-
     public override IJsonValue ToJson() {
       JsonObject RetVal = base.ToJson() as JsonObject;
       JsonObject Session = RetVal.SafeGetValueFirst<JsonObject>(TPuttySession.JSON_THIS_ELEMENT);
@@ -82,36 +70,6 @@ namespace libxputty_std20 {
       return RetVal;
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
-
-    public override IPuttySession LoadFromRegistry() {
-
-      #region === Validate parameters ===
-      if ( string.IsNullOrWhiteSpace(Name) ) {
-        return null;
-      }
-      #endregion === Validate parameters ===
-
-      using ( RegistryKey PuttySessionKey = GetRegistryKey(Name) ) {
-        HostName = PuttySessionKey.GetValue(REG_HOSTNAME, "") as string;
-        Port = (int)PuttySessionKey.GetValue(REG_PORT, 0);
-        RemoteCommand = PuttySessionKey.GetValue(REG_SSH_REMOTE_COMMAND, "") as string;
-      }
-
-      return this;
-    }
-
-    public override void SaveToRegistry() {
-      using ( RegistryKey SessionKey = GetRegistryKeyRW(Name) ) {
-        try {
-          SessionKey.SetValue(REG_SSH_REMOTE_COMMAND, RemoteCommand);
-          SessionKey.SetValue(REG_HOSTNAME, HostName);
-          SessionKey.SetValue(REG_PORT, Port);
-          SessionKey.Close();
-        } catch ( Exception ex ) {
-          Log.Write($"Unable to save value to registry key {SessionKey.Name} : {ex.Message}");
-        }
-      }
-    }
 
     public async override void StartPlink() {
       base.StartPlink();

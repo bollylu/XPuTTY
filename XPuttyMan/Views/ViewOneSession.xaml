@@ -118,8 +118,6 @@
 
           </StackPanel>
 
-          
-
         </Grid>
 
         <Border Grid.Row="1"

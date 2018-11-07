@@ -1,27 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Xml.Linq;
 using BLTools;
-using Microsoft.Win32;
-using libxputty_std20.Interfaces;
 using BLTools.Json;
-using System.IO;
+using libxputty_std20.Interfaces;
+using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySessionList : IToXml, IToJson {
-
-    internal const string XML_THIS_ELEMENT = "Sessions";
-
-    internal const string JSON_THIS_ELEMENT = "Sessions";
+  public class TPuttySessionList : IToJson, IPuttySessionsList {
 
     #region --- Public properties ------------------------------------------------------------------------------
+    
     public List<IPuttySession> Items { get; } = new List<IPuttySession>();
 
     public int Count => Items.Count;
-
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region Private variables
@@ -51,22 +47,13 @@ namespace libxputty_std20 {
       return RetVal.ToString();
     }
 
-
-    public XElement ToXml() {
-      XElement RetVal = new XElement(XML_THIS_ELEMENT);
-      foreach ( IPuttySession PuttySessionItem in Items ) {
-        RetVal.Add(PuttySessionItem.ToXml());
-      }
-      return RetVal;
-    }
-
-    public  IJsonValue ToJson() {
+    public IJsonValue ToJson() {
       JsonArray Content = new JsonArray();
-      foreach(IPuttySession PuttySessionItem in Items) {
+      foreach ( IPuttySession PuttySessionItem in Items ) {
         Content.Add(PuttySessionItem.ToJson());
       }
       JsonObject RetVal = new JsonObject() {
-        {JSON_THIS_ELEMENT, Content }
+        //{JSON_THIS_ELEMENT, Content }
       };
       return RetVal;
     }
@@ -90,59 +77,6 @@ namespace libxputty_std20 {
     }
     #endregion --- Indexers --------------------------------------------
 
-    public IEnumerable<(string SessionName, string SessionProtocol)> GetSessionNamesAndProtocolFromRegistry() {
-      using ( RegistryKey BaseKey = Registry.CurrentUser.OpenSubKey(TPuttySession.REG_KEYNAME_BASE) ) {
-        foreach ( string KeyNameItem in BaseKey.GetSubKeyNames() ) {
-          string Protocol = (BaseKey.OpenSubKey(KeyNameItem).GetValue(TPuttySession.REG_PROTOCOL_TYPE, "Unknown") as string).ToUpper();
-          yield return (SessionName: KeyNameItem, SessionProtocol: Protocol);
-        }
-      }
-      yield break;
-    }
-
-    public void ReadSessionsFromRegistry() {
-
-      IEnumerable<(string, string)> SessionsWithProtocol = GetSessionNamesAndProtocolFromRegistry();
-      if ( !SessionsWithProtocol.Any() ) {
-        return;
-      }
-
-      lock ( Lock_Content ) {
-        Items.Clear();
-        foreach ( (string SessionNameItem, string SessionProtocolItem) in SessionsWithProtocol ) {
-
-          IPuttySession NewSession;
-          if ( SessionProtocolItem == TPuttyProtocol.SSH ) {
-            NewSession = new TPuttySessionSSH(SessionNameItem);
-            Items.Add(NewSession.LoadFromRegistry());
-            continue;
-          }
-          if ( SessionProtocolItem == TPuttyProtocol.Serial ) {
-            NewSession = new TPuttySessionSerial(SessionNameItem);
-            Items.Add(NewSession.LoadFromRegistry());
-            continue;
-          }
-          if ( SessionProtocolItem == TPuttyProtocol.Telnet ) {
-            NewSession = new TPuttySessionTelnet(SessionNameItem);
-            Items.Add(NewSession.LoadFromRegistry());
-            continue;
-          }
-          if ( SessionProtocolItem == TPuttyProtocol.RLogin ) {
-            NewSession = new TPuttySessionRLogin(SessionNameItem);
-            Items.Add(NewSession.LoadFromRegistry());
-            continue;
-          }
-          if ( SessionProtocolItem == TPuttyProtocol.Raw ) {
-            NewSession = new TPuttySessionRaw(SessionNameItem);
-            Items.Add(NewSession.LoadFromRegistry());
-            continue;
-          }
-        }
-
-      }
-
-    }
-
     public void Clear() {
       lock ( Lock_Content ) {
         Items.Clear();
@@ -155,40 +89,45 @@ namespace libxputty_std20 {
       }
     }
 
-    public void ExportToXml(string filename) {
-      if ( string.IsNullOrWhiteSpace(filename) ) {
-        return;
+    public void Add(IEnumerable<IPuttySession> sessions) {
+      lock ( Lock_Content ) {
+        foreach ( IPuttySession PuttySessionItem in sessions ) {
+          Items.Add(PuttySessionItem);
+        }
       }
-
-      XDocument ExportFile = new XDocument(new XDeclaration("1.0", Encoding.UTF8.EncodingName, "yes"));
-      XElement Root = new XElement("Root");
-      Root.Add(this.ToXml());
-      ExportFile.Add(Root);
-      try {
-        ExportFile.Save(filename);
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to export sessions in XML file {filename} : {ex.Message}");
-      }
-
     }
 
-    public void ExportToJson(string filename) {
+    #region --- Json --------------------------------------------
+    public void SaveToJson(string filename) {
       if ( string.IsNullOrWhiteSpace(filename) ) {
         return;
       }
 
-      JsonObject JsonToSave = this.ToJson() as JsonObject;
       try {
-        File.WriteAllText(filename, JsonToSave.RenderAsString(true, 2));
+        File.WriteAllText(filename, this.ToJson().RenderAsString(true, 2));
       } catch ( Exception ex ) {
         Log.Write($"Unable to export sessions in JSON file {filename} : {ex.Message}");
       }
 
     }
 
-    public string ExportToJson() {
-      JsonObject JsonToSave = this.ToJson() as JsonObject;
-      return JsonToSave.RenderAsString(true, 2);
+    public string SaveToJsonString() {
+      return this.ToJson().RenderAsString(true, 2);
     }
+
+    public Stream SaveToJsonStream() {
+      return this.ToJson().RenderAsString(true, 2).ToStream();
+    }
+    #endregion --- Json --------------------------------------------
+
+    public static TPuttySessionList Empty {
+      get {
+        if ( _Empty == null ) {
+          _Empty = new TPuttySessionList();
+        }
+        return _Empty;
+      }
+    }
+    private static TPuttySessionList _Empty;
   }
 }

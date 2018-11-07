@@ -53,24 +53,28 @@
         </MenuItem>
         <Separator />
 
-        <MenuItem Header="Save sessions file">
+        <MenuItem Header="Save sessions file"
+                  Command="{Binding Path=CommandFileSave}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
         <Separator />
 
-        <MenuItem Header="Save sessions into registry">
+        <MenuItem Header="Save sessions into registry"
+                  Command="{Binding Path=CommandFileSaveRegistry}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <MenuItem Header="Save sessions XML data file">
+        <MenuItem Header="Save sessions XML data file"
+                  Command="{Binding Path=CommandFileSaveXml}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <MenuItem Header="Save sessions JSON data file">
+        <MenuItem Header="Save sessions JSON data file"
+                  Command="{Binding Path=CommandFileSaveJson}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
@@ -125,29 +129,7 @@
       <Grid.RowDefinitions>
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
-
-      <TabControl Grid.Row="1"
-                  ItemsSource="{Binding Path=SessionsTabs, Mode=OneWay}"
-                  SelectedIndex="{Binding Path=TabSelectedIndex}"
-                  Margin="10">
-
-        <TabControl.ContentTemplate>
-          <DataTemplate>
-                <localViews:ViewSessionsList DataContext="{Binding}"
-                                             SnapsToDevicePixels="True" />
-          </DataTemplate>
-        </TabControl.ContentTemplate>
-
-        <TabControl.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal">
-              <TextBlock Text="{Binding Path=Header, Mode=OneWay}" />
-              <TextBlock Text="{Binding Path=Count, StringFormat=' ({0})', TargetNullValue='', Mode=OneWay}" />
-            </StackPanel>
-          </DataTemplate>
-        </TabControl.ItemTemplate>
-
-      </TabControl>
+      <localViews:ViewGroupLevel1ByTabs DataContext="{Binding Path=SessionsTabs}" />
     </Grid>
 
     <bltoolswpfctrl:ExtendedStatusBar x:Name="stsBar"

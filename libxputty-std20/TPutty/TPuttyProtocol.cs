@@ -3,34 +3,35 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace libxputty_std20 {
+
+  public enum EPuttyProtocol {
+    Unknown,
+    SSH,
+    Serial,
+    Telnet,
+    Raw,
+    RLogin
+  }
+
   public class TPuttyProtocol {
 
-    private enum EPuttyProtocol {
-      Unknown,
-      SSH,
-      Serial,
-      Telnet,
-      Raw,
-      RLogin
-    }
+    public EPuttyProtocol Value { get; set; }
 
-    private EPuttyProtocol _Value { get; set; }
-
-    public bool IsUnknown => _Value == EPuttyProtocol.Unknown;
-    public bool IsSSH => _Value == EPuttyProtocol.SSH;
-    public bool IsSerial => _Value == EPuttyProtocol.Serial;
-    public bool IsTelnet => _Value == EPuttyProtocol.Telnet;
-    public bool IsRaw => _Value == EPuttyProtocol.Raw;
-    public bool IsRLogin => _Value == EPuttyProtocol.RLogin;
+    public bool IsUnknown => Value == EPuttyProtocol.Unknown;
+    public bool IsSSH => Value == EPuttyProtocol.SSH;
+    public bool IsSerial => Value == EPuttyProtocol.Serial;
+    public bool IsTelnet => Value == EPuttyProtocol.Telnet;
+    public bool IsRaw => Value == EPuttyProtocol.Raw;
+    public bool IsRLogin => Value == EPuttyProtocol.RLogin;
 
     public TPuttyProtocol() {
-      _Value = EPuttyProtocol.Unknown;
+      Value = EPuttyProtocol.Unknown;
     }
 
     public static TPuttyProtocol Unknown {
       get {
         if ( _Unknown == null ) {
-          _Unknown = new TPuttyProtocol() { _Value = EPuttyProtocol.Unknown };
+          _Unknown = new TPuttyProtocol() { Value = EPuttyProtocol.Unknown };
         }
         return _Unknown;
       }
@@ -39,7 +40,7 @@ namespace libxputty_std20 {
     public static TPuttyProtocol SSH {
       get {
         if ( _SSH == null ) {
-          _SSH = new TPuttyProtocol() { _Value = EPuttyProtocol.SSH };
+          _SSH = new TPuttyProtocol() { Value = EPuttyProtocol.SSH };
         }
         return _SSH;
       }
@@ -48,7 +49,7 @@ namespace libxputty_std20 {
     public static TPuttyProtocol Serial {
       get {
         if ( _Serial == null ) {
-          _Serial = new TPuttyProtocol() { _Value = EPuttyProtocol.Serial };
+          _Serial = new TPuttyProtocol() { Value = EPuttyProtocol.Serial };
         }
         return _Serial;
       }
@@ -57,7 +58,7 @@ namespace libxputty_std20 {
     public static TPuttyProtocol Telnet {
       get {
         if ( _Telnet == null ) {
-          _Telnet = new TPuttyProtocol() { _Value = EPuttyProtocol.Telnet };
+          _Telnet = new TPuttyProtocol() { Value = EPuttyProtocol.Telnet };
         }
         return _Telnet;
       }
@@ -66,7 +67,7 @@ namespace libxputty_std20 {
     public static TPuttyProtocol Raw {
       get {
         if ( _Raw == null ) {
-          _Raw = new TPuttyProtocol() { _Value = EPuttyProtocol.Raw };
+          _Raw = new TPuttyProtocol() { Value = EPuttyProtocol.Raw };
         }
         return _Raw;
       }
@@ -75,7 +76,7 @@ namespace libxputty_std20 {
     public static TPuttyProtocol RLogin {
       get {
         if ( _RLogin == null ) {
-          _RLogin = new TPuttyProtocol() { _Value = EPuttyProtocol.RLogin };
+          _RLogin = new TPuttyProtocol() { Value = EPuttyProtocol.RLogin };
         }
         return _RLogin;
       }
@@ -114,7 +115,7 @@ namespace libxputty_std20 {
         return default;
       }
 
-      switch ( source._Value ) {
+      switch ( source.Value ) {
         case EPuttyProtocol.Unknown:
           return "UNKNOWN";
         case EPuttyProtocol.SSH:

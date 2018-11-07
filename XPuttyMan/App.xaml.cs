@@ -64,10 +64,10 @@ namespace EasyPutty {
         string LogFilename = Path.Combine(LogBase, $"{Path.GetFileNameWithoutExtension(TraceFactory.GetTraceDefaultLogFilename())}.log");
         Trace.Listeners.Add(new TimeStampTraceListener(LogFilename));
       }
-      foreach ( TimeStampTraceListener TraceListenerItem in Trace.Listeners.OfType<TimeStampTraceListener>() ) {
-        TraceListenerItem.DisplayUserId = true;
-        TraceListenerItem.DisplayComputerName = true;
-      }
+      //foreach ( TimeStampTraceListener TraceListenerItem in Trace.Listeners.OfType<TimeStampTraceListener>() ) {
+      //  TraceListenerItem.DisplayUserId = true;
+      //  TraceListenerItem.DisplayComputerName = true;
+      //}
     }
   }
 }

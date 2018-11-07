@@ -2,30 +2,23 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
-using System.Xml.Linq;
+
 using BLTools;
 using BLTools.Json;
+
 using libxputty_std20.Interfaces;
-using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IName, IToJson, IToXml {
+  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IName, IToJson {
 
     #region --- Constants --------------------------------------------
-    public const string REG_KEYNAME_BASE = @"Software\SimonTatham\PuTTY\Sessions";
-
     public const string EXECUTABLE_PUTTY = "putty.exe";
     public static string EXECUTABLE_PUTTY_WITHOUT_EXTENSION = Path.GetFileNameWithoutExtension(EXECUTABLE_PUTTY);
     public const string EXECUTABLE_PLINK = "plink.exe";
     public static string EXECUTABLE_PLINK_WITHOUT_EXTENSION = Path.GetFileNameWithoutExtension(EXECUTABLE_PLINK);
     public const string EXECUTABLE_PSCP = "pscp.exe";
-
-    internal const string REG_PROTOCOL_TYPE = "Protocol";
-
-    protected const string XML_THIS_ELEMENT = "Session";
-    protected const string XML_ATTRIBUTE_NAME = "Name";
-    protected const string XML_ATTRIBUTE_PROTOCOL = "Protocol";
 
     public const string JSON_THIS_ELEMENT = "Session";
     public const string JSON_NAME = "Name";
@@ -41,6 +34,47 @@ namespace libxputty_std20 {
     #region --- Public properties ------------------------------------------------------------------------------
     public string CleanName => Name.Replace("%20", " ");
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
+
+    private IEnumerable<string> Groups => CleanName.ItemsBetween("[", "]");
+
+    public string GroupLevel1 {
+      get {
+        if ( string.IsNullOrWhiteSpace(_GroupLevel1) && Groups.Any() ) {
+          _GroupLevel1 = Groups.First();
+        }
+        return _GroupLevel1;
+      }
+      set {
+        _GroupLevel1 = value;
+      }
+    }
+    private string _GroupLevel1;
+
+    public string GroupLevel2 {
+      get {
+        if ( string.IsNullOrWhiteSpace(_GroupLevel2) && Groups.Any() && Groups.Count() > 1 ) {
+          _GroupLevel2 = Groups.Skip(1).First();
+        }
+        return _GroupLevel2;
+      }
+      set {
+        _GroupLevel2 = value;
+      }
+    }
+    private string _GroupLevel2;
+
+    public string Section {
+      get {
+        if ( string.IsNullOrWhiteSpace(_Section) ) {
+          _Section = CleanName.Between("{", "}");
+        }
+        return _Section;
+      }
+      set {
+        _Section = value;
+      }
+    }
+    private string _Section;
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Converters -------------------------------------------------------------------------------------
@@ -48,13 +82,6 @@ namespace libxputty_std20 {
       StringBuilder RetVal = new StringBuilder();
       RetVal.Append($"Session {CleanName.PadRight(80, '.')} : ");
       return RetVal.ToString();
-    }
-
-    public virtual XElement ToXml() {
-      XElement RetVal = new XElement(XML_THIS_ELEMENT);
-      RetVal.SetAttributeValue(XML_ATTRIBUTE_NAME, Name);
-      RetVal.SetAttributeValue(XML_ATTRIBUTE_PROTOCOL, Protocol);
-      return RetVal;
     }
 
     public virtual IJsonValue ToJson() {
@@ -81,49 +108,18 @@ namespace libxputty_std20 {
       PuttyProcess.OnStart += PuttyProcess_OnStart;
 
     }
+
     public TPuttySession(string name) {
       Name = name;
       PuttyProcess.OnExit += PuttyProcess_OnExit;
       PuttyProcess.OnStart += PuttyProcess_OnStart;
     }
+
     public virtual void Dispose() {
       PuttyProcess.OnExit -= PuttyProcess_OnExit;
       PuttyProcess.OnStart -= PuttyProcess_OnStart;
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
-
-    #region --- Registry interactions --------------------------------------------
-    public static RegistryKey GetRegistryKey(string keyName) {
-      string PuttySessionKeyName = $@"{REG_KEYNAME_BASE}\{keyName}";
-      return Registry.CurrentUser.OpenSubKey(PuttySessionKeyName);
-    }
-
-    public static RegistryKey GetRegistryKeyRW(string keyName) {
-      string PuttySessionKeyName = $@"{REG_KEYNAME_BASE}\{keyName}";
-      return Registry.CurrentUser.CreateSubKey(PuttySessionKeyName, true);
-    }
-
-    public static TPuttyProtocol GetSessionProtocolFromRegistry(string sessionKeyName = "") {
-      #region === Validate parameters ===
-      if ( string.IsNullOrWhiteSpace(sessionKeyName) ) {
-        return TPuttyProtocol.Unknown;
-      }
-      #endregion === Validate parameters ===
-
-      string PuttySessionKeyName = $@"{REG_KEYNAME_BASE}\{sessionKeyName}";
-      using ( RegistryKey PuttySessionKey = Registry.CurrentUser.OpenSubKey(PuttySessionKeyName) ) {
-        return PuttySessionKey.GetValue(REG_PROTOCOL_TYPE, "") as string;
-      }
-    }
-
-    public virtual IPuttySession LoadFromRegistry() {
-      return this;
-    }
-
-    public virtual void SaveToRegistry() {
-
-    }
-    #endregion --- Registry interactions --------------------------------------------
 
     public static IPuttySession Empty {
       get {

@@ -9,6 +9,10 @@ using BLTools.Json;
 namespace libxputty_std20.Interfaces {
   public interface IPuttySession : IDisposable {
     string Name { get; set; }
+    string GroupLevel1 { get; set; }
+    string GroupLevel2 { get; set; }
+    string Section { get; set; }
+
     string CleanName { get; }
     int PID { get; }
     string CommandLine { get; }
@@ -22,13 +26,9 @@ namespace libxputty_std20.Interfaces {
 
     void Stop();
 
-    void SaveToRegistry();
-    IPuttySession LoadFromRegistry();
-
     event EventHandler OnStart;
     event EventHandler OnExit;
 
-    XElement ToXml();
     IJsonValue ToJson();
   }
 }

@@ -18,8 +18,8 @@ namespace EasyPutty.Views {
   /// <summary>
   /// Interaction logic for ViewSessionsList.xaml
   /// </summary>
-  public partial class ViewSessionsList : UserControl {
-    public ViewSessionsList() {
+  public partial class ViewSessionsBySectionsWithExpander : UserControl {
+    public ViewSessionsBySectionsWithExpander() {
       InitializeComponent();
     }
 

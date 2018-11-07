@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="EasyPutty.Views.ViewGroupLevel2ByTabs"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
+             xmlns:localViews="clr-namespace:EasyPutty.Views"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsGroupsL2}}">
+
+    <TabControl 
+      ItemsSource="{Binding Mode=OneWay}"
+                SelectedIndex="{Binding Path=TabSelectedIndex}"
+                Margin="10"
+                TabStripPlacement="Top">
+
+      <TabControl.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Orientation="Horizontal"
+                      d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupWithView.DesignVMPuttySessionsGroup}}">
+            <TextBlock Text="{Binding Path=Header, Mode=OneWay}" />
+            <TextBlock Text="{Binding Path=SessionsCount, StringFormat=' ({0})', TargetNullValue='', Mode=OneWay}" />
+          </StackPanel>
+        </DataTemplate>
+      </TabControl.ItemTemplate>
+
+      <TabControl.ContentTemplate>
+        <DataTemplate>
+          <localViews:ViewSessionsBySectionsWithExpander DataContext="{Binding Path=PuttySessions}"
+                                                         SnapsToDevicePixels="True" />
+        </DataTemplate>
+      </TabControl.ContentTemplate>
+
+    </TabControl>
+
+  </Grid>
+</UserControl>
