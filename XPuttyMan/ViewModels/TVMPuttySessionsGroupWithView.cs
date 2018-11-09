@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Windows.Data;
 using BLTools;
 
 namespace EasyPutty.ViewModels {
   public class TVMPuttySessionsGroupWithView : TVMPuttySessionsGroup {
-
-    public string Section => PuttySessions.Any() ? PuttySessions.First().Section : "";
 
     public CollectionView PuttySessionsView { get; private set; }
 
@@ -18,14 +17,15 @@ namespace EasyPutty.ViewModels {
     public TVMPuttySessionsGroupWithView(string header = "") : base(header) {
     }
 
-    public TVMPuttySessionsGroupWithView(string header, IEnumerable<TVMPuttySession> vmPuttySessions) : base(header, vmPuttySessions) {
+    public TVMPuttySessionsGroupWithView(string header, IEnumerable<TVMPuttySession> vmPuttySessions) {
+      Add(vmPuttySessions);
     }
 
     protected override void _InitializeCommands() {
     }
 
     protected override void _Initialize() {
-      PuttySessionsView = (CollectionView)CollectionViewSource.GetDefaultView(PuttySessions);
+      PuttySessionsView = (CollectionView)CollectionViewSource.GetDefaultView(Items);
       if ( PuttySessionsView.CanGroup ) {
         PropertyGroupDescription GroupDescription = new PropertyGroupDescription("Section");
         PuttySessionsView.GroupDescriptions.Add(GroupDescription);
@@ -38,10 +38,16 @@ namespace EasyPutty.ViewModels {
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
+    public override string ToString() {
+      StringBuilder RetVal = new StringBuilder();
+      RetVal.Append($"{Header} - {Count} sessions");
+      return RetVal.ToString();
+    }
+
     public static TVMPuttySessionsGroupWithView DesignVMPuttySessionsGroupWithView {
       get {
         if ( _DesignVMPuttySessionsGroupWithView == null ) {
-          _DesignVMPuttySessionsGroupWithView = new TVMPuttySessionsGroupWithView();
+          _DesignVMPuttySessionsGroupWithView = new TVMPuttySessionsGroupWithView("Groupe 1 Sections");
           _DesignVMPuttySessionsGroupWithView.Add(TVMPuttySession.DesignVMPuttySession);
           _DesignVMPuttySessionsGroupWithView.Add(TVMPuttySession.DesignVMPuttySession2);
         }

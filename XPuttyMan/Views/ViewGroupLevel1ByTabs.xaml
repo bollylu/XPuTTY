@@ -9,27 +9,47 @@
              d:DesignHeight="450"
              d:DesignWidth="800">
 
-  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsGroupsL1}}">
+  <UserControl.Resources>
+    <ResourceDictionary Source="SmallVisuals.xaml" />
+  </UserControl.Resources>
 
-    <TabControl TabStripPlacement="Left"
-                ItemsSource="{Binding Mode=OneWay}">
+  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsNestedGroup}}"
+        DataContext="{Binding}">
 
-      <TabControl.ItemTemplate>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <ItemsControl Grid.Column="0"
+                  ItemsSource="{Binding Path=Items}">
+
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Vertical" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+
+      <ItemsControl.ItemTemplate>
         <DataTemplate>
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Path=Header, Mode=OneWay}" />
-            <TextBlock Text="{Binding Path=GroupsCount, StringFormat=' ({0})', TargetNullValue='', Mode=OneWay}" />
-          </StackPanel>
+          <Button Content="{Binding Path=Header}"
+                  Margin="10"
+                  Padding="5"
+                  Command="{Binding Path=CommandSelectItem}" />
         </DataTemplate>
-      </TabControl.ItemTemplate>
+      </ItemsControl.ItemTemplate>
 
-      <TabControl.ContentTemplate>
-        <DataTemplate>
-          <localViews:ViewGroupLevel2ByTabs SnapsToDevicePixels="True"
-                                            DataContext="{Binding Path=PuttyGroups}" />
-        </DataTemplate>
-      </TabControl.ContentTemplate>
-    </TabControl>
+    </ItemsControl>
+
+    <Grid Grid.Column="1">
+      <StackPanel>
+        <TextBlock Text="{Binding Path=SelectedItem.Header}" FontSize="16" FontFamily="Arial" FontWeight="Bold" />
+        <Line StrokeThickness="1" HorizontalAlignment="Stretch" />
+        <localViews:ViewGroupLevel2ByTabs SnapsToDevicePixels="True"
+                                          DataContext="{Binding Path=SelectedItem}"
+                                          d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsNestedGroup}}" />
+      </StackPanel>
+    </Grid>
 
   </Grid>
 </UserControl>

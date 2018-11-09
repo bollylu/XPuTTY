@@ -1,0 +1,128 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:bltoolswpfctrl="clr-namespace:BLTools.WPF.Controls;assembly=BLTools.WPF.Controls.45"
+                    xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
+                    xmlns:localViews="clr-namespace:EasyPutty.Views"
+                    xmlns:bltoolswpf="clr-namespace:BLTools.WPF;assembly=BLTools.WPF.45"
+                    mc:Ignorable="d">
+
+  <bltoolswpf:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+  
+  <ControlTemplate x:Key="MainMenu">
+    <Menu Height="23"
+          HorizontalAlignment="Stretch"
+          Name="mnuMain"
+          VerticalAlignment="Top"
+          d:DataContext="{Binding Source={x:Static localViewModels:MainViewModel.DesignMainViewModel}}">
+
+      <MenuItem Header="File">
+        <MenuItem Header="New sessions file"
+                  Command="{Binding Path=CommandFileNew}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
+        <MenuItem Header="Open sessions from registry"
+                  Command="{Binding Path=CommandFileOpenRegistry}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Open sessions XML data file">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Open sessions JSON data file">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileOpenPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
+        <MenuItem Header="Save sessions file"
+                  Command="{Binding Path=CommandFileSave}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileSavePicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
+        <MenuItem Header="Save sessions into registry"
+                  Command="{Binding Path=CommandFileSaveRegistry}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileSavePicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Save sessions XML data file"
+                  Command="{Binding Path=CommandFileSaveXml}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileSavePicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Header="Save sessions JSON data file"
+                  Command="{Binding Path=CommandFileSaveJson}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileSavePicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <Separator />
+
+        <MenuItem Name="mnuFileQuit"
+                  Header="Quit"
+                  Command="{Binding Path=CommandFileQuit}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=FileQuitPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="View"
+                Name="mnuView">
+
+      </MenuItem>
+      <MenuItem Header="Tools"
+                Name="mnuTools">
+
+        <!--<MenuItem Name="mnuToolsExportAll"
+                  Header="Export all"
+                  Command="{Binding Path=CommandToolsExportAll}">
+        </MenuItem>
+        <MenuItem Name="mnuToolsExportSelectedItems"
+                  Header="Export selected items"
+                  Command="{Binding Path=CommandToolsExportSelected}">
+        </MenuItem>-->
+        <Separator />
+        <MenuItem Name="mnuToolsOptions"
+                  Header="Options">
+        </MenuItem>
+      </MenuItem>
+      <MenuItem Header="Help"
+                Name="mnuHelp">
+        <MenuItem Name="mnuHelpContact"
+                  Header="Contact"
+                  Command="{Binding Path=CommandHelpContact}">
+          <MenuItem.Icon>
+            <Image Source="{Binding Path=ContactPicture}" />
+          </MenuItem.Icon>
+        </MenuItem>
+        <MenuItem Name="mnuHelpAbout"
+                  Header="About"
+                  Command="{Binding Path=CommandHelpAbout}" />
+      </MenuItem>
+
+    </Menu>
+  </ControlTemplate>
+
+  <ContextMenu  x:Key="OneSessionContextMenu"
+                d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySession}}"
+                Visibility="{Binding CanEditRemoteCommand, Converter={StaticResource BoolToVisibility}}">
+    <MenuItem Header="Edit remote command"
+              Command="{Binding Path=CommandEditSessionRemoteCommand}"
+              IsEnabled="{Binding Path=CanEditRemoteCommand}" />
+  </ContextMenu>
+
+</ResourceDictionary>

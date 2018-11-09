@@ -12,6 +12,10 @@
         Width="750"
         MinWidth="725">
 
+  <Window.Resources>
+    <ResourceDictionary Source="Views\Menus.xaml" />
+  </Window.Resources>
+  
   <Grid DataContext="{Binding}"
         d:DataContext="{Binding Source={x:Static localViewModels:MainViewModel.DesignMainViewModel}}">
     <Grid.RowDefinitions>
@@ -20,116 +24,13 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <Menu Grid.Row="0"
-          Height="23"
-          HorizontalAlignment="Stretch"
-          Name="mnuMain"
-          VerticalAlignment="Top">
-
-      <MenuItem Header="File">
-        <MenuItem Header="New sessions file"
-                  Command="{Binding Path=CommandFileNew}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <Separator />
-
-        <MenuItem Header="Open sessions from registry"
-                  Command="{Binding Path=CommandFileOpenRegistry}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Open sessions XML data file">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Open sessions JSON data file">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <Separator />
-
-        <MenuItem Header="Save sessions file"
-                  Command="{Binding Path=CommandFileSave}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileSavePicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <Separator />
-
-        <MenuItem Header="Save sessions into registry"
-                  Command="{Binding Path=CommandFileSaveRegistry}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileSavePicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Save sessions XML data file"
-                  Command="{Binding Path=CommandFileSaveXml}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileSavePicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Save sessions JSON data file"
-                  Command="{Binding Path=CommandFileSaveJson}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileSavePicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <Separator />
-
-        <MenuItem Name="mnuFileQuit"
-                  Header="Quit"
-                  Click="MnuFileQuit_Click">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileQuitPicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-      </MenuItem>
-      <MenuItem Header="View"
-                Name="mnuView">
-
-      </MenuItem>
-      <MenuItem Header="Tools"
-                Name="mnuTools">
-
-        <MenuItem Name="mnuToolsExportAll"
-                  Header="Export all"
-                  Command="{Binding Path=CommandToolsExportAll}">
-        </MenuItem>
-        <MenuItem Name="mnuToolsExportSelectedItems"
-                  Header="Export selected items"
-                  Command="{Binding Path=CommandToolsExportSelected}">
-        </MenuItem>
-        <Separator />
-        <MenuItem Name="mnuToolsOptions"
-                  Header="Options">
-        </MenuItem>
-      </MenuItem>
-      <MenuItem Header="Help"
-                Name="mnuHelp">
-        <MenuItem Name="mnuHelpContact"
-                  Header="Contact"
-                  Command="{Binding Path=CommandHelpContact}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=ContactPicture}" />
-          </MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Name="mnuHelpAbout"
-                  Header="About"
-                  Command="{Binding Path=CommandHelpAbout}" />
-      </MenuItem>
-
-    </Menu>
+    <Menu Template="{StaticResource ResourceKey=MainMenu}" />
 
     <Grid Grid.Row="1">
       <Grid.RowDefinitions>
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
-      <localViews:ViewGroupLevel1ByTabs DataContext="{Binding Path=SessionsTabs}" />
+      <localViews:ViewGroupLevel1ByTabs DataContext="{Binding Path=PuttyGroup}" />
     </Grid>
 
     <bltoolswpfctrl:ExtendedStatusBar x:Name="stsBar"

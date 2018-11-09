@@ -12,16 +12,7 @@
   <Grid DataContext="{Binding}"
         d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupWithView.DesignVMPuttySessionsGroupWithView}}">
 
-    <Grid.Resources>
-      <bltoolswpf:BoolToVisibilityConverter x:Key="BoolToVisibility" />
-    </Grid.Resources>
-
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*" />
-    </Grid.ColumnDefinitions>
-
-    <ListView d:DataContext="{Binding Path=PuttySessions}"
-              ItemsSource="{Binding Mode=OneWay}"
+    <ListView ItemsSource="{Binding Items}"
               Margin="10"
               SnapsToDevicePixels="True"
               SelectionMode="Extended"
@@ -30,7 +21,6 @@
 
       <ListView.GroupStyle>
         <GroupStyle>
-
           <GroupStyle.ContainerStyle>
             <Style TargetType="{x:Type GroupItem}">
               <Setter Property="Template">
@@ -68,7 +58,6 @@
           </GroupStyle.ContainerStyle>
         </GroupStyle>
       </ListView.GroupStyle>
-
 
       <ListView.ItemTemplate>
         <DataTemplate>

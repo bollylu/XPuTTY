@@ -226,6 +226,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Interfaces\IHeaderedItems.cs" />
     <Compile Include="ViewModels\TVMEasyPuttyBase.cs" />
     <Compile Include="Base classes\TGroup.cs" />
     <Compile Include="Base classes\TRelayCommand.cs" />
@@ -273,9 +274,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\Menus.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\PopupDisplaySupportContact.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SmallVisuals.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ViewGroupLevel1ByTabs.xaml">
       <SubType>Designer</SubType>
@@ -383,7 +392,6 @@
     <Resource Include="Pictures\ViewConsole.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Interfaces\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>

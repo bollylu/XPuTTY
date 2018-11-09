@@ -8,32 +8,43 @@
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
-  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsGroupsL2}}">
 
-    <TabControl 
-      ItemsSource="{Binding Mode=OneWay}"
-                SelectedIndex="{Binding Path=TabSelectedIndex}"
-                Margin="10"
-                TabStripPlacement="Top">
+  <!--<UserControl.Resources>
+    <ResourceDictionary Source="SmallVisuals.xaml" />
+  </UserControl.Resources>-->
 
-      <TabControl.ItemTemplate>
+  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsNestedGroup}}"
+        DataContext="{Binding}">
+
+    <Grid.RowDefinitions>
+      <RowDefinition Height="auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <ItemsControl Grid.Row="0"
+                  ItemsSource="{Binding Path=Items}">
+
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+
+      <ItemsControl.ItemTemplate>
         <DataTemplate>
-          <StackPanel Orientation="Horizontal"
-                      d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupWithView.DesignVMPuttySessionsGroup}}">
-            <TextBlock Text="{Binding Path=Header, Mode=OneWay}" />
-            <TextBlock Text="{Binding Path=SessionsCount, StringFormat=' ({0})', TargetNullValue='', Mode=OneWay}" />
-          </StackPanel>
+          <Button Content="{Binding Path=Header}"
+                  Margin="10"
+                  Padding="5"
+                  Command="{Binding Path=CommandSelectItem}" />
         </DataTemplate>
-      </TabControl.ItemTemplate>
+      </ItemsControl.ItemTemplate>
 
-      <TabControl.ContentTemplate>
-        <DataTemplate>
-          <localViews:ViewSessionsBySectionsWithExpander DataContext="{Binding Path=PuttySessions}"
-                                                         SnapsToDevicePixels="True" />
-        </DataTemplate>
-      </TabControl.ContentTemplate>
+    </ItemsControl>
 
-    </TabControl>
-
+    <Grid Grid.Row="1">
+      <localViews:ViewSessionsBySectionsWithExpander d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupWithView.DesignVMPuttySessionsGroupWithView}}"
+                                                     DataContext="{Binding Path=SelectedItem}"
+                                                     SnapsToDevicePixels="True" />
+    </Grid>
   </Grid>
 </UserControl>

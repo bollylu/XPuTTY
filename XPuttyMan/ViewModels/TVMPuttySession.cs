@@ -7,8 +7,11 @@ using BLTools;
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
+using EasyPutty.Interfaces;
+using System.Collections.ObjectModel;
+
 namespace EasyPutty.ViewModels {
-  public sealed class TVMPuttySession : TVMEasyPuttyBase {
+  public sealed class TVMPuttySession : TVMEasyPuttyBase, IHeaderedItem {
 
     public IPuttySession PuttySession => _Data as IPuttySession;
 
@@ -21,7 +24,7 @@ namespace EasyPutty.ViewModels {
 
     public string CleanName => PuttySession == null ? "" : PuttySession.CleanName;
 
-    public string DisplayName => CleanName.Replace($"[{GroupLevel1}]", "").Replace($"[{GroupLevel2}]", "").Replace($"{{{Section}}}", "");
+    public string Header => CleanName.Replace($"[{GroupLevel1}]", "").Replace($"[{GroupLevel2}]", "").Replace($"{{{Section}}}", "");
 
     public string GroupLevel1 {
       get {
@@ -36,6 +39,7 @@ namespace EasyPutty.ViewModels {
       }
     }
     private string _GroupLevel1;
+
     public string GroupLevel2 {
       get {
         if ( string.IsNullOrWhiteSpace(_GroupLevel2) ) {
@@ -199,6 +203,7 @@ namespace EasyPutty.ViewModels {
         return _DesignVMPuttySession2;
       }
     }
+
     private static TVMPuttySession _DesignVMPuttySession2;
     #endregion --- For design time --------------------------------------------
 

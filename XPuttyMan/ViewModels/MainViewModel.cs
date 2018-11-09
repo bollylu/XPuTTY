@@ -31,11 +31,13 @@ namespace EasyPutty.ViewModels {
     public TRelayCommand CommandFileSaveXml { get; private set; }
     public TRelayCommand CommandFileSaveJson { get; private set; }
 
+    public TRelayCommand CommandFileQuit { get; private set; }
+
     public TRelayCommand CommandHelpContact { get; private set; }
     public TRelayCommand CommandHelpAbout { get; private set; }
-    public TRelayCommand CommandStartSession { get; private set; }
-    public TRelayCommand CommandToolsExportAll { get; private set; }
-    public TRelayCommand CommandToolsExportSelected { get; private set; }
+    //public TRelayCommand CommandStartSession { get; private set; }
+    //public TRelayCommand CommandToolsExportAll { get; private set; }
+    //public TRelayCommand CommandToolsExportSelected { get; private set; }
     #endregion RelayCommand
 
     public string ApplicationTitle {
@@ -51,6 +53,17 @@ namespace EasyPutty.ViewModels {
 
     private readonly string _ApplicationTitleBase = "EasyPutty v0.1";
 
+    public TVMPuttySessionsGroup SelectedItem {
+      get {
+        return _SelectedItem;
+      }
+      set {
+        _SelectedItem = value;
+        NotifyPropertyChanged(nameof(SelectedItem));
+      }
+    }
+    private TVMPuttySessionsGroup _SelectedItem;
+
     #region --- Pictures --------------------------------------------
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
     public string FileOpenPicture => App.GetPictureFullname("FileOpen");
@@ -59,7 +72,14 @@ namespace EasyPutty.ViewModels {
     public string ContactPicture => App.GetPictureFullname("help");
     #endregion --- Pictures --------------------------------------------
 
-    public ObservableCollection<TVMPuttySessionsGroup> SessionsTabs { get; set; } = new ObservableCollection<TVMPuttySessionsGroup>();
+    public TVMPuttySessionsGroup PuttyGroup { get; private set; } = new TVMPuttySessionsGroup("Main");
+
+    public IEnumerable<TVMPuttySession> AllVMPuttySessions => PuttyGroup.Items.Cast<TVMPuttySessionsGroup>()
+                                                                        .SelectMany(x => x.Items).Cast<TVMPuttySessionsGroup>()
+                                                                        .SelectMany(x => x.Items).Cast<TVMPuttySessionsGroupWithView>()
+                                                                        .SelectMany(x => x.Items).Cast<TVMPuttySession>();
+    public IEnumerable<IPuttySession> AllPuttySessions => AllVMPuttySessions.Select(x => x.PuttySession);
+    public int TotalSessionsCount => AllVMPuttySessions.Count();
 
     private string _DataSourceName;
     public IPuttySessionSource SessionSource;
@@ -74,10 +94,9 @@ namespace EasyPutty.ViewModels {
       }
       if ( App.AppIsStartingUp ) {
         App.AppIsStartingUp = false;
-        SessionsTabs.Clear();
+        PuttyGroup.Clear();
         SessionSource = new TPuttySessionSourceRegistry();
-        _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH).ToList());
-        NotifyExecutionStatus($"{SessionsTabs.SelectMany(x => x.PuttyGroups).SelectMany(x => x.PuttySessions).Count()} session(s)");
+        _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
       }
     }
 
@@ -94,10 +113,12 @@ namespace EasyPutty.ViewModels {
       CommandFileSaveXml = new TRelayCommand(() => _FileSaveXml(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
       CommandFileSaveJson = new TRelayCommand(() => _FileSaveJson(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
 
+      CommandFileQuit = new TRelayCommand(() => _FileQuit(), _ => { return true; });
+
       CommandHelpContact = new TRelayCommand(() => _HelpContact(), _ => { return true; });
       CommandHelpAbout = new TRelayCommand(() => _HelpAbout(), _ => { return true; });
-      CommandToolsExportAll = new TRelayCommand(() => _ExportAll(), _ => { return !WorkInProgress; });
-      CommandToolsExportSelected = new TRelayCommand(() => _ExportSelected(), _ => { return !WorkInProgress; });
+      //CommandToolsExportAll = new TRelayCommand(() => _ExportAll(), _ => { return !WorkInProgress; });
+      //CommandToolsExportSelected = new TRelayCommand(() => _ExportSelected(), _ => { return !WorkInProgress; });
     }
 
     public override void Dispose() {
@@ -109,7 +130,7 @@ namespace EasyPutty.ViewModels {
     private void _FileNew() {
       MainWindow.DataIsDirty = false;
       _DataSourceName = "";
-      SessionsTabs.Clear();
+      PuttyGroup.Clear();
     }
     private void _FileOpenXml() {
       OpenFileDialog OFD = new OpenFileDialog {
@@ -148,11 +169,11 @@ namespace EasyPutty.ViewModels {
       Log.Write("Refreshing sessions from registry ...");
       NotifyExecutionProgress("Reading sessions ...");
 
-      SessionsTabs.Clear();
+      PuttyGroup.Clear();
 
       _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH).ToList());
 
-      NotifyExecutionStatus($"{SessionsTabs.SelectMany(x => x.PuttyGroups).SelectMany(x => x.PuttySessions).Count()} session(s)");
+      NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
       WorkInProgress = false;
       CommandFileOpenRegistry.NotifyCanExecuteChanged();
@@ -180,7 +201,7 @@ namespace EasyPutty.ViewModels {
 
       if ( SFD.ShowDialog() == true ) {
         TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
-        SaveXmlSource.SaveSessions(SessionsTabs.SelectMany(x => x.PuttyGroups).SelectMany(x => x.PuttySessions).Select(x => x.PuttySession));
+        SaveXmlSource.SaveSessions(AllPuttySessions);
       }
 
       NotifyExecutionCompleted("Done.");
@@ -213,6 +234,10 @@ namespace EasyPutty.ViewModels {
       MainWindow.DataIsDirty = false;
     }
 
+    private void _FileQuit() {
+      Application.Current.Shutdown();
+    }
+
     private void _HelpContact() {
 
     }
@@ -226,77 +251,74 @@ namespace EasyPutty.ViewModels {
     }
     #endregion --- Menu --------------------------------------------
 
-    private void _ExportAll() {
-      WorkInProgress = true;
-      Log.Write("Exporting all sessions...");
-      NotifyExecutionProgress("Exporting sessions...");
+    //private void _ExportAll() {
+    //  WorkInProgress = true;
+    //  Log.Write("Exporting all sessions...");
+    //  NotifyExecutionProgress("Exporting sessions...");
 
-      SaveFileDialog SFD = new SaveFileDialog {
-        DefaultExt = ".xml",
-        Title = "Select a filename to export your data",
-        OverwritePrompt = true,
-        AddExtension = true
-      };
-      SFD.DefaultExt = ".xml";
-      SFD.Filter = "XML files (.xml)|*.xml";
+    //  SaveFileDialog SFD = new SaveFileDialog {
+    //    DefaultExt = ".xml",
+    //    Title = "Select a filename to export your data",
+    //    OverwritePrompt = true,
+    //    AddExtension = true
+    //  };
+    //  SFD.DefaultExt = ".xml";
+    //  SFD.Filter = "XML files (.xml)|*.xml";
 
-      if ( SFD.ShowDialog() == true ) {
-        TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
-        SaveXmlSource.SaveSessions(SessionsTabs.SelectMany(x => x.PuttyGroups).SelectMany(x => x.PuttySessions).Select(x => x.PuttySession));
-      }
+    //  if ( SFD.ShowDialog() == true ) {
+    //    TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
+    //    SaveXmlSource.SaveSessions(AllPuttySessions);
+    //  }
 
-      NotifyExecutionCompleted("Done.");
-      WorkInProgress = false;
-    }
-    private void _ExportSelected() {
-      WorkInProgress = true;
-      Log.Write("Exporting selected sessions...");
-      NotifyExecutionProgress("Exporting selected sessions...");
+    //  NotifyExecutionCompleted("Done.");
+    //  WorkInProgress = false;
+    //}
+    //private void _ExportSelected() {
+    //  WorkInProgress = true;
+    //  Log.Write("Exporting selected sessions...");
+    //  NotifyExecutionProgress("Exporting selected sessions...");
 
-      SaveFileDialog SFD = new SaveFileDialog {
-        DefaultExt = ".xml",
-        Title = "Select a filename to export your data",
-        OverwritePrompt = true,
-        AddExtension = true
-      };
-      SFD.DefaultExt = ".xml";
-      SFD.Filter = "XML files (.xml)|*.xml";
+    //  SaveFileDialog SFD = new SaveFileDialog {
+    //    DefaultExt = ".xml",
+    //    Title = "Select a filename to export your data",
+    //    OverwritePrompt = true,
+    //    AddExtension = true
+    //  };
+    //  SFD.DefaultExt = ".xml";
+    //  SFD.Filter = "XML files (.xml)|*.xml";
 
-      if ( SFD.ShowDialog() == true ) {
-        TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
-        SaveXmlSource.SaveSessions(SessionsTabs.SelectMany(x => x.PuttyGroups).SelectMany(x => x.PuttySessions).Where(x => x.IsSelected).Select(x => x.PuttySession));
-      }
+    //  if ( SFD.ShowDialog() == true ) {
+    //    TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
+    //    SaveXmlSource.SaveSessions(AllVMPuttySessions.Where(x => x.IsSelected).Select(x => x.PuttySession));
+    //  }
 
-      NotifyExecutionCompleted("Done.");
-      WorkInProgress = false;
-    }
+    //  NotifyExecutionCompleted("Done.");
+    //  WorkInProgress = false;
+    //}
 
 
     private void _DispatchSessions(IEnumerable<IPuttySession> sessions) {
 
-      IEnumerable<IGrouping<string, IPuttySession>> SessionsByGroupL1 = sessions.OrderBy(x => x.GroupLevel1)
-                                                                                .ThenBy(x => x.GroupLevel2)
-                                                                                .ThenBy(x => x.Section)
-                                                                                .GroupBy(x => x.GroupLevel1).ToList();
+      IEnumerable<IGrouping<string, IPuttySession>> SessionsByGroupL1 = sessions.Where(x => !(string.IsNullOrWhiteSpace(x.GroupLevel1) && string.IsNullOrWhiteSpace(x.GroupLevel2)))
+                                                                                .GroupBy(x => x.GroupLevel1);
 
-      Log.Write("Foreach L1");
       foreach ( IGrouping<string, IPuttySession> SessionsByGroupL1Item in SessionsByGroupL1 ) {
-        string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "null";
-        Log.Write("");
-        Log.Write($"New group L1 {L1Header} for {SessionsByGroupL1Item.Count()} items");
-        TVMPuttySessionsGroup GroupL1 = new TVMPuttySessionsGroup(SessionsByGroupL1Item.First().GroupLevel1);
-        Log.Write("Foreach L2");
-        foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.GroupBy(x => x.GroupLevel2).ToList() ) {
-          string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "null";
-          Log.Write("");
-          Log.Write($"New group L2 {L2Header} for {SessionsByGroupL2Item.Count()} items");
-          TVMPuttySessionsGroupWithView GroupL2 = new TVMPuttySessionsGroupWithView(L2Header, _CreateAndRecoverSessions(SessionsByGroupL2Item, EPuttyProtocol.SSH));
-          Log.Write($"Adding groupe L2 {GroupL2.Header} to {GroupL1.Header}");
+
+        string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "<unnamed>";
+        TVMPuttySessionsGroup GroupL1 = new TVMPuttySessionsGroup(L1Header);
+
+        foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.OrderBy(x => x.GroupLevel2).GroupBy(x => x.GroupLevel2) ) {
+
+          string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<unnamed>";
+          TVMPuttySessionsGroup GroupL2 = new TVMPuttySessionsGroup(L2Header);
+
+          GroupL2.Add(new TVMPuttySessionsGroupWithView(L2Header, _CreateAndRecoverSessions(SessionsByGroupL2Item, EPuttyProtocol.SSH)));
           GroupL1.Add(GroupL2);
+
         }
-        Log.Write($"Adding groupe L1 {GroupL1.Header} to tabs");
-        SessionsTabs.Add(GroupL1);
+        PuttyGroup.Add(GroupL1);
       }
+      NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
     }
 
 

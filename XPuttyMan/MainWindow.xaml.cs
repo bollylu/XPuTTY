@@ -64,15 +64,6 @@ namespace EasyPutty {
       this.DataContext = MainItem;
 
     }
-
-    #region Menu
-    private void MnuFileQuit_Click(object sender, RoutedEventArgs e) {
-      Application.Current.Shutdown();
-    }
-
-
-    #endregion Menu
-
     
   }
 }

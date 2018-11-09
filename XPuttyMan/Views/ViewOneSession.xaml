@@ -9,10 +9,12 @@
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
+
+  <UserControl.Resources>
+    <ResourceDictionary Source="Menus.xaml" />
+  </UserControl.Resources>
+  
   <Grid>
-    <Grid.Resources>
-      <bltoolswpf:BoolToVisibilityConverter x:Key="BoolToVisibility" />
-    </Grid.Resources>
 
     <Border BorderBrush="DarkBlue"
             BorderThickness="1"
@@ -44,18 +46,11 @@
             </Style.Triggers>
           </Style>
         </Grid.Style>
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" ContextMenu="{StaticResource ResourceKey=OneSessionContextMenu}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60" />
             <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
-          <Grid.ContextMenu>
-            <ContextMenu Visibility="{Binding CanEditRemoteCommand, Converter={StaticResource BoolToVisibility}}">
-              <MenuItem Header="Edit remote command"
-                        Command="{Binding Path=CommandEditSessionRemoteCommand}"
-                        IsEnabled="{Binding Path=CanEditRemoteCommand}" />
-            </ContextMenu>
-          </Grid.ContextMenu>
 
           <StackPanel Orientation="Horizontal"
                       Grid.Column="0"
