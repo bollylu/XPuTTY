@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace EasyPutty.Interfaces {
-  public interface IHeaderedItem {
+  public interface IHeader {
     string Header { get; }
   }
 }

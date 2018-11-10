@@ -226,17 +226,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Interfaces\IHeaderedItems.cs" />
+    <Compile Include="Interfaces\IHeader.cs" />
     <Compile Include="ViewModels\TVMEasyPuttyBase.cs" />
     <Compile Include="Base classes\TGroup.cs" />
     <Compile Include="Base classes\TRelayCommand.cs" />
     <Compile Include="Tools\Helpers.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\TVMPuttySessionGroup.cs" />
+    <Compile Include="ViewModels\TVMPuttyGroup.cs" />
     <Compile Include="ViewModels\TVMSupportContact.cs" />
     <Compile Include="ViewModels\TVMSupportContacts.cs" />
     <Compile Include="ViewModels\TVMPuttySession.cs" />
-    <Compile Include="ViewModels\TVMPuttySessionsGroupWithView.cs" />
+    <Compile Include="ViewModels\TVMPuttySessionsGroupedBy.cs" />
     <Compile Include="Views\DisplaySupportInformationControl.xaml.cs">
       <DependentUpon>DisplaySupportInformationControl.xaml</DependentUpon>
     </Compile>

@@ -53,7 +53,7 @@ namespace EasyPutty.ViewModels {
 
     private readonly string _ApplicationTitleBase = "EasyPutty v0.1";
 
-    public TVMPuttySessionsGroup SelectedItem {
+    public TVMPuttyGroup SelectedItem {
       get {
         return _SelectedItem;
       }
@@ -62,7 +62,7 @@ namespace EasyPutty.ViewModels {
         NotifyPropertyChanged(nameof(SelectedItem));
       }
     }
-    private TVMPuttySessionsGroup _SelectedItem;
+    private TVMPuttyGroup _SelectedItem;
 
     #region --- Pictures --------------------------------------------
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
@@ -72,11 +72,10 @@ namespace EasyPutty.ViewModels {
     public string ContactPicture => App.GetPictureFullname("help");
     #endregion --- Pictures --------------------------------------------
 
-    public TVMPuttySessionsGroup PuttyGroup { get; private set; } = new TVMPuttySessionsGroup("Main");
+    public TVMPuttyGroup PuttyGroup { get; private set; } = new TVMPuttyGroup("Main");
 
-    public IEnumerable<TVMPuttySession> AllVMPuttySessions => PuttyGroup.Items.Cast<TVMPuttySessionsGroup>()
-                                                                        .SelectMany(x => x.Items).Cast<TVMPuttySessionsGroup>()
-                                                                        .SelectMany(x => x.Items).Cast<TVMPuttySessionsGroupWithView>()
+    public IEnumerable<TVMPuttySession> AllVMPuttySessions => PuttyGroup.Items.Cast<TVMPuttyGroup>()
+                                                                        .SelectMany(x => x.Items).Cast<TVMPuttyGroup>()
                                                                         .SelectMany(x => x.Items).Cast<TVMPuttySession>();
     public IEnumerable<IPuttySession> AllPuttySessions => AllVMPuttySessions.Select(x => x.PuttySession);
     public int TotalSessionsCount => AllVMPuttySessions.Count();
@@ -305,14 +304,14 @@ namespace EasyPutty.ViewModels {
       foreach ( IGrouping<string, IPuttySession> SessionsByGroupL1Item in SessionsByGroupL1 ) {
 
         string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "<unnamed>";
-        TVMPuttySessionsGroup GroupL1 = new TVMPuttySessionsGroup(L1Header);
+        TVMPuttyGroup GroupL1 = new TVMPuttyGroup(L1Header);
 
         foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.OrderBy(x => x.GroupLevel2).GroupBy(x => x.GroupLevel2) ) {
 
           string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<unnamed>";
-          TVMPuttySessionsGroup GroupL2 = new TVMPuttySessionsGroup(L2Header);
+          TVMPuttyGroup GroupL2 = new TVMPuttyGroup(L2Header);
 
-          GroupL2.Add(new TVMPuttySessionsGroupWithView(L2Header, _CreateAndRecoverSessions(SessionsByGroupL2Item, EPuttyProtocol.SSH)));
+          GroupL2.Add(_CreateAndRecoverSessions(SessionsByGroupL2Item, EPuttyProtocol.SSH));
           GroupL1.Add(GroupL2);
 
         }

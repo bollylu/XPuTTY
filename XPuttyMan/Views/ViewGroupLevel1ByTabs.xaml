@@ -13,7 +13,7 @@
     <ResourceDictionary Source="SmallVisuals.xaml" />
   </UserControl.Resources>
 
-  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsNestedGroup}}"
+  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttyGroup.DesignVMPuttyGroupWithNestedGroups}}"
         DataContext="{Binding}">
 
     <Grid.ColumnDefinitions>
@@ -41,13 +41,19 @@
 
     </ItemsControl>
 
-    <Grid Grid.Column="1">
+    <Grid Grid.Column="1"
+          DataContext="{Binding Path=SelectedItem}">
       <StackPanel>
-        <TextBlock Text="{Binding Path=SelectedItem.Header}" FontSize="16" FontFamily="Arial" FontWeight="Bold" />
-        <Line StrokeThickness="1" HorizontalAlignment="Stretch" />
-        <localViews:ViewGroupLevel2ByTabs SnapsToDevicePixels="True"
-                                          DataContext="{Binding Path=SelectedItem}"
-                                          d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsNestedGroup}}" />
+        <Border Margin="10"
+                BorderThickness="0,0,0,2"
+                BorderBrush="Red">
+          <TextBlock Text="{Binding Path=Header, Mode=OneWay}"
+                     FontSize="18"
+                     FontFamily="Arial"
+                     FontWeight="Bold" 
+                     Margin="0,0,0,5"/>
+        </Border>
+        <localViews:ViewGroupLevel2ByTabs SnapsToDevicePixels="True" />
       </StackPanel>
     </Grid>
 

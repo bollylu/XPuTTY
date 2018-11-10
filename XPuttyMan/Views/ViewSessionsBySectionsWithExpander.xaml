@@ -10,9 +10,9 @@
 
 
   <Grid DataContext="{Binding}"
-        d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupWithView.DesignVMPuttySessionsGroupWithView}}">
+        d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupedBy.DesignSingleVMPuttySessionsGroupedBy}}">
 
-    <ListView ItemsSource="{Binding Items}"
+    <ListView ItemsSource="{Binding Path=Items}"
               Margin="10"
               SnapsToDevicePixels="True"
               SelectionMode="Extended"
@@ -27,7 +27,6 @@
                 <Setter.Value>
                   <ControlTemplate>
                     <Expander SnapsToDevicePixels="True"
-                              DataContext="{Binding}"
                               ExpandDirection="Down"
                               VerticalAlignment="Bottom"
                               VerticalContentAlignment="Bottom"

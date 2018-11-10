@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 
 using BLTools;
+
+using EasyPutty.Interfaces;
 
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
-using EasyPutty.Interfaces;
-using System.Collections.ObjectModel;
-
 namespace EasyPutty.ViewModels {
-  public sealed class TVMPuttySession : TVMEasyPuttyBase, IHeaderedItem {
+  public sealed class TVMPuttySession : TVMEasyPuttyBase, IHeader {
 
     public IPuttySession PuttySession => _Data as IPuttySession;
 

@@ -13,7 +13,7 @@
     <ResourceDictionary Source="SmallVisuals.xaml" />
   </UserControl.Resources>-->
 
-  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroup.DesignVMPuttySessionsNestedGroup}}"
+  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttyGroup.DesignVMPuttyGroup}}"
         DataContext="{Binding}">
 
     <Grid.RowDefinitions>
@@ -41,10 +41,9 @@
 
     </ItemsControl>
 
-    <Grid Grid.Row="1">
-      <localViews:ViewSessionsBySectionsWithExpander d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupWithView.DesignVMPuttySessionsGroupWithView}}"
-                                                     DataContext="{Binding Path=SelectedItem}"
-                                                     SnapsToDevicePixels="True" />
+    <Grid Grid.Row="1"
+          DataContext="{Binding Path=SelectedItem}">
+      <localViews:ViewSessionsBySectionsWithExpander SnapsToDevicePixels="True" />
     </Grid>
   </Grid>
 </UserControl>
