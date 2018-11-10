@@ -60,77 +60,75 @@ namespace libxputty_std20 {
         return TPuttySession.Empty;
       }
 
+      TPuttySession BaseSession = new TPuttySession(Name) {
+        GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, "<empty>"),
+        GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, "<empty>"),
+        Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, "<empty>"),
+        RemoteCommand = session.SafeReadElementValue<string>(XML_ELEMENT_SSH_REMOTE_COMMAND, "")
+      };
+
+      if (Protocol.IsSerial) {
+        TPuttySessionSerial NewSession = new TPuttySessionSerial(BaseSession) {
+          SerialLine = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SERIAL_LINE, ""),
+          SerialSpeed = session.SafeReadAttribute<int>(XML_ATTRIBUTE_SERIAL_SPEED, 9600),
+          SerialDataBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_DATA_BITS, 0),
+          SerialStopBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_STOP_BITS, 0),
+          SerialParity = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_PARITY, 0)
+        };
+        return NewSession;
+      }
+
+      IHostAndPort SessionHAP;
+
       switch ( Protocol.Value ) {
-        case EPuttyProtocol.SSH: {
-            TPuttySessionSSH NewSession = new TPuttySessionSSH(Name) {
-              GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, ""),
-              GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, ""),
-              Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, ""),
-              HostName = session.SafeReadAttribute<string>(XML_ATTRIBUTE_HOSTNAME, ""),
-              Port = session.SafeReadAttribute<int>(XML_ATTRIBUTE_PORT, 0),
-              RemoteCommand = session.SafeReadElementValue<string>(XML_ELEMENT_SSH_REMOTE_COMMAND)
-            };
-            return NewSession;
-          }
+        case EPuttyProtocol.SSH: 
+            SessionHAP = new TPuttySessionSSH(BaseSession);
+            break;
 
-        case EPuttyProtocol.Serial: {
-            TPuttySessionSerial NewSession = new TPuttySessionSerial(Name) {
-              GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, ""),
-              GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, ""),
-              Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, ""),
-              SerialLine = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SERIAL_LINE, ""),
-              SerialSpeed = session.SafeReadAttribute<int>(XML_ATTRIBUTE_SERIAL_SPEED, 9600),
-              SerialDataBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_DATA_BITS, 0),
-              SerialStopBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_STOP_BITS, 0),
-              SerialParity = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_PARITY, 0)
-            };
-            return NewSession;
-          }
+        case EPuttyProtocol.Telnet: 
+            SessionHAP = new TPuttySessionTelnet(BaseSession);
+            break;
 
-        case EPuttyProtocol.Telnet: {
-            TPuttySessionTelnet NewSession = new TPuttySessionTelnet(Name) {
-              GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, ""),
-              GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, ""),
-              Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, ""),
-              HostName = session.SafeReadAttribute<string>(XML_ATTRIBUTE_HOSTNAME, ""),
-              Port = session.SafeReadAttribute<int>(XML_ATTRIBUTE_PORT, 0),
-            };
-            return NewSession;
-          }
+        case EPuttyProtocol.RLogin: 
+            SessionHAP = new TPuttySessionRLogin(BaseSession);
+            break;
 
-        case EPuttyProtocol.RLogin: {
-            TPuttySessionRLogin NewSession = new TPuttySessionRLogin(Name) {
-              GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, ""),
-              GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, ""),
-              Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, ""),
-              HostName = session.SafeReadAttribute<string>(XML_ATTRIBUTE_HOSTNAME, ""),
-              Port = session.SafeReadAttribute<int>(XML_ATTRIBUTE_PORT, 0),
-            };
-            return NewSession;
-          }
-
-        case EPuttyProtocol.Raw: {
-            TPuttySessionRaw NewSession = new TPuttySessionRaw(Name) {
-              GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, ""),
-              GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, ""),
-              Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, ""),
-              HostName = session.SafeReadAttribute<string>(XML_ATTRIBUTE_HOSTNAME, ""),
-              Port = session.SafeReadAttribute<int>(XML_ATTRIBUTE_PORT, 0),
-            };
-            return NewSession;
-          }
+        case EPuttyProtocol.Raw: 
+            SessionHAP = new TPuttySessionRaw(BaseSession);
+            break;
 
         default:
-          Log.Write("Unable to convert session from XML : Protocol type is invalid");
+          Log.Write("Unable to convert session from XML : Protocol type is missing or invalid");
           return TPuttySession.Empty;
       }
+
+      SessionHAP.HostName = session.SafeReadAttribute<string>(XML_ATTRIBUTE_HOSTNAME, "");
+      SessionHAP.Port = session.SafeReadAttribute<int>(XML_ATTRIBUTE_PORT, 0);
+
+      return SessionHAP as IPuttySession;
+    }
+
+    protected IEnumerable<IPuttySession> _ConvertFromXml(IEnumerable<XElement> sessions) {
+      if ( sessions == null || !sessions.Any() ) {
+        yield break;
+      }
+      foreach ( XElement SessionItem in sessions ) {
+        yield return _ConvertFromXml(SessionItem);
+      }
+      yield break;
     }
 
     protected XElement _ConvertToXml(IPuttySession session) {
 
       XElement RetVal = new XElement(XML_ELEMENT_SESSION);
-      RetVal.SetAttributeValue(XML_ATTRIBUTE_NAME, session.Name);
+
+      string StrippedName = session.CleanName.Replace($"[{session.GroupLevel1}]", "")
+                                             .Replace($"[{session.GroupLevel2}]", "")
+                                             .Replace($"{{{session.Section}}}", "");
+      RetVal.SetAttributeValue(XML_ATTRIBUTE_NAME, StrippedName);
+
       RetVal.SetAttributeValue(XML_ATTRIBUTE_PROTOCOL_TYPE, session.Protocol);
+
       if ( !string.IsNullOrWhiteSpace(session.GroupLevel1) ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_GROUP_LEVEL1, session.GroupLevel1);
       }
@@ -141,42 +139,21 @@ namespace libxputty_std20 {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SECTION, session.Section);
       }
 
-      switch ( session ) {
-        case TPuttySessionSSH PuttySession:
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_HOSTNAME, PuttySession.HostName);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_PORT, PuttySession.Port);
-          if ( !string.IsNullOrWhiteSpace(PuttySession.RemoteCommand) ) {
-            RetVal.SetElementValue(XML_ELEMENT_SSH_REMOTE_COMMAND, PuttySession.RemoteCommand);
-          }
-          break;
+      if ( session is IHostAndPort SessionHAP ) {
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_HOSTNAME, SessionHAP.HostName);
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_PORT, SessionHAP.Port);
+      }
 
-        case TPuttySessionSerial PuttySession:
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_LINE, PuttySession.SerialLine);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_SPEED, PuttySession.SerialSpeed);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_DATA_BITS, PuttySession.SerialDataBits);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_STOP_BITS, PuttySession.SerialStopBits);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_PARITY, PuttySession.SerialParity);
-          break;
+      if ( !string.IsNullOrWhiteSpace(session.RemoteCommand) ) {
+        RetVal.SetElementValue(XML_ELEMENT_SSH_REMOTE_COMMAND, session.RemoteCommand);
+      }
 
-        case TPuttySessionTelnet PuttySession:
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_HOSTNAME, PuttySession.HostName);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_PORT, PuttySession.Port);
-          break;
-
-        case TPuttySessionRLogin PuttySession:
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_HOSTNAME, PuttySession.HostName);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_PORT, PuttySession.Port);
-          break;
-
-        case TPuttySessionRaw PuttySession:
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_HOSTNAME, PuttySession.HostName);
-          RetVal.SetAttributeValue(XML_ATTRIBUTE_PORT, PuttySession.Port);
-          break;
-
-        default:
-          Log.Write("Unable to convert session from XML : Protocol type is invalid");
-          RetVal = null;
-          break;
+      if ( session is TPuttySessionSerial PuttySession ) {
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_LINE, PuttySession.SerialLine);
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_SPEED, PuttySession.SerialSpeed);
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_DATA_BITS, PuttySession.SerialDataBits);
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_STOP_BITS, PuttySession.SerialStopBits);
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_PARITY, PuttySession.SerialParity);
       }
 
       return RetVal;
@@ -251,19 +228,21 @@ namespace libxputty_std20 {
       }
 
       XElement Root;
+      IEnumerable<XElement> PuttySessions;
       try {
         Root = XDocument.Load(Location).Root;
         if ( !Root.Elements(XML_ELEMENT_SESSIONS).Any() ) {
           yield break;
         }
+        PuttySessions = Root.Element(XML_ELEMENT_SESSIONS).Elements(XML_ELEMENT_SESSION);
       } catch ( Exception ex ) {
         Log.Write($"Unable to read data from XML file {Location} : {ex.Message}");
         yield break;
       }
 
-      IEnumerable<XElement> PuttySessions = Root.Elements(XML_ELEMENT_SESSIONS);
-      foreach ( XElement SessionItem in PuttySessions ) {
-        yield return _ConvertFromXml(SessionItem);
+      
+      foreach ( IPuttySession SessionItem in _ConvertFromXml(PuttySessions) ) {
+        yield return SessionItem;
       }
     }
 

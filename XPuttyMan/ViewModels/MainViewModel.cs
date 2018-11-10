@@ -91,25 +91,25 @@ namespace EasyPutty.ViewModels {
       if ( App.CurrentUserCredential != null ) {
         ApplicationTitle = App.AppUsername;
       }
-      if ( App.AppIsStartingUp ) {
-        App.AppIsStartingUp = false;
-        PuttyGroup.Clear();
-        SessionSource = new TPuttySessionSourceRegistry();
-        _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
-      }
+      //if ( App.AppIsStartingUp ) {
+      //  App.AppIsStartingUp = false;
+      //  PuttyGroup.Clear();
+      //  SessionSource = new TPuttySessionSourceRegistry();
+      //  _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
+      //}
     }
 
     protected override void _InitializeCommands() {
-      CommandFileNew = new TRelayCommand(() => _FileNew(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
+      CommandFileNew = new TRelayCommand(() => _FileNew(), _ => { return !WorkInProgress; });
 
-      CommandFileOpenRegistry = new TRelayCommand(() => _FileOpenRegistry(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
-      CommandFileOpenXml = new TRelayCommand(() => _FileOpenXml(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
+      CommandFileOpenRegistry = new TRelayCommand(() => _FileOpenRegistry(), _ => { return !WorkInProgress; });
+      CommandFileOpenXml = new TRelayCommand(() => _FileOpenXml(), _ => { return !WorkInProgress; });
       CommandFileOpenJson = new TRelayCommand(() => _FileOpenJson(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
 
       CommandFileSave = new TRelayCommand(() => _FileSave(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
 
       CommandFileSaveRegistry = new TRelayCommand(() => _FileSaveRegistry(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
-      CommandFileSaveXml = new TRelayCommand(() => _FileSaveXml(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
+      CommandFileSaveXml = new TRelayCommand(() => _FileSaveXml(), _ => { return !WorkInProgress; });
       CommandFileSaveJson = new TRelayCommand(() => _FileSaveJson(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
 
       CommandFileQuit = new TRelayCommand(() => _FileQuit(), _ => { return true; });
@@ -131,7 +131,9 @@ namespace EasyPutty.ViewModels {
       _DataSourceName = "";
       PuttyGroup.Clear();
     }
+
     private void _FileOpenXml() {
+      WorkInProgress = true;
       OpenFileDialog OFD = new OpenFileDialog {
         Title = "Select new sessions file",
         Filter = "Parameter file|*.xml",
@@ -142,9 +144,25 @@ namespace EasyPutty.ViewModels {
         ValidateNames = true
       };
       if ( OFD.ShowDialog() != true ) {
+        WorkInProgress = false;
         return;
       }
+      SessionSource = new TPuttySessionSourceXml(OFD.FileName);
+      _DataSourceName = SessionSource.DataSourceName;
+      NotifyPropertyChanged(nameof(ApplicationTitle));
+      Log.Write($"Refreshing sessions from XML file {OFD.FileName}");
+      NotifyExecutionProgress("Reading sessions ...");
+      PuttyGroup.Clear();
+
+      _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
+
+      NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
+      Log.Write("Refresh done.");
+      WorkInProgress = false;
+      CommandFileOpenRegistry.NotifyCanExecuteChanged();
+      NotifyExecutionCompleted("Done.", true);
     }
+
     private void _FileOpenJson() {
       OpenFileDialog OFD = new OpenFileDialog {
         Title = "Select new sessions file",
@@ -170,7 +188,7 @@ namespace EasyPutty.ViewModels {
 
       PuttyGroup.Clear();
 
-      _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH).ToList());
+      _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
 
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
@@ -240,6 +258,7 @@ namespace EasyPutty.ViewModels {
     private void _HelpContact() {
 
     }
+
     private void _HelpAbout() {
       StringBuilder Usage = new StringBuilder();
       Usage.AppendLine($"xPuttyMan v{Assembly.GetEntryAssembly().GetName().Version.ToString()}");
@@ -319,11 +338,6 @@ namespace EasyPutty.ViewModels {
       }
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
     }
-
-
-
-
-
 
     private IEnumerable<TVMPuttySession> _CreateAndRecoverSessions(IEnumerable<IPuttySession> sessions, EPuttyProtocol protocol) {
       if ( sessions == null || !sessions.Any() ) {

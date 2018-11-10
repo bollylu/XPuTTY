@@ -7,11 +7,12 @@ using BLTools;
 using BLTools.Json;
 
 namespace libxputty_std20.Interfaces {
-  public interface IPuttySession : IDisposable {
+  public interface IPuttySession : IDisposable, IName {
     string Name { get; set; }
     string GroupLevel1 { get; set; }
     string GroupLevel2 { get; set; }
     string Section { get; set; }
+    string RemoteCommand { get; set; }
 
     string CleanName { get; }
     int PID { get; }
@@ -21,8 +22,8 @@ namespace libxputty_std20.Interfaces {
 
     TPuttyProtocol Protocol { get; set; }
 
-    void Start();
-    void StartPlink();
+    void Start(string arguments = "");
+    void StartPlink(string arguments = "");
 
     void Stop();
 

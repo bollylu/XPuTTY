@@ -11,7 +11,7 @@ using BLTools.Json;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IName, IToJson {
+  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IToJson {
 
     #region --- Constants --------------------------------------------
     public const string EXECUTABLE_PUTTY = "putty.exe";
@@ -34,6 +34,8 @@ namespace libxputty_std20 {
     #region --- Public properties ------------------------------------------------------------------------------
     public string CleanName => Name.Replace("%20", " ");
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
+
+    public string RemoteCommand { get; set; }
 
     private IEnumerable<string> Groups => CleanName.ItemsBetween("[", "]");
 
@@ -77,6 +79,8 @@ namespace libxputty_std20 {
     private string _Section;
     #endregion --- Public properties ---------------------------------------------------------------------------
 
+    protected string TempFileForRemoteCommand;
+
     #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
       StringBuilder RetVal = new StringBuilder();
@@ -115,6 +119,18 @@ namespace libxputty_std20 {
       PuttyProcess.OnStart += PuttyProcess_OnStart;
     }
 
+    public TPuttySession(IPuttySession session) {
+      Name = session.Name;
+      Description = session.Description;
+      Comment = session.Comment;
+      GroupLevel1 = session.GroupLevel1;
+      GroupLevel2 = session.GroupLevel2;
+      Section = session.Section;
+      RemoteCommand = session.RemoteCommand;
+      PuttyProcess.OnExit += PuttyProcess_OnExit;
+      PuttyProcess.OnStart += PuttyProcess_OnStart;
+    }
+
     public virtual void Dispose() {
       PuttyProcess.OnExit -= PuttyProcess_OnExit;
       PuttyProcess.OnStart -= PuttyProcess_OnStart;
@@ -139,10 +155,10 @@ namespace libxputty_std20 {
 
     public ISupportContact SupportContact => throw new NotImplementedException();
 
-    public virtual void Start() {
+    public virtual void Start(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
-        Arguments = $"-load {"\"" + CleanName + "\""}",
+        Arguments = arguments == "" ? $"{"\"" + CleanName + "\""}" : arguments,
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
@@ -150,10 +166,10 @@ namespace libxputty_std20 {
       PuttyProcess.Start();
     }
 
-    public virtual void StartPlink() {
+    public virtual void StartPlink(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
-        Arguments = $"{"\"" + CleanName + "\""}",
+        Arguments = arguments == "" ? $"{"\"" + CleanName + "\""}" : arguments,
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
@@ -168,6 +184,10 @@ namespace libxputty_std20 {
     }
 
     private void PuttyProcess_OnExit(object sender, EventArgs e) {
+      if (!string.IsNullOrWhiteSpace(TempFileForRemoteCommand)) {
+        Log.Write($"Cleaning up temp file {TempFileForRemoteCommand}");
+        File.Delete(TempFileForRemoteCommand);
+      }
       if ( OnExit != null ) {
         OnExit(this, EventArgs.Empty);
       }

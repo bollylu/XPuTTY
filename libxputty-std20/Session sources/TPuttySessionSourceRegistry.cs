@@ -19,7 +19,7 @@ namespace libxputty_std20 {
     protected const string REG_HOSTNAME = "HostName";
     protected const string REG_PORT = "PortNumber";
 
-    protected const string REG_SSH_REMOTE_COMMAND = "RemoteCommand";
+    protected const string REG_REMOTE_COMMAND = "RemoteCommand";
 
     protected const string REG_SERIAL_LINE = "SerialLine";
     protected const string REG_SERIAL_SPEED = "SerialSpeed";
@@ -56,7 +56,7 @@ namespace libxputty_std20 {
             TPuttySessionSSH NewSession = new TPuttySessionSSH(name) {
               HostName = PuttySessionKey.GetValue(REG_HOSTNAME, "") as string,
               Port = (int)PuttySessionKey.GetValue(REG_PORT, 0),
-              RemoteCommand = PuttySessionKey.GetValue(REG_SSH_REMOTE_COMMAND, "") as string
+              RemoteCommand = PuttySessionKey.GetValue(REG_REMOTE_COMMAND, "") as string
             };
             return NewSession;
           }
@@ -123,7 +123,7 @@ namespace libxputty_std20 {
         case TPuttySessionSSH PuttySession:
           using ( RegistryKey PuttySessionKey = _GetRegistryKeyRW(PuttySession.Name) ) {
             try {
-              PuttySessionKey.SetValue(REG_SSH_REMOTE_COMMAND, PuttySession.RemoteCommand);
+              PuttySessionKey.SetValue(REG_REMOTE_COMMAND, PuttySession.RemoteCommand);
               PuttySessionKey.SetValue(REG_HOSTNAME, PuttySession.HostName);
               PuttySessionKey.SetValue(REG_PORT, PuttySession.Port);
               PuttySessionKey.Close();

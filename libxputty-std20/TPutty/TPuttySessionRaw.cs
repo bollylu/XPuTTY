@@ -6,9 +6,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
+using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionRaw : TPuttySession, IDisposable {
+  public class TPuttySessionRaw : TPuttySession, IHostAndPort {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -21,6 +22,14 @@ namespace libxputty_std20 {
     }
     public TPuttySessionRaw(string name) : base(name) {
       Protocol = TPuttyProtocol.Raw;
+    }
+
+    public TPuttySessionRaw(IPuttySession session) : base(session) {
+      Protocol = TPuttyProtocol.Raw;
+      if ( session is IHostAndPort SessionHAP ) {
+        HostName = SessionHAP.HostName;
+        Port = SessionHAP.Port;
+      }
     }
 
     public override void Dispose() {

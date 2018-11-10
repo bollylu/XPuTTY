@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Win32;
+
+using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionTelnet : TPuttySession, IDisposable {
+  public class TPuttySessionTelnet : TPuttySession, IHostAndPort {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -21,6 +17,14 @@ namespace libxputty_std20 {
     }
     public TPuttySessionTelnet(string name) : base(name) {
       Protocol = TPuttyProtocol.Telnet;
+    }
+
+    public TPuttySessionTelnet(IPuttySession session) : base(session) {
+      Protocol = TPuttyProtocol.Telnet;
+      if ( session is IHostAndPort SessionHAP ) {
+        HostName = SessionHAP.HostName;
+        Port = SessionHAP.Port;
+      }
     }
 
     public override void Dispose() {

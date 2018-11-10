@@ -28,6 +28,17 @@ namespace libxputty_std20 {
       Protocol = TPuttyProtocol.Serial;
     }
 
+    public TPuttySessionSerial(TPuttySession session) : base(session) {
+      Protocol = TPuttyProtocol.Serial;
+      if ( session is TPuttySessionSerial SessionSerial ) {
+        SerialLine = SessionSerial.SerialLine;
+        SerialSpeed = SessionSerial.SerialSpeed;
+        SerialDataBits = SessionSerial.SerialDataBits;
+        SerialStopBits = SessionSerial.SerialStopBits;
+        SerialParity = SessionSerial.SerialParity;
+      }
+    }
+
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Converters -------------------------------------------------------------------------------------

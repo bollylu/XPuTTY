@@ -32,7 +32,8 @@
             <Image Source="{Binding Path=FileOpenPicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <MenuItem Header="Open sessions XML data file">
+        <MenuItem Header="Open sessions XML data file"
+                  Command="{Binding Path=CommandFileOpenXml}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileOpenPicture}" />
           </MenuItem.Icon>

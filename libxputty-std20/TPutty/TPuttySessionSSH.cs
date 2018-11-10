@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -11,7 +12,7 @@ using libxputty_std20.Interfaces;
 using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySessionSSH : TPuttySession {
+  public class TPuttySessionSSH : TPuttySession, IHostAndPort {
 
     #region --- Constants --------------------------------------------
     protected const string REG_HOSTNAME = "HostName";
@@ -26,15 +27,23 @@ namespace libxputty_std20 {
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
     public int Port { get; set; }
-    public string RemoteCommand { get; set; }
     #endregion --- Public properties ---------------------------------------------------------------------------
 
+    
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionSSH() : base() {
       Protocol = TPuttyProtocol.SSH;
     }
     public TPuttySessionSSH(string name) : base(name) {
       Protocol = TPuttyProtocol.SSH;
+    }
+
+    public TPuttySessionSSH(IPuttySession session) : base(session) {
+      Protocol = TPuttyProtocol.SSH;
+      if ( session is IHostAndPort SessionHAP ) {
+        HostName = SessionHAP.HostName;
+        Port = SessionHAP.Port;
+      }
     }
 
     public override void Dispose() {
@@ -71,8 +80,17 @@ namespace libxputty_std20 {
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
 
-    public async override void StartPlink() {
-      base.StartPlink();
+    public async override void Start(string arguments="") {
+      TempFileForRemoteCommand = Path.GetTempFileName();
+      Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
+      File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
+      base.Start($"-ssh -l root -pw NN2003Pass -P {Port} {HostName} -t -m \"{TempFileForRemoteCommand}\"");
+      await Task.Delay(500);
+      SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
+    }
+
+    public async override void StartPlink(string arguments = "") {
+      base.StartPlink($"-t -l root -pw NN2003Pass -P {Port} {HostName} \"{RemoteCommand.Replace(@"""", @"\""")}\"");
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
