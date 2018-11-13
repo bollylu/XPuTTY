@@ -34,9 +34,11 @@ namespace libxputty_std20 {
     protected const string XML_ATTRIBUTE_SERIAL_PARITY = "SerialParity";
     protected const string XML_ATTRIBUTE_SERIAL_STOP_BITS = "SerialStopHalfBits";
     protected const string XML_ATTRIBUTE_SERIAL_FLOW_CONTROL = "SerialFlowControl";
+
+    public const string DATASOURCE_PREFIX = "xml";
     #endregion --- Constants --------------------------------------------
 
-    public override string DataSourceName => $@"xml://{Location ?? ""}";
+    public override string DataSourceName => $@"{DATASOURCE_PREFIX}://{Location ?? ""}";
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionSourceXml() : base() {
@@ -73,7 +75,8 @@ namespace libxputty_std20 {
           SerialSpeed = session.SafeReadAttribute<int>(XML_ATTRIBUTE_SERIAL_SPEED, 9600),
           SerialDataBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_DATA_BITS, 0),
           SerialStopBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_STOP_BITS, 0),
-          SerialParity = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_PARITY, 0)
+          SerialParity = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_PARITY, 0),
+          SerialFlowControl = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SERIAL_FLOW_CONTROL, "")
         };
         return NewSession;
       }
@@ -154,6 +157,7 @@ namespace libxputty_std20 {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_DATA_BITS, PuttySession.SerialDataBits);
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_STOP_BITS, PuttySession.SerialStopBits);
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_PARITY, PuttySession.SerialParity);
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_FLOW_CONTROL, PuttySession.SerialFlowControl);
       }
 
       return RetVal;

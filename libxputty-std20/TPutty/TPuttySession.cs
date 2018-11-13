@@ -36,6 +36,7 @@ namespace libxputty_std20 {
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
 
     public string RemoteCommand { get; set; }
+    public string CleanedRemoteCommand => (RemoteCommand ?? "").Replace("\"", "\\\"");
 
     private IEnumerable<string> Groups => CleanName.ItemsBetween("[", "]");
 
@@ -77,6 +78,11 @@ namespace libxputty_std20 {
       }
     }
     private string _Section;
+
+    public ICredential Credential { get; set; }
+
+    protected string SessionTitle;
+
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     protected string TempFileForRemoteCommand;
@@ -199,7 +205,7 @@ namespace libxputty_std20 {
 
     protected void SetProcessTitle(string title = "") {
       if ( PuttyProcess != null ) {
-        PuttyProcess.SetProcessTitle(title);
+        PuttyProcess.ProcessTitle = title;
       }
     }
     #endregion --- Windows processes -------------------------------------------- 

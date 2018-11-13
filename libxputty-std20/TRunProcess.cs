@@ -33,6 +33,7 @@ namespace libxputty_std20 {
     private Task Watcher;
     private CancellationTokenSource WatcherCancellation = new CancellationTokenSource();
 
+    public string ProcessTitle;
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TRunProcess() {
       StartInfo = new ProcessStartInfo();
@@ -78,6 +79,7 @@ namespace libxputty_std20 {
             try {
               Process WatchedProcess = Process.GetProcessById(PID);
               await Task.Delay(WATCH_DELAY_MS);
+              SetProcessTitle(ProcessTitle);
             } catch {
               _Process.Dispose();
               _Process = null;

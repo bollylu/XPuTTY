@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,22 +15,12 @@ using Microsoft.Win32;
 namespace libxputty_std20 {
   public class TPuttySessionSSH : TPuttySession, IHostAndPort {
 
-    #region --- Constants --------------------------------------------
-    protected const string REG_HOSTNAME = "HostName";
-    protected const string REG_PORT = "PortNumber";
-    protected const string REG_SSH_REMOTE_COMMAND = "RemoteCommand";
-
-    protected const string JSON_HOSTNAME = "HostName";
-    protected const string JSON_PORT = "PortNumber";
-    protected const string JSON_SSH_REMOTE_COMMAND = "RemoteCommand"; 
-    #endregion --- Constants --------------------------------------------
-
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
     public int Port { get; set; }
     #endregion --- Public properties ---------------------------------------------------------------------------
 
-    
+
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionSSH() : base() {
       Protocol = TPuttyProtocol.SSH;
@@ -71,26 +62,47 @@ namespace libxputty_std20 {
     public override IJsonValue ToJson() {
       JsonObject RetVal = base.ToJson() as JsonObject;
       JsonObject Session = RetVal.SafeGetValueFirst<JsonObject>(TPuttySession.JSON_THIS_ELEMENT);
-      Session.Add(JSON_HOSTNAME, HostName);
-      Session.Add(JSON_PORT, Port);
-      Session.Add(JSON_SSH_REMOTE_COMMAND, Convert.ToBase64String(RemoteCommand.ToByteArray()));
       RetVal.Clear();
       RetVal.Add(TPuttySession.JSON_THIS_ELEMENT, Session);
       return RetVal;
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
 
-    public async override void Start(string arguments="") {
+    public async override void Start(string arguments = "") {
       TempFileForRemoteCommand = Path.GetTempFileName();
       Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
       File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
-      base.Start($"-ssh -l root -pw NN2003Pass -P {Port} {HostName} -t -m \"{TempFileForRemoteCommand}\"");
+      List<string> Params = new List<string>();
+      Params.Add("-t");
+      Params.Add("-ssh");
+      Params.Add($"-P {Port}");
+      Params.Add($"-m \"{TempFileForRemoteCommand}\"");
+      Params.Add(HostName);
+      if (Credential!=null) {
+        Params.Add($"-l {Credential.UsernameWithoutDomain}");
+        Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
+      }
+      base.Start(string.Join(" ", Params));
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
 
     public async override void StartPlink(string arguments = "") {
-      base.StartPlink($"-t -l root -pw NN2003Pass -P {Port} {HostName} \"{RemoteCommand.Replace(@"""", @"\""")}\"");
+      TempFileForRemoteCommand = Path.GetTempFileName();
+      Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
+      File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
+      Log.Write(File.ReadAllText(TempFileForRemoteCommand));
+      List<string> Params = new List<string>();
+      Params.Add("-t");
+      Params.Add("-ssh");
+      Params.Add($"-P {Port}");
+      Params.Add($"-m \"{TempFileForRemoteCommand}\"");
+      Params.Add(HostName);
+      if ( Credential != null ) {
+        Params.Add($"-l {Credential.UsernameWithoutDomain}");
+        Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
+      }
+      base.StartPlink(string.Join(" ", Params));
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }

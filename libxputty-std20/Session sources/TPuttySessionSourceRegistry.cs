@@ -27,14 +27,18 @@ namespace libxputty_std20 {
     protected const string REG_SERIAL_PARITY = "SerialParity";
     protected const string REG_SERIAL_STOP_BITS = "SerialStopHalfBits";
     protected const string REG_SERIAL_FLOW_CONTROL = "SerialFlowControl";
+
+    public const string DATASOURCE_PREFIX = "reg";
     #endregion --- Constants --------------------------------------------
 
-    public override string DataSourceName => $"reg://{Location.Replace('\\', '/')}";
+    public override string DataSourceName => $"{DATASOURCE_PREFIX}://{Location.Replace('\\', '/')}";
 
+    #region --- Constructor(s) --------------------------------------------
     public TPuttySessionSourceRegistry() : base() {
       SourceType = ESourceType.Registry;
       Location = $@"HKCU\{REG_KEYNAME_BASE}";
     }
+    #endregion --- Constructor(s) --------------------------------------------
 
     protected override IEnumerable<(string, TPuttyProtocol)> _GetSessionList() {
       using ( RegistryKey BaseKey = Registry.CurrentUser.OpenSubKey(REG_KEYNAME_BASE) ) {
@@ -48,62 +52,66 @@ namespace libxputty_std20 {
 
     protected override IPuttySession _ReadSession(string name, TPuttyProtocol protocol) {
 
-      string CleanName = name.Replace("%20", "");
+      string CleanName = name.Replace("%20", " ");
 
-      switch ( protocol.Value ) {
-        case EPuttyProtocol.SSH:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKey(name) ) {
-            TPuttySessionSSH NewSession = new TPuttySessionSSH(name) {
-              HostName = PuttySessionKey.GetValue(REG_HOSTNAME, "") as string,
-              Port = (int)PuttySessionKey.GetValue(REG_PORT, 0),
-              RemoteCommand = PuttySessionKey.GetValue(REG_REMOTE_COMMAND, "") as string
-            };
-            return NewSession;
-          }
+      IPuttySession BaseSession;
+      IPuttySession RetVal;
 
-        case EPuttyProtocol.Serial:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKey(Name) ) {
-            TPuttySessionSerial NewSession = new TPuttySessionSerial(name) {
+      using ( RegistryKey PuttySessionKey = _GetRegistryKey(name) ) {
+
+        #region --- Read common data --------------------------------------------
+        BaseSession = new TPuttySession(name) {
+          RemoteCommand = PuttySessionKey.GetValue(REG_REMOTE_COMMAND, "") as string,
+          GroupLevel1 = CleanName.ItemsBetween("[", "]").FirstOrDefault(),
+          GroupLevel2 = CleanName.ItemsBetween("[", "]").Skip(1).FirstOrDefault(),
+          Section = CleanName.ItemsBetween("{", "}").FirstOrDefault()
+        };
+        #endregion --- Read common data -----------------------------------------
+
+        #region --- Create RetVal based on protocol type --------------------------------------------
+        switch ( protocol.Value ) {
+          case EPuttyProtocol.SSH:
+            RetVal = new TPuttySessionSSH(BaseSession);
+            break;
+
+          case EPuttyProtocol.Serial:
+            RetVal = new TPuttySessionSerial(BaseSession) {
               SerialLine = PuttySessionKey.GetValue(REG_SERIAL_LINE, "") as string,
               SerialSpeed = (int)PuttySessionKey.GetValue(REG_SERIAL_SPEED, 0),
               SerialParity = Convert.ToByte(PuttySessionKey.GetValue(REG_SERIAL_PARITY, 0)),
               SerialStopBits = Convert.ToByte(PuttySessionKey.GetValue(REG_SERIAL_STOP_BITS, 0)),
-              SerialDataBits = Convert.ToByte(PuttySessionKey.GetValue(REG_SERIAL_DATA_BITS, 0))
+              SerialDataBits = Convert.ToByte(PuttySessionKey.GetValue(REG_SERIAL_DATA_BITS, 0)),
+              SerialFlowControl = PuttySessionKey.GetValue(REG_SERIAL_FLOW_CONTROL, "") as string
             };
-            return NewSession;
-          }
+            break;
 
-        case EPuttyProtocol.Telnet:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKey(name) ) {
-            TPuttySessionTelnet NewSession = new TPuttySessionTelnet(name) {
-              HostName = PuttySessionKey.GetValue(REG_HOSTNAME, "") as string,
-              Port = (int)PuttySessionKey.GetValue(REG_PORT, 0),
-            };
-            return NewSession;
-          }
+          case EPuttyProtocol.Telnet:
+            RetVal = new TPuttySessionTelnet(BaseSession);
+            break;
 
-        case EPuttyProtocol.RLogin:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKey(name) ) {
-            TPuttySessionRLogin NewSession = new TPuttySessionRLogin(name) {
-              HostName = PuttySessionKey.GetValue(REG_HOSTNAME, "") as string,
-              Port = (int)PuttySessionKey.GetValue(REG_PORT, 0),
-            };
-            return NewSession;
-          }
+          case EPuttyProtocol.RLogin:
+            RetVal = new TPuttySessionRLogin(BaseSession);
+            break;
 
-        case EPuttyProtocol.Raw:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKey(name) ) {
-            TPuttySessionRaw NewSession = new TPuttySessionRaw(name) {
-              HostName = PuttySessionKey.GetValue(REG_HOSTNAME, "") as string,
-              Port = (int)PuttySessionKey.GetValue(REG_PORT, 0),
-            };
-            return NewSession;
-          }
+          case EPuttyProtocol.Raw:
+            RetVal = new TPuttySessionRaw(BaseSession);
+            break;
 
-        default:
-          Log.Write("Unable to read session from registry : Protocol type is invalid");
-          return TPuttySession.Empty;
+          default:
+            Log.Write("Unable to read session from registry : Protocol type is invalid");
+            return TPuttySession.Empty;
+        }
+        #endregion --- Create RetVal based on protocol type -----------------------------------------
+
+        #region --- Add specific data --------------------------------------------
+        if ( RetVal is IHostAndPort SessionHAP ) {
+          SessionHAP.HostName = PuttySessionKey.GetValue(REG_HOSTNAME, "") as string;
+          SessionHAP.Port = (int)PuttySessionKey.GetValue(REG_PORT, 0);
+        }
+        #endregion --- Add specific data -----------------------------------------
+
       }
+      return RetVal;
     }
 
     protected override IEnumerable<IPuttySession> _ReadSessions() {
@@ -119,74 +127,68 @@ namespace libxputty_std20 {
 
     protected override void _SaveSession(IPuttySession session) {
 
-      switch ( session ) {
-        case TPuttySessionSSH PuttySession:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKeyRW(PuttySession.Name) ) {
-            try {
-              PuttySessionKey.SetValue(REG_REMOTE_COMMAND, PuttySession.RemoteCommand);
-              PuttySessionKey.SetValue(REG_HOSTNAME, PuttySession.HostName);
-              PuttySessionKey.SetValue(REG_PORT, PuttySession.Port);
-              PuttySessionKey.Close();
-            } catch ( Exception ex ) {
-              Log.Write($"Unable to save value to registry key {PuttySession.Name} : {ex.Message}");
-            }
-          };
-          return;
+      string GL1 = session.GroupLevel1 == "" ? "" : $"[{session.GroupLevel1}]";
+      string GL2 = session.GroupLevel2 == "" ? "" : $"[{session.GroupLevel2}]";
+      string SCT = session.Section == "" ? "" : $"[{session.Section}]";
 
-        case TPuttySessionSerial PuttySession:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKey(Name) ) {
-            try {
-              PuttySessionKey.SetValue(REG_SERIAL_LINE, PuttySession.SerialLine);
-              PuttySessionKey.SetValue(REG_SERIAL_SPEED, PuttySession.SerialSpeed);
-              PuttySessionKey.SetValue(REG_SERIAL_PARITY, PuttySession.SerialParity);
-              PuttySessionKey.SetValue(REG_SERIAL_STOP_BITS, PuttySession.SerialStopBits);
-              PuttySessionKey.SetValue(REG_SERIAL_DATA_BITS, PuttySession.SerialDataBits);
-              PuttySessionKey.Close();
-            } catch ( Exception ex ) {
-              Log.Write($"Unable to save value to registry key {PuttySession.Name} : {ex.Message}");
-            }
-            return;
+      string KeyName = $"{GL1}{GL2}{SCT}{session.Name.Replace(" ", "%20")}";
+
+      using ( RegistryKey PuttySessionKey = _GetRegistryKeyRW(KeyName) ) {
+
+        try {
+          PuttySessionKey.SetValue(REG_REMOTE_COMMAND, session.RemoteCommand);
+
+        } catch ( Exception ex ) {
+          Log.Write($"Unable to save value to registry key {KeyName} : {ex.Message}");
+        }
+
+        if ( session is IHostAndPort SessionHAP ) {
+          try {
+            PuttySessionKey.SetValue(REG_REMOTE_COMMAND, session.RemoteCommand);
+            PuttySessionKey.SetValue(REG_HOSTNAME, SessionHAP.HostName);
+            PuttySessionKey.SetValue(REG_PORT, SessionHAP.Port);
+
+          } catch ( Exception ex ) {
+            Log.Write($"Unable to save value to registry key {KeyName} : {ex.Message}");
           }
+        }
 
-        case TPuttySessionTelnet PuttySession:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKeyRW(PuttySession.Name) ) {
+        switch ( session ) {
+          case TPuttySessionSSH PuttySessionSSH:
+            break;
+
+          case TPuttySessionSerial PuttySessionSerial:
             try {
-              PuttySessionKey.SetValue(REG_HOSTNAME, PuttySession.HostName);
-              PuttySessionKey.SetValue(REG_PORT, PuttySession.Port);
+              PuttySessionKey.SetValue(REG_SERIAL_LINE, PuttySessionSerial.SerialLine);
+              PuttySessionKey.SetValue(REG_SERIAL_SPEED, PuttySessionSerial.SerialSpeed);
+              PuttySessionKey.SetValue(REG_SERIAL_PARITY, PuttySessionSerial.SerialParity);
+              PuttySessionKey.SetValue(REG_SERIAL_STOP_BITS, PuttySessionSerial.SerialStopBits);
+              PuttySessionKey.SetValue(REG_SERIAL_DATA_BITS, PuttySessionSerial.SerialDataBits);
+              PuttySessionKey.SetValue(REG_SERIAL_FLOW_CONTROL, PuttySessionSerial.SerialFlowControl);
               PuttySessionKey.Close();
             } catch ( Exception ex ) {
-              Log.Write($"Unable to save value to registry key {PuttySession.Name} : {ex.Message}");
+              Log.Write($"Unable to save value to registry key {PuttySessionSerial.Name} : {ex.Message}");
             }
-          };
-          return;
+            break;
 
-        case TPuttySessionRLogin PuttySession:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKeyRW(PuttySession.Name) ) {
-            try {
-              PuttySessionKey.SetValue(REG_HOSTNAME, PuttySession.HostName);
-              PuttySessionKey.SetValue(REG_PORT, PuttySession.Port);
-              PuttySessionKey.Close();
-            } catch ( Exception ex ) {
-              Log.Write($"Unable to save value to registry key {PuttySession.Name} : {ex.Message}");
-            }
-          };
-          return;
+          case TPuttySessionTelnet PuttySessionTelnet:
 
-        case TPuttySessionRaw PuttySession:
-          using ( RegistryKey PuttySessionKey = _GetRegistryKeyRW(PuttySession.Name) ) {
-            try {
-              PuttySessionKey.SetValue(REG_HOSTNAME, PuttySession.HostName);
-              PuttySessionKey.SetValue(REG_PORT, PuttySession.Port);
-              PuttySessionKey.Close();
-            } catch ( Exception ex ) {
-              Log.Write($"Unable to save value to registry key {PuttySession.Name} : {ex.Message}");
-            }
-          };
-          return;
+            break;
 
-        default:
-          Log.Write("Unable to read session from registry : Protocol type is invalid");
-          return;
+          case TPuttySessionRLogin PuttySessionRLogin:
+
+            break;
+
+          case TPuttySessionRaw PuttySessionRaw:
+
+            break;
+
+          default:
+            Log.Write("Unable to read session from registry : Protocol type is invalid");
+            break;
+        }
+
+        PuttySessionKey.Close();
       }
     }
 

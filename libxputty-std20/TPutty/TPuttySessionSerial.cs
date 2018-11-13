@@ -18,17 +18,20 @@ namespace libxputty_std20 {
     public byte SerialDataBits { get; set; }
     public byte SerialStopBits { get; set; }
     public byte SerialParity { get; set; }
+    public string SerialFlowControl { get; set; }
+
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionSerial() : base() {
       Protocol = TPuttyProtocol.Serial;
     }
+
     public TPuttySessionSerial(string name) : base(name) {
       Protocol = TPuttyProtocol.Serial;
     }
 
-    public TPuttySessionSerial(TPuttySession session) : base(session) {
+    public TPuttySessionSerial(IPuttySession session) : base(session) {
       Protocol = TPuttyProtocol.Serial;
       if ( session is TPuttySessionSerial SessionSerial ) {
         SerialLine = SessionSerial.SerialLine;
@@ -36,6 +39,7 @@ namespace libxputty_std20 {
         SerialDataBits = SessionSerial.SerialDataBits;
         SerialStopBits = SessionSerial.SerialStopBits;
         SerialParity = SessionSerial.SerialParity;
+        SerialFlowControl = SessionSerial.SerialFlowControl;
       }
     }
 
@@ -50,6 +54,7 @@ namespace libxputty_std20 {
       RetVal.Append($", {SerialDataBits}");
       RetVal.Append($", {SerialStopBits}");
       RetVal.Append($", {SerialParity}");
+      RetVal.Append($", {SerialFlowControl}");
       return RetVal.ToString();
     }
     #endregion --- Converters -------------------------------------------------------------------------------------

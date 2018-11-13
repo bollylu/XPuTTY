@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,7 +8,7 @@ using System.Text;
 using System.Windows;
 
 using BLTools;
-
+using EasyPutty.Properties;
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
@@ -42,7 +41,7 @@ namespace EasyPutty.ViewModels {
 
     public string ApplicationTitle {
       get {
-        return $"{_ApplicationTitleBase} : {_ApplicationTitle} : {_DataSourceName}";
+        return $"{_ApplicationTitleBase} : {_ApplicationTitle} : {DataSourceName}";
       }
       set {
         _ApplicationTitle = value;
@@ -80,8 +79,24 @@ namespace EasyPutty.ViewModels {
     public IEnumerable<IPuttySession> AllPuttySessions => AllVMPuttySessions.Select(x => x.PuttySession);
     public int TotalSessionsCount => AllVMPuttySessions.Count();
 
-    private string _DataSourceName;
-    public IPuttySessionSource SessionSource;
+    public string DataSourceName => SessionSource == null ? "" : SessionSource.DataSourceName;
+
+    public IPuttySessionSource SessionSource {
+      get {
+        return _SessionSource;
+      }
+      set {
+        _SessionSource = value;
+        Settings CurrentSettings = new Settings();
+        if ( CurrentSettings.LastDataSource != _SessionSource.DataSourceName ) {
+          CurrentSettings.LastDataSource = $"{_SessionSource.DataSourceName}";
+          CurrentSettings.Save();
+        }
+        NotifyPropertyChanged(nameof(DataSourceName));
+        NotifyPropertyChanged(nameof(ApplicationTitle));
+      }
+    }
+    private IPuttySessionSource _SessionSource;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() : base() {
@@ -91,12 +106,21 @@ namespace EasyPutty.ViewModels {
       if ( App.CurrentUserCredential != null ) {
         ApplicationTitle = App.AppUsername;
       }
-      //if ( App.AppIsStartingUp ) {
-      //  App.AppIsStartingUp = false;
-      //  PuttyGroup.Clear();
-      //  SessionSource = new TPuttySessionSourceRegistry();
-      //  _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
-      //}
+
+      #region --- Reload data from previous PuttySessionSource --------------------------------------------
+      Settings CurrentSettings = new Settings();
+      CurrentSettings.Reload();
+
+      if ( string.IsNullOrWhiteSpace(CurrentSettings.LastDataSource) ) {
+        return;
+      }
+
+      SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource);
+      if ( SessionSource != null ) {
+        _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
+      } 
+      #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
+
     }
 
     protected override void _InitializeCommands() {
@@ -104,20 +128,18 @@ namespace EasyPutty.ViewModels {
 
       CommandFileOpenRegistry = new TRelayCommand(() => _FileOpenRegistry(), _ => { return !WorkInProgress; });
       CommandFileOpenXml = new TRelayCommand(() => _FileOpenXml(), _ => { return !WorkInProgress; });
-      CommandFileOpenJson = new TRelayCommand(() => _FileOpenJson(), _ => { return !WorkInProgress && !MainWindow.DataIsDirty; });
+      CommandFileOpenJson = new TRelayCommand(() => _FileOpenJson(), _ => { return !WorkInProgress; });
 
-      CommandFileSave = new TRelayCommand(() => _FileSave(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
+      CommandFileSave = new TRelayCommand(() => _FileSave(), _ => { return !WorkInProgress ; });
 
-      CommandFileSaveRegistry = new TRelayCommand(() => _FileSaveRegistry(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
+      CommandFileSaveRegistry = new TRelayCommand(() => _FileSaveRegistry(), _ => { return !WorkInProgress; });
       CommandFileSaveXml = new TRelayCommand(() => _FileSaveXml(), _ => { return !WorkInProgress; });
-      CommandFileSaveJson = new TRelayCommand(() => _FileSaveJson(), _ => { return !WorkInProgress && MainWindow.DataIsDirty; });
+      CommandFileSaveJson = new TRelayCommand(() => _FileSaveJson(), _ => { return !WorkInProgress; });
 
       CommandFileQuit = new TRelayCommand(() => _FileQuit(), _ => { return true; });
 
       CommandHelpContact = new TRelayCommand(() => _HelpContact(), _ => { return true; });
       CommandHelpAbout = new TRelayCommand(() => _HelpAbout(), _ => { return true; });
-      //CommandToolsExportAll = new TRelayCommand(() => _ExportAll(), _ => { return !WorkInProgress; });
-      //CommandToolsExportSelected = new TRelayCommand(() => _ExportSelected(), _ => { return !WorkInProgress; });
     }
 
     public override void Dispose() {
@@ -128,7 +150,6 @@ namespace EasyPutty.ViewModels {
     #region --- Menu --------------------------------------------
     private void _FileNew() {
       MainWindow.DataIsDirty = false;
-      _DataSourceName = "";
       PuttyGroup.Clear();
     }
 
@@ -148,8 +169,7 @@ namespace EasyPutty.ViewModels {
         return;
       }
       SessionSource = new TPuttySessionSourceXml(OFD.FileName);
-      _DataSourceName = SessionSource.DataSourceName;
-      NotifyPropertyChanged(nameof(ApplicationTitle));
+      
       Log.Write($"Refreshing sessions from XML file {OFD.FileName}");
       NotifyExecutionProgress("Reading sessions ...");
       PuttyGroup.Clear();
@@ -159,7 +179,6 @@ namespace EasyPutty.ViewModels {
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
       WorkInProgress = false;
-      CommandFileOpenRegistry.NotifyCanExecuteChanged();
       NotifyExecutionCompleted("Done.", true);
     }
 
@@ -180,7 +199,6 @@ namespace EasyPutty.ViewModels {
     private void _FileOpenRegistry() {
       WorkInProgress = true;
       SessionSource = new TPuttySessionSourceRegistry();
-      _DataSourceName = SessionSource.DataSourceName;
       NotifyPropertyChanged(nameof(ApplicationTitle));
       CommandFileOpenRegistry.NotifyCanExecuteChanged();
       Log.Write("Refreshing sessions from registry ...");

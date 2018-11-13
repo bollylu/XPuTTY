@@ -22,5 +22,17 @@ namespace EasyPutty.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastDataSource {
+            get {
+                return ((string)(this["LastDataSource"]));
+            }
+            set {
+                this["LastDataSource"] = value;
+            }
+        }
     }
 }
