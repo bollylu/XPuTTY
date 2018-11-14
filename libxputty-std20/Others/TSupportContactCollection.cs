@@ -73,7 +73,7 @@ namespace libxputty_std20 {
     }
 
     #region Converters
-    public override XElement ToXml() {
+    public XElement ToXml() {
       if ( !Items.Any() ) {
         return null;
       }

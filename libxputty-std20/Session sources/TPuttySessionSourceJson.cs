@@ -165,5 +165,8 @@ namespace libxputty_std20 {
       
     }
 
+    protected override IEnumerable<TPuttySessionGroup> _ReadGroups() {
+      throw new NotImplementedException();
+    }
   }
 }

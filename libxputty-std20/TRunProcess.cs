@@ -66,12 +66,12 @@ namespace libxputty_std20 {
         OnStart(this, EventArgs.Empty);
       }
 
-      StartWatcher();
+      _StartWatcher();
 
       Log.Write("Start completed.");
     }
 
-    public void StartWatcher() {
+    protected void _StartWatcher() {
       if ( Watcher == null || Watcher.IsCanceled || Watcher.IsCompleted ) {
         Log.Write("Starting the watcher...");
         Watcher = Task.Run(async () => {
@@ -108,7 +108,7 @@ namespace libxputty_std20 {
       }
       try {
         _Process = process;
-        StartWatcher();
+        _StartWatcher();
         Log.Write("Process assigned.");
       } catch ( Exception ex ) {
         Log.Write($"Unable to assign process : {ex.Message}");
@@ -121,7 +121,7 @@ namespace libxputty_std20 {
       }
       try {
         _Process = Process.GetProcessById(pid);
-        StartWatcher();
+        _StartWatcher();
         Log.Write("Process assigned.");
       } catch ( Exception ex ) {
         Log.Write($"Unable to assign process {pid} : {ex.Message}");

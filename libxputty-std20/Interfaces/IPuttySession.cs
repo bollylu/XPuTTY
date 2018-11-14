@@ -7,8 +7,8 @@ using BLTools;
 using BLTools.Json;
 
 namespace libxputty_std20.Interfaces {
-  public interface IPuttySession : IDisposable, IName {
-    string Name { get; set; }
+  public interface IPuttySession : IDisposable, IName, ICredentialContainer {
+
     string GroupLevel1 { get; set; }
     string GroupLevel2 { get; set; }
     string Section { get; set; }

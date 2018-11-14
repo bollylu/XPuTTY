@@ -28,9 +28,20 @@
 
     <Grid Grid.Row="1">
       <Grid.RowDefinitions>
+        <RowDefinition Height="auto" />
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
-      <localViews:ViewGroupLevel1ByTabs DataContext="{Binding Path=PuttyGroup}" />
+      <Border Grid.Row="0"
+              Margin="10"
+              BorderThickness="0,0,0,2"
+              BorderBrush="Red">
+        <TextBlock Text="{Binding Path=ContentLocation, Mode=OneWay}"
+                   FontSize="18"
+                   FontFamily="Arial"
+                   FontWeight="Bold"
+                   Margin="0,0,0,5" />
+      </Border>
+      <localViews:ViewGroupLevel1ByTabs Grid.Row="1" DataContext="{Binding Path=PuttyGroup}" />
     </Grid>
 
     <bltoolswpfctrl:ExtendedStatusBar x:Name="stsBar"

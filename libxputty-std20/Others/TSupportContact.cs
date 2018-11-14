@@ -70,7 +70,7 @@ namespace libxputty_std20 {
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region Converters
-    public override XElement ToXml() {
+    public XElement ToXml() {
       XElement RetVal = base.ToXml(XML_THIS_ELEMENT);
       if ( !string.IsNullOrWhiteSpace(Email) ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_EMAIL, Email);

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,7 +7,9 @@ using System.Text;
 using System.Windows;
 
 using BLTools;
+
 using EasyPutty.Properties;
+
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
@@ -41,7 +42,7 @@ namespace EasyPutty.ViewModels {
 
     public string ApplicationTitle {
       get {
-        return $"{_ApplicationTitleBase} : {_ApplicationTitle} : {DataSourceName}";
+        return $"{_ApplicationTitleBase} : {_ApplicationTitle} : {SessionSourceName}";
       }
       set {
         _ApplicationTitle = value;
@@ -58,10 +59,22 @@ namespace EasyPutty.ViewModels {
       }
       set {
         _SelectedItem = value;
+        ContentLocation = _SelectedItem.Header;
         NotifyPropertyChanged(nameof(SelectedItem));
       }
     }
     private TVMPuttyGroup _SelectedItem;
+
+    public string ContentLocation {
+      get {
+        return _ContentLocation;
+      }
+      set {
+        _ContentLocation = value;
+        NotifyPropertyChanged(nameof(ContentLocation));
+      }
+    }
+    private string _ContentLocation;
 
     #region --- Pictures --------------------------------------------
     public string PuttyIcon => App.GetPictureFullname("putty_icon");
@@ -73,13 +86,13 @@ namespace EasyPutty.ViewModels {
 
     public TVMPuttyGroup PuttyGroup { get; private set; } = new TVMPuttyGroup("Main");
 
-    public IEnumerable<TVMPuttySession> AllVMPuttySessions => PuttyGroup.Items.Cast<TVMPuttyGroup>()
-                                                                        .SelectMany(x => x.Items).Cast<TVMPuttyGroup>()
-                                                                        .SelectMany(x => x.Items).Cast<TVMPuttySession>();
+    public IEnumerable<TVMPuttySession> AllVMPuttySessions => PuttyGroup.Groups
+                                                                        .SelectMany(x => x.Groups)
+                                                                        .SelectMany(x => x.Sessions);
     public IEnumerable<IPuttySession> AllPuttySessions => AllVMPuttySessions.Select(x => x.PuttySession);
     public int TotalSessionsCount => AllVMPuttySessions.Count();
 
-    public string DataSourceName => SessionSource == null ? "" : SessionSource.DataSourceName;
+    public string SessionSourceName => SessionSource == null ? "" : SessionSource.DataSourceName;
 
     public IPuttySessionSource SessionSource {
       get {
@@ -92,7 +105,7 @@ namespace EasyPutty.ViewModels {
           CurrentSettings.LastDataSource = $"{_SessionSource.DataSourceName}";
           CurrentSettings.Save();
         }
-        NotifyPropertyChanged(nameof(DataSourceName));
+        NotifyPropertyChanged(nameof(SessionSourceName));
         NotifyPropertyChanged(nameof(ApplicationTitle));
       }
     }
@@ -106,6 +119,7 @@ namespace EasyPutty.ViewModels {
       if ( App.CurrentUserCredential != null ) {
         ApplicationTitle = App.AppUsername;
       }
+      PuttyGroup.Parent = this;
 
       #region --- Reload data from previous PuttySessionSource --------------------------------------------
       Settings CurrentSettings = new Settings();
@@ -117,8 +131,8 @@ namespace EasyPutty.ViewModels {
 
       SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource);
       if ( SessionSource != null ) {
-        _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
-      } 
+        _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+      }
       #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
 
     }
@@ -130,7 +144,7 @@ namespace EasyPutty.ViewModels {
       CommandFileOpenXml = new TRelayCommand(() => _FileOpenXml(), _ => { return !WorkInProgress; });
       CommandFileOpenJson = new TRelayCommand(() => _FileOpenJson(), _ => { return !WorkInProgress; });
 
-      CommandFileSave = new TRelayCommand(() => _FileSave(), _ => { return !WorkInProgress ; });
+      CommandFileSave = new TRelayCommand(() => _FileSave(), _ => { return !WorkInProgress; });
 
       CommandFileSaveRegistry = new TRelayCommand(() => _FileSaveRegistry(), _ => { return !WorkInProgress; });
       CommandFileSaveXml = new TRelayCommand(() => _FileSaveXml(), _ => { return !WorkInProgress; });
@@ -153,6 +167,7 @@ namespace EasyPutty.ViewModels {
       PuttyGroup.Clear();
     }
 
+    #region --- File Open --------------------------------------------
     private void _FileOpenXml() {
       WorkInProgress = true;
       OpenFileDialog OFD = new OpenFileDialog {
@@ -169,12 +184,12 @@ namespace EasyPutty.ViewModels {
         return;
       }
       SessionSource = new TPuttySessionSourceXml(OFD.FileName);
-      
+
       Log.Write($"Refreshing sessions from XML file {OFD.FileName}");
       NotifyExecutionProgress("Reading sessions ...");
       PuttyGroup.Clear();
 
-      _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
+      _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
 
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
@@ -183,19 +198,22 @@ namespace EasyPutty.ViewModels {
     }
 
     private void _FileOpenJson() {
-      OpenFileDialog OFD = new OpenFileDialog {
-        Title = "Select new sessions file",
-        Filter = "Parameter file|*.json",
-        CheckFileExists = true,
-        CheckPathExists = true,
-        AddExtension = true,
-        DefaultExt = ".json",
-        ValidateNames = true
-      };
-      if ( OFD.ShowDialog() != true ) {
-        return;
-      }
+
+      //OpenFileDialog OFD = new OpenFileDialog {
+      //  Title = "Select new sessions file",
+      //  Filter = "Parameter file|*.json",
+      //  CheckFileExists = true,
+      //  CheckPathExists = true,
+      //  AddExtension = true,
+      //  DefaultExt = ".json",
+      //  ValidateNames = true
+      //};
+      //if ( OFD.ShowDialog() != true ) {
+      //  return;
+      //}
+
     }
+
     private void _FileOpenRegistry() {
       WorkInProgress = true;
       SessionSource = new TPuttySessionSourceRegistry();
@@ -206,7 +224,7 @@ namespace EasyPutty.ViewModels {
 
       PuttyGroup.Clear();
 
-      _DispatchSessions(SessionSource.ReadSessions().Where(x => x.Protocol.IsSSH));
+      _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
 
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
@@ -214,16 +232,23 @@ namespace EasyPutty.ViewModels {
       CommandFileOpenRegistry.NotifyCanExecuteChanged();
       NotifyExecutionCompleted("Done.", true);
     }
+    #endregion --- File Open --------------------------------------------
 
+    #region --- File Save --------------------------------------------
     private void _FileSave() {
-      MainWindow.DataIsDirty = false;
+      if ( MainWindow.DataIsDirty ) {
+        WorkInProgress = true;
+        SessionSource.SaveSessions(AllPuttySessions);
+        MainWindow.DataIsDirty = false;
+        WorkInProgress = false;
+      }
     }
 
     private void _FileSaveXml() {
       WorkInProgress = true;
 
-      Log.Write("Exporting all sessions...");
-      NotifyExecutionProgress("Exporting sessions...");
+      Log.Write("Saving all sessions to XML");
+      NotifyExecutionProgress("Save sessions to XML");
 
       SaveFileDialog SFD = new SaveFileDialog {
         DefaultExt = ".xml",
@@ -235,39 +260,52 @@ namespace EasyPutty.ViewModels {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
-        SaveXmlSource.SaveSessions(AllPuttySessions);
+        SessionSource = new TPuttySessionSourceXml(SFD.FileName);
+        SessionSource.SaveSessions(AllPuttySessions);
+        MainWindow.DataIsDirty = false;
       }
 
       NotifyExecutionCompleted("Done.");
       MainWindow.DataIsDirty = false;
       WorkInProgress = false;
     }
+
     private void _FileSaveJson() {
+      //WorkInProgress = true;
+      //Log.Write("Saving all sessions to Json...");
+
+      //SaveFileDialog SFD = new SaveFileDialog {
+      //  DefaultExt = ".json",
+      //  Title = "Select a filename to export your data",
+      //  OverwritePrompt = true,
+      //  AddExtension = true
+      //};
+      //SFD.DefaultExt = ".json";
+      //SFD.Filter = "JSON files (.json)|*.json";
+
+      //if ( SFD.ShowDialog() == true ) {
+      //  //TPuttySessionList SessionsToSave = new TPuttySessionList(SessionsTabs.SelectMany(x => x.PuttyGroups).SelectMany(x => x.PuttySessions).Select(x => x.PuttySession));
+      //  //SessionsToSave.SaveToJson(SFD.FileName);
+      //}
+
+      //NotifyExecutionCompleted("Done.");
+      //MainWindow.DataIsDirty = false;
+      //WorkInProgress = false;
+    }
+
+    private void _FileSaveRegistry() {
       WorkInProgress = true;
-      Log.Write("Saving all sessions to Json...");
 
-      SaveFileDialog SFD = new SaveFileDialog {
-        DefaultExt = ".json",
-        Title = "Select a filename to export your data",
-        OverwritePrompt = true,
-        AddExtension = true
-      };
-      SFD.DefaultExt = ".json";
-      SFD.Filter = "JSON files (.json)|*.json";
-
-      if ( SFD.ShowDialog() == true ) {
-        //TPuttySessionList SessionsToSave = new TPuttySessionList(SessionsTabs.SelectMany(x => x.PuttyGroups).SelectMany(x => x.PuttySessions).Select(x => x.PuttySession));
-        //SessionsToSave.SaveToJson(SFD.FileName);
-      }
-
+      Log.Write("Saving all sessions to XML");
+      NotifyExecutionProgress("Save sessions to XML");
+      SessionSource = new TPuttySessionSourceRegistry();
+      SessionSource.SaveSessions(AllPuttySessions);
       NotifyExecutionCompleted("Done.");
       MainWindow.DataIsDirty = false;
+
       WorkInProgress = false;
     }
-    private void _FileSaveRegistry() {
-      MainWindow.DataIsDirty = false;
-    }
+    #endregion --- File Save --------------------------------------------
 
     private void _FileQuit() {
       Application.Current.Shutdown();
@@ -341,17 +379,22 @@ namespace EasyPutty.ViewModels {
       foreach ( IGrouping<string, IPuttySession> SessionsByGroupL1Item in SessionsByGroupL1 ) {
 
         string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "<unnamed>";
-        TVMPuttyGroup GroupL1 = new TVMPuttyGroup(L1Header);
+        TVMPuttyGroup GroupL1 = new TVMPuttyGroup(L1Header) {
+          Parent = PuttyGroup
+        };
 
         foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.OrderBy(x => x.GroupLevel2).GroupBy(x => x.GroupLevel2) ) {
 
           string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<unnamed>";
-          TVMPuttyGroup GroupL2 = new TVMPuttyGroup(L2Header);
+          TVMPuttyGroup GroupL2 = new TVMPuttyGroup(L2Header) {
+            Parent = GroupL1
+          };
 
           GroupL2.Add(_CreateAndRecoverSessions(SessionsByGroupL2Item, EPuttyProtocol.SSH));
           GroupL1.Add(GroupL2);
 
         }
+
         PuttyGroup.Add(GroupL1);
       }
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
@@ -365,10 +408,11 @@ namespace EasyPutty.ViewModels {
       IEnumerable<Process> CurrentlyRunningSessions = TPuttySession.GetAllPuttyProcess();
 
       foreach ( IPuttySession SessionItem in sessions.Where(x => x.Protocol.Value == protocol)
-                                                     .Where(x => !string.IsNullOrWhiteSpace(((TPuttySessionSSH)x).HostName))
+                                                     .OfType<IHostAndPort>()
+                                                     .Where(x => !string.IsNullOrWhiteSpace(x.HostName))
                                                      ) {
 
-        Process RunningSession = CurrentlyRunningSessions.FirstOrDefault(x => TRunProcess.GetCommandLine(x.Id).EndsWith($"\"{SessionItem.CleanName}\""));
+        Process RunningSession = CurrentlyRunningSessions.FirstOrDefault(x => TRunProcess.GetCommandLine(x.Id) == SessionItem.CommandLine);
 
         TVMPuttySession NewPuttySessionVM;
         NewPuttySessionVM = new TVMPuttySession(SessionItem);

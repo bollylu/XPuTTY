@@ -9,7 +9,7 @@ using BLTools;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public abstract class TPuttyBase : IName, IToXml, IDisposable, IParent {
+  public abstract class TPuttyBase : IName, IDisposable, IParent, ICredentialContainer {
 
     #region XML constants
     public const string XML_ATTRIBUTE_NAME = "Name";
@@ -80,19 +80,9 @@ namespace libxputty_std20 {
       _Initialize();
     }
 
-    public TPuttyBase(XElement element) : this() {
-      if ( element == null ) {
-        return;
-      }
-
-      Name = element.SafeReadAttribute<string>(XML_ATTRIBUTE_NAME, "");
-      Description = element.SafeReadAttribute<string>(XML_ATTRIBUTE_DESCRIPTION, "");
-      Comment = element.SafeReadAttribute<string>(XML_ATTRIBUTE_COMMENT, "");
-
-      if ( element.Elements(TCredential.XML_THIS_ELEMENT).Count() > 0 ) {
-        SetLocalCredential(new TCredential(element.SafeReadElement(TCredential.XML_THIS_ELEMENT), Name));
-      }
-
+    public TPuttyBase(string name) {
+      Name = name;
+      _Initialize();
     }
 
     public TPuttyBase(TPuttyBase puttyBase) {
@@ -187,7 +177,6 @@ namespace libxputty_std20 {
     #endregion ICredentialContainer
 
     #region Converters
-    public abstract XElement ToXml();
     public virtual XElement ToXml(string name) {
       return ToXml(GetXName(name));
     }
@@ -233,58 +222,7 @@ namespace libxputty_std20 {
     }
     #endregion IParent
 
-    #region Xml IO
-    public virtual bool SaveXml(string storageLocation = "") {
-      #region Validate parameters
-      if ( !string.IsNullOrWhiteSpace(storageLocation) ) {
-        StorageLocation = storageLocation;
-      }
-      #endregion Validate parameters
-      XDocument XmlFile = new XDocument {
-        Declaration = new XDeclaration("1.0", Encoding.UTF8.EncodingName, "true")
-      };
-      XmlFile.Add(this.ToXml());
-      try {
-        Log.Write($"Saving data {this.GetType().Name} to file {StorageLocation} ...");
-        XmlFile.Save(StorageLocation);
-        Log.Write("SaveXml successful");
-        return true;
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to save information to file {StorageLocation} : {ex.Message}", ErrorLevel.Error);
-        return false;
-      }
-    }
-
-    public virtual XElement LoadXml(string storageLocation = "") {
-      #region Validate parameters
-      if ( !string.IsNullOrWhiteSpace(storageLocation) ) {
-        StorageLocation = storageLocation;
-      }
-      if ( !File.Exists(StorageLocation) ) {
-        Log.Write($"Unable to read information from file {StorageLocation} : incorrect or missing filename", ErrorLevel.Error);
-        return null;
-      }
-      #endregion Validate parameters
-      XDocument XmlFile;
-      try {
-        Log.Write("Reading file content...");
-        XmlFile = XDocument.Load(StorageLocation);
-
-        Log.Write("Parsing content...");
-        XElement Root = XmlFile.Root;
-        if ( Root == null ) {
-          Log.Write("unable to read config file content");
-          return null;
-        }
-
-        Log.Write("LoadXml Sucessfull");
-        return Root;
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to read information from file {StorageLocation} : {ex.Message}", ErrorLevel.Error);
-        return null;
-      }
-    }
-    #endregion Xml IO
+    
 
     #region IDisposable Support
     private bool disposedValue = false; // To detect redundant calls

@@ -11,6 +11,7 @@ namespace EasyPutty.ViewModels {
     public TRelayCommand CommandSelectItem { get; private set; }
 
     public TVMPuttyGroup ParentGroup => GetParent<TVMPuttyGroup>();
+    public MainViewModel ParentRoot => GetParent<MainViewModel>();
 
     public string Header {
       get {
@@ -25,6 +26,9 @@ namespace EasyPutty.ViewModels {
 
     public ObservableCollection<IHeader> Items { get; private set; } = new ObservableCollection<IHeader>();
 
+    public IEnumerable<TVMPuttyGroup> Groups => Items.OfType<TVMPuttyGroup>();
+    public IEnumerable<TVMPuttySession> Sessions => Items.OfType<TVMPuttySession>();
+
     public TVMPuttyGroup SelectedItem {
       get {
         return _SelectedItem;
@@ -32,6 +36,15 @@ namespace EasyPutty.ViewModels {
       set {
         _SelectedItem = value;
         NotifyPropertyChanged(nameof(SelectedItem));
+        if ( ParentRoot != null ) {
+          StringBuilder Display = new StringBuilder();
+          TVMPuttyGroup GroupIterator = ParentRoot.PuttyGroup.SelectedItem;
+          while ( GroupIterator != null ) {
+            Display.AppendFormat($" > {GroupIterator.Header}");
+            GroupIterator = GroupIterator.SelectedItem;
+          }
+          ParentRoot.ContentLocation = Display.ToString();
+        }
       }
     }
     private TVMPuttyGroup _SelectedItem;
@@ -57,11 +70,13 @@ namespace EasyPutty.ViewModels {
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
 
+    #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
       StringBuilder RetVal = new StringBuilder();
       RetVal.Append($"{Header} - {Count} item(s)");
       return RetVal.ToString();
     }
+    #endregion --- Converters -------------------------------------------------------------------------------------
 
     public void Add(IHeader item) {
       if ( item == null ) {
@@ -75,9 +90,11 @@ namespace EasyPutty.ViewModels {
     }
 
     public void Add(IEnumerable<IHeader> items) {
+      #region === Validate parameters ===
       if ( items == null ) {
         return;
       }
+      #endregion === Validate parameters ===
       foreach ( IHeader ItemItem in items ) {
         Add(ItemItem);
       }
@@ -142,7 +159,7 @@ namespace EasyPutty.ViewModels {
         L2Group2.Add(TVMPuttySessionsGroupedBy.DesignMultiVMPuttySessionsGroupedBy);
         yield return L2Group2;
       }
-    } 
+    }
     #endregion --- Statics for design --------------------------------------------
 
   }

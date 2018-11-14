@@ -14,7 +14,9 @@ namespace libxputty_std20 {
     #region --- Constants --------------------------------------------
     public const string REG_KEYNAME_BASE = @"Software\SimonTatham\PuTTY\Sessions";
 
+    public const string GROUP_SEPARATOR = "//";
     protected const string REG_PROTOCOL_TYPE = "Protocol";
+    protected const string REG_USERNAME = "UserName";
 
     protected const string REG_HOSTNAME = "HostName";
     protected const string REG_PORT = "PortNumber";
@@ -52,20 +54,28 @@ namespace libxputty_std20 {
 
     protected override IPuttySession _ReadSession(string name, TPuttyProtocol protocol) {
 
-      string CleanName = name.Replace("%20", " ");
-
       IPuttySession BaseSession;
       IPuttySession RetVal;
 
       using ( RegistryKey PuttySessionKey = _GetRegistryKey(name) ) {
 
+        string CleanedName = name.Replace("%20", " ");
+
         #region --- Read common data --------------------------------------------
-        BaseSession = new TPuttySession(name) {
+        BaseSession = new TPuttySession(CleanedName) {
           RemoteCommand = PuttySessionKey.GetValue(REG_REMOTE_COMMAND, "") as string,
-          GroupLevel1 = CleanName.ItemsBetween("[", "]").FirstOrDefault(),
-          GroupLevel2 = CleanName.ItemsBetween("[", "]").Skip(1).FirstOrDefault(),
-          Section = CleanName.ItemsBetween("{", "}").FirstOrDefault()
+          Section = CleanedName.Between("{", "}")
         };
+
+        BaseSession.SetLocalCredential(TCredential.Create(PuttySessionKey.GetValue(REG_USERNAME, "") as string, ""));
+
+        string Group = CleanedName.Between("[", "]");
+        if ( Group.Contains(GROUP_SEPARATOR) ) {
+          BaseSession.GroupLevel1 = Group.Before(GROUP_SEPARATOR);
+          BaseSession.GroupLevel2 = Group.After(GROUP_SEPARATOR);
+        } else {
+          BaseSession.GroupLevel1 = Group;
+        }
         #endregion --- Read common data -----------------------------------------
 
         #region --- Create RetVal based on protocol type --------------------------------------------
@@ -123,6 +133,10 @@ namespace libxputty_std20 {
       foreach ( (string SessionNameItem, TPuttyProtocol SessionProtocolItem) in SessionsWithProtocol ) {
         yield return _ReadSession(SessionNameItem, SessionProtocolItem);
       }
+    }
+
+    protected override IEnumerable<TPuttySessionGroup> _ReadGroups() {
+      throw new NotImplementedException();
     }
 
     protected override void _SaveSession(IPuttySession session) {

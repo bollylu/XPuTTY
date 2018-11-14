@@ -51,8 +51,7 @@ namespace libxputty_std20 {
         return Username.Before("@");
       }
     }
-
-    private bool _XmlSecure;
+    
     public bool XmlSecure {
       get {
         if ( Inherited ) {
@@ -64,17 +63,16 @@ namespace libxputty_std20 {
         _XmlSecure = value;
       }
     }
+    private bool _XmlSecure;
 
     public SecureString SecurePassword { get; protected set; }
 
-    private string _EncryptionKey = "";
-
     public string EncryptionKey {
       private get {
-        if ( !string.IsNullOrWhiteSpace(_EncryptionKey) ) {
-          return _EncryptionKey;
+        if ( string.IsNullOrWhiteSpace(_EncryptionKey) ) {
+          _EncryptionKey = MakeKey(ParentName);
         }
-        return MakeKey(ParentName);
+        return _EncryptionKey;
       }
       set {
         if ( !string.IsNullOrWhiteSpace(value) ) {
@@ -84,6 +82,7 @@ namespace libxputty_std20 {
         }
       }
     }
+    private string _EncryptionKey = "";
 
     public bool HasValue => !string.IsNullOrWhiteSpace(Username);
     public bool Inherited {
@@ -233,7 +232,7 @@ namespace libxputty_std20 {
     #endregion Constructor(s)
 
     #region Converters
-    public override XElement ToXml() {
+    public XElement ToXml() {
       XElement RetVal = new XElement(XML_THIS_ELEMENT);
       if ( Inherited ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_INHERITED, Inherited);

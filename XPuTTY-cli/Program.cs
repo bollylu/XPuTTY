@@ -37,7 +37,7 @@ namespace XPuTTY_cli {
 
         TPuttySessionSourceRegistry RegSource = new TPuttySessionSourceRegistry();
 
-        IEnumerable<IPuttySession> Sessions = RegSource.ReadSessions();
+        IEnumerable<IPuttySession> Sessions = RegSource.GetSessions();
 
         switch ( Command ) {
           case CMD_LIST:

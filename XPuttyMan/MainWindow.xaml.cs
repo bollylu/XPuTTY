@@ -25,7 +25,7 @@ namespace EasyPutty {
     /// <summary>
     /// public global reference to the main window
     /// </summary>
-    //public static MainWindow Self;
+    public static MainWindow Self;
     
     public static bool DataIsDirty = false;
     #endregion Public static variables

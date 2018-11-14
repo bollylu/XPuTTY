@@ -35,6 +35,7 @@ namespace libxputty_std20 {
         HostName = SessionHAP.HostName;
         Port = SessionHAP.Port;
       }
+      SetLocalCredential(session.Credential);
     }
 
     public override void Dispose() {
@@ -72,17 +73,21 @@ namespace libxputty_std20 {
       TempFileForRemoteCommand = Path.GetTempFileName();
       Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
       File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
-      List<string> Params = new List<string>();
-      Params.Add("-t");
-      Params.Add("-ssh");
-      Params.Add($"-P {Port}");
-      Params.Add($"-m \"{TempFileForRemoteCommand}\"");
-      Params.Add(HostName);
-      if (Credential!=null) {
-        Params.Add($"-l {Credential.UsernameWithoutDomain}");
+
+      List<string> Params = new List<string> {
+        "-t",
+        "-ssh",
+        $"-P {Port}",
+        $"-m \"{TempFileForRemoteCommand}\"",
+        HostName
+      };
+      if ( Credential != null ) {
+        Params.Add($"-l {Credential.Username}");
         Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
       }
-      base.Start(string.Join(" ", Params));
+
+      base.Start(Params);
+
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
@@ -92,17 +97,21 @@ namespace libxputty_std20 {
       Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
       File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
       Log.Write(File.ReadAllText(TempFileForRemoteCommand));
-      List<string> Params = new List<string>();
-      Params.Add("-t");
-      Params.Add("-ssh");
-      Params.Add($"-P {Port}");
-      Params.Add($"-m \"{TempFileForRemoteCommand}\"");
-      Params.Add(HostName);
+
+      List<string> Params = new List<string> {
+        "-t",
+        "-ssh",
+        $"-P {Port}",
+        $"-m \"{TempFileForRemoteCommand}\"",
+        HostName
+      };
       if ( Credential != null ) {
         Params.Add($"-l {Credential.UsernameWithoutDomain}");
         Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
       }
-      base.StartPlink(string.Join(" ", Params));
+
+      base.StartPlink(Params);
+
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }

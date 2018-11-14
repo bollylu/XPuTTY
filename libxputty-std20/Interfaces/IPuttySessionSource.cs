@@ -12,12 +12,13 @@ namespace libxputty_std20.Interfaces {
     string DataSourceName { get; }
 
 
-    IEnumerable<IPuttySession> ReadSessions();
-    IPuttySession ReadSession();
+    IEnumerable<IPuttySession> GetSessions();
+    IPuttySession GetSession(string name);
 
     void SaveSessions(IEnumerable<IPuttySession> sessions);
     void SaveSession(IPuttySession session);
 
     IEnumerable<(string, TPuttyProtocol)> GetSessionsList();
+
   }
 }

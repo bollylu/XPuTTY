@@ -22,7 +22,7 @@ namespace EasyPutty.ViewModels {
 
     public string CleanName => PuttySession == null ? "" : PuttySession.CleanName;
 
-    public string Header => CleanName.Replace($"[{GroupLevel1}]", "").Replace($"[{GroupLevel2}]", "").Replace($"{{{Section}}}", "");
+    public string Header => CleanName.Replace($"[{string.Join("//", GroupLevel1, GroupLevel2).TrimEnd('/')}]", "").Replace($"{{{Section}}}", "");
 
     public string GroupLevel1 {
       get {

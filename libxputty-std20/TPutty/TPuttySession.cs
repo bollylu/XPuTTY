@@ -11,7 +11,7 @@ using BLTools.Json;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySession : IPuttySession, IDisposable, ISupportContactContainer, IToJson {
+  public class TPuttySession : TPuttyBase, IPuttySession, IDisposable, ISupportContactContainer {
 
     #region --- Constants --------------------------------------------
     public const string EXECUTABLE_PUTTY = "putty.exe";
@@ -25,12 +25,6 @@ namespace libxputty_std20 {
     public const string JSON_PROTOCOL = "Protocol";
     #endregion --- Constants --------------------------------------------
 
-    #region --- IName --------------------------------------------
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public string Comment { get; set; }
-    #endregion --- IName --------------------------------------------
-
     #region --- Public properties ------------------------------------------------------------------------------
     public string CleanName => Name.Replace("%20", " ");
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
@@ -38,48 +32,9 @@ namespace libxputty_std20 {
     public string RemoteCommand { get; set; }
     public string CleanedRemoteCommand => (RemoteCommand ?? "").Replace("\"", "\\\"");
 
-    private IEnumerable<string> Groups => CleanName.ItemsBetween("[", "]");
-
-    public string GroupLevel1 {
-      get {
-        if ( string.IsNullOrWhiteSpace(_GroupLevel1) && Groups.Any() ) {
-          _GroupLevel1 = Groups.First();
-        }
-        return _GroupLevel1;
-      }
-      set {
-        _GroupLevel1 = value;
-      }
-    }
-    private string _GroupLevel1;
-
-    public string GroupLevel2 {
-      get {
-        if ( string.IsNullOrWhiteSpace(_GroupLevel2) && Groups.Any() && Groups.Count() > 1 ) {
-          _GroupLevel2 = Groups.Skip(1).First();
-        }
-        return _GroupLevel2;
-      }
-      set {
-        _GroupLevel2 = value;
-      }
-    }
-    private string _GroupLevel2;
-
-    public string Section {
-      get {
-        if ( string.IsNullOrWhiteSpace(_Section) ) {
-          _Section = CleanName.Between("{", "}");
-        }
-        return _Section;
-      }
-      set {
-        _Section = value;
-      }
-    }
-    private string _Section;
-
-    public ICredential Credential { get; set; }
+    public string GroupLevel1 { get; set; }
+    public string GroupLevel2 { get; set; }
+    public string Section { get; set; }
 
     protected string SessionTitle;
 
@@ -112,17 +67,11 @@ namespace libxputty_std20 {
     #endregion --- Event handlers --------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySession() {
+    public TPuttySession() : base() {
       Name = "<no name>";
-      PuttyProcess.OnExit += PuttyProcess_OnExit;
-      PuttyProcess.OnStart += PuttyProcess_OnStart;
-
     }
 
-    public TPuttySession(string name) {
-      Name = name;
-      PuttyProcess.OnExit += PuttyProcess_OnExit;
-      PuttyProcess.OnStart += PuttyProcess_OnStart;
+    public TPuttySession(string name) : base(name) {
     }
 
     public TPuttySession(IPuttySession session) {
@@ -133,11 +82,13 @@ namespace libxputty_std20 {
       GroupLevel2 = session.GroupLevel2;
       Section = session.Section;
       RemoteCommand = session.RemoteCommand;
+    }
+
+    protected override void _Initialize() {
       PuttyProcess.OnExit += PuttyProcess_OnExit;
       PuttyProcess.OnStart += PuttyProcess_OnStart;
     }
-
-    public virtual void Dispose() {
+    public override void Dispose() {
       PuttyProcess.OnExit -= PuttyProcess_OnExit;
       PuttyProcess.OnStart -= PuttyProcess_OnStart;
     }
@@ -161,10 +112,34 @@ namespace libxputty_std20 {
 
     public ISupportContact SupportContact => throw new NotImplementedException();
 
+    public bool HasUnsecuredPassword => throw new NotImplementedException();
+
+    public virtual void Start(IEnumerable<string> arguments) {
+      ProcessStartInfo StartInfo = new ProcessStartInfo {
+        FileName = EXECUTABLE_PUTTY,
+        Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
+        UseShellExecute = false
+      };
+      PuttyProcess.StartInfo = StartInfo;
+
+      PuttyProcess.Start();
+    }
+
     public virtual void Start(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
-        Arguments = arguments == "" ? $"{"\"" + CleanName + "\""}" : arguments,
+        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
+        UseShellExecute = false
+      };
+      PuttyProcess.StartInfo = StartInfo;
+
+      PuttyProcess.Start();
+    }
+
+    public virtual void StartPlink(IEnumerable<string> arguments) {
+      ProcessStartInfo StartInfo = new ProcessStartInfo {
+        FileName = EXECUTABLE_PLINK,
+        Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
@@ -175,7 +150,7 @@ namespace libxputty_std20 {
     public virtual void StartPlink(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
-        Arguments = arguments == "" ? $"{"\"" + CleanName + "\""}" : arguments,
+        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
@@ -190,7 +165,7 @@ namespace libxputty_std20 {
     }
 
     private void PuttyProcess_OnExit(object sender, EventArgs e) {
-      if (!string.IsNullOrWhiteSpace(TempFileForRemoteCommand)) {
+      if ( !string.IsNullOrWhiteSpace(TempFileForRemoteCommand) ) {
         Log.Write($"Cleaning up temp file {TempFileForRemoteCommand}");
         File.Delete(TempFileForRemoteCommand);
       }
@@ -219,5 +194,7 @@ namespace libxputty_std20 {
       }
       yield break;
     }
+
+
   }
 }
