@@ -156,13 +156,13 @@ namespace libxputty_std20 {
         RetVal.Add(session.Credential.ToXml());
       }
 
-      if ( !string.IsNullOrWhiteSpace(session.GroupLevel1) ) {
+      if ( !string.IsNullOrWhiteSpace(session.GroupLevel1) && session.GroupLevel1 != "<empty>" ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_GROUP_LEVEL1, session.GroupLevel1);
       }
-      if ( !string.IsNullOrWhiteSpace(session.GroupLevel2) ) {
+      if ( !string.IsNullOrWhiteSpace(session.GroupLevel2) && session.GroupLevel2!="<empty>") {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_GROUP_LEVEL2, session.GroupLevel2);
       }
-      if ( !string.IsNullOrWhiteSpace(session.Section) ) {
+      if ( !string.IsNullOrWhiteSpace(session.Section) && session.Section != "<empty>" ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SECTION, session.Section);
       }
 
@@ -322,7 +322,6 @@ namespace libxputty_std20 {
       SaveXml(SessionsToSave);
     }
     #endregion --- Save data --------------------------------------------
-
 
     #region Xml IO
     public virtual bool SaveXml(XElement xmlData, string storageLocation = "") {

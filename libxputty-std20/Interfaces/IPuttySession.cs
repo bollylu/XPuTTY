@@ -22,6 +22,8 @@ namespace libxputty_std20.Interfaces {
 
     TPuttyProtocol Protocol { get; set; }
 
+    IParent Parent { get; }
+
     void Start(string arguments = "");
     void StartPlink(string arguments = "");
 

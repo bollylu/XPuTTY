@@ -24,7 +24,7 @@ namespace libxputty_std20 {
     protected const int NO_PROCESS_PID = -1;
     #endregion --- Constants --------------------------------------------
 
-    public bool IsRunning => Process.GetProcesses().Any(x => x.Id == PID);
+    public bool IsRunning => _Process != null && !_Process.HasExited; // Process.GetProcesses().Any(x => x.Id == PID);
     public int PID => _Process == null ? NO_PROCESS_PID : _Process.Id;
     public ProcessStartInfo StartInfo { get; set; }
 
@@ -60,7 +60,9 @@ namespace libxputty_std20 {
       }
 
       _Process.StartInfo = StartInfo;
+      _Process.ErrorDataReceived += _Process_ErrorDataReceived;
       _Process.Start();
+      _Process.BeginErrorReadLine();
 
       if ( OnStart != null ) {
         OnStart(this, EventArgs.Empty);
@@ -71,16 +73,22 @@ namespace libxputty_std20 {
       Log.Write("Start completed.");
     }
 
+    private void _Process_ErrorDataReceived(object sender, DataReceivedEventArgs e) {
+      Log.Write(e.Data);
+    }
+
     protected void _StartWatcher() {
       if ( Watcher == null || Watcher.IsCanceled || Watcher.IsCompleted ) {
         Log.Write("Starting the watcher...");
         Watcher = Task.Run(async () => {
-          while ( PID != NO_PROCESS_PID || WatcherCancellation.IsCancellationRequested ) {
+          while ( !_Process.HasExited || WatcherCancellation.IsCancellationRequested ) {
             try {
-              Process WatchedProcess = Process.GetProcessById(PID);
+              SetProcessTitle(_Process, ProcessTitle);
               await Task.Delay(WATCH_DELAY_MS);
-              SetProcessTitle(ProcessTitle);
+              _Process.Refresh();
+              
             } catch {
+              _Process.OutputDataReceived -= _Process_ErrorDataReceived;
               _Process.Dispose();
               _Process = null;
             }
@@ -131,7 +139,7 @@ namespace libxputty_std20 {
     public static string GetCommandLine(int pid) {
       #region === Validate parameters ===
       if ( pid < 1 ) {
-        return "";
+        return null;
       }
       #endregion === Validate parameters ===
       using ( ManagementObjectSearcher WmiSearch = new ManagementObjectSearcher($"SELECT CommandLine, ProcessId FROM Win32_Process WHERE ProcessId={pid}") ) {
@@ -145,11 +153,13 @@ namespace libxputty_std20 {
       }
     }
 
-    public void SetProcessTitle(string title = "") {
-      if ( _Process != null ) {
-        IntPtr handle = _Process.MainWindowHandle;
-        User32dll.SetWindowText(handle, title);
-      }
+    public void SetProcessTitle(Process process, string title = "") {
+      try {
+        if ( process != null ) {
+          IntPtr handle = process.MainWindowHandle;
+          User32dll.SetWindowText(handle, title);
+        }
+      } catch { }
     }
   }
 }

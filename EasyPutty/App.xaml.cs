@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Windows;
 
 using BLTools;
@@ -43,7 +44,7 @@ namespace EasyPutty {
     }
 
     public static string GetPictureFullname(string name = "default") {
-      return $"/xputtyman;component/Pictures/{name}.png";
+      return $"/{Assembly.GetExecutingAssembly().GetName().Name};component/Pictures/{name}.png";
     }
 
     public static void SetLogDestination() {

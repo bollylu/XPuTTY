@@ -25,6 +25,16 @@ namespace libxputty_std20 {
     public const string JSON_PROTOCOL = "Protocol";
     #endregion --- Constants --------------------------------------------
 
+    public static IPuttySession Empty {
+      get {
+        if ( _Empty == null ) {
+          _Empty = new TPuttySession("<empty>");
+        }
+        return _Empty;
+      }
+    }
+    private static IPuttySession _Empty;
+
     #region --- Public properties ------------------------------------------------------------------------------
     public string CleanName => Name.Replace("%20", " ");
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
@@ -37,7 +47,6 @@ namespace libxputty_std20 {
     public string Section { get; set; }
 
     protected string SessionTitle;
-
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     protected string TempFileForRemoteCommand;
@@ -94,16 +103,6 @@ namespace libxputty_std20 {
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    public static IPuttySession Empty {
-      get {
-        if ( _Empty == null ) {
-          _Empty = new TPuttySession("<empty>");
-        }
-        return _Empty;
-      }
-    }
-    private static IPuttySession _Empty;
-
     #region --- Windows processes --------------------------------------------
     public TRunProcess PuttyProcess { get; protected set; } = new TRunProcess();
     public bool IsRunning => PuttyProcess.IsRunning;
@@ -112,13 +111,12 @@ namespace libxputty_std20 {
 
     public ISupportContact SupportContact => throw new NotImplementedException();
 
-    public bool HasUnsecuredPassword => throw new NotImplementedException();
-
     public virtual void Start(IEnumerable<string> arguments) {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
         Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
-        UseShellExecute = false
+        UseShellExecute = false,
+        RedirectStandardError = true
       };
       PuttyProcess.StartInfo = StartInfo;
 
@@ -129,7 +127,8 @@ namespace libxputty_std20 {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
-        UseShellExecute = false
+        UseShellExecute = false,
+        RedirectStandardError = true
       };
       PuttyProcess.StartInfo = StartInfo;
 
@@ -140,7 +139,9 @@ namespace libxputty_std20 {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
         Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
-        UseShellExecute = false
+        UseShellExecute = false,
+        RedirectStandardOutput = false,
+        RedirectStandardError = true
       };
       PuttyProcess.StartInfo = StartInfo;
 
@@ -151,7 +152,9 @@ namespace libxputty_std20 {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
-        UseShellExecute = false
+        UseShellExecute = false,
+        RedirectStandardOutput = false,
+        RedirectStandardError = true
       };
       PuttyProcess.StartInfo = StartInfo;
 
@@ -183,7 +186,6 @@ namespace libxputty_std20 {
         PuttyProcess.ProcessTitle = title;
       }
     }
-    #endregion --- Windows processes -------------------------------------------- 
 
     public static IEnumerable<Process> GetAllPuttyProcess() {
       foreach ( Process ProcessItem in Process.GetProcessesByName(EXECUTABLE_PUTTY_WITHOUT_EXTENSION) ) {
@@ -194,6 +196,9 @@ namespace libxputty_std20 {
       }
       yield break;
     }
+    #endregion --- Windows processes -------------------------------------------- 
+
+
 
 
   }

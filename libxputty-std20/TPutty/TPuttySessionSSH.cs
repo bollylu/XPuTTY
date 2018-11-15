@@ -35,6 +35,7 @@ namespace libxputty_std20 {
         HostName = SessionHAP.HostName;
         Port = SessionHAP.Port;
       }
+      Parent = session.Parent;
       SetLocalCredential(session.Credential);
     }
 
@@ -83,7 +84,9 @@ namespace libxputty_std20 {
       };
       if ( Credential != null ) {
         Params.Add($"-l {Credential.Username}");
-        Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
+        if ( !string.IsNullOrEmpty(Credential.SecurePassword.ConvertToUnsecureString()) ) {
+          Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
+        }
       }
 
       base.Start(Params);
@@ -106,8 +109,10 @@ namespace libxputty_std20 {
         HostName
       };
       if ( Credential != null ) {
-        Params.Add($"-l {Credential.UsernameWithoutDomain}");
-        Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
+        Params.Add($"-l {Credential.Username}");
+        if ( !string.IsNullOrEmpty(Credential.SecurePassword.ConvertToUnsecureString()) ) {
+          Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
+        }
       }
 
       base.StartPlink(Params);

@@ -16,10 +16,10 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>I:\AppsDeployment\xPuttyMan\</PublishUrl>
+    <PublishUrl>I:\AppsDeployment\EasyPutty\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateEnabled>false</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
@@ -29,9 +29,8 @@
     <UpdateUrl>http://localhost/XPuttyMan/</UpdateUrl>
     <ProductName>EasyPutty</ProductName>
     <PublisherName>Luc Bolly</PublisherName>
-    <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>9</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationRevision>4</ApplicationRevision>
+    <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -76,7 +75,7 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>xputtyman.ico</ApplicationIcon>
+    <ApplicationIcon>easyputty.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BLTools.45, Version=3.45.1.39146, Culture=neutral, PublicKeyToken=42a294c809db3b02, processorArchitecture=MSIL">
@@ -358,10 +357,10 @@
     <Resource Include="Pictures\putty_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="xputtyman.ico" />
+    <Resource Include="easyputty.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Pictures\xputtyman.ico" />
+    <Resource Include="Pictures\easyputty.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Pictures\xputtyman.png" />

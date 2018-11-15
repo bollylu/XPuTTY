@@ -56,7 +56,7 @@
                       Margin="5,0,0,0"
                       VerticalAlignment="Center" HorizontalAlignment="Center">
             <StackPanel.Resources>
-              <Style TargetType="Image">
+              <Style TargetType="Button">
                 <Setter Property="HorizontalAlignment"
                         Value="Center" />
                 <Setter Property="VerticalAlignment"
@@ -65,7 +65,7 @@
                   <Trigger Property="IsMouseOver"
                            Value="True">
                     <Setter Property="ToolTip"
-                            Value="{Binding Path=PuttyCommandLine}" />
+                            Value="{Binding Path=PuttyCommandLine, Mode=OneWay}" />
                   </Trigger>
                 </Style.Triggers>
               </Style>

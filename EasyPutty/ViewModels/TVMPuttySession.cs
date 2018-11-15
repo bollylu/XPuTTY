@@ -158,12 +158,14 @@ namespace EasyPutty.ViewModels {
       Log.Write($"Session {CleanName} exited.");
       NotifyPropertyChanged(nameof(IsRunning));
       NotifyPropertyChanged(nameof(RunningIcon));
+      NotifyPropertyChanged(nameof(PuttyCommandLine));
     }
 
     private void _PuttySession_OnStart(object sender, EventArgs e) {
-      Log.Write($"Starting session {CleanName}");
+      Log.Write($"=> Started session {CleanName}");
       NotifyPropertyChanged(nameof(IsRunning));
       NotifyPropertyChanged(nameof(RunningIcon));
+      NotifyPropertyChanged(nameof(PuttyCommandLine));
     }
 
     #region --- For design time --------------------------------------------

@@ -51,7 +51,7 @@ namespace libxputty_std20 {
         return Username.Before("@");
       }
     }
-    
+
     public bool XmlSecure {
       get {
         if ( Inherited ) {
@@ -68,18 +68,14 @@ namespace libxputty_std20 {
     public SecureString SecurePassword { get; protected set; }
 
     public string EncryptionKey {
-      private get {
+      get {
         if ( string.IsNullOrWhiteSpace(_EncryptionKey) ) {
           _EncryptionKey = MakeKey(ParentName);
         }
         return _EncryptionKey;
       }
       set {
-        if ( !string.IsNullOrWhiteSpace(value) ) {
-          _EncryptionKey = MakeKey(value);
-        } else {
-          _EncryptionKey = MakeKey(ParentName);
-        }
+        _EncryptionKey = value;
       }
     }
     private string _EncryptionKey = "";
@@ -137,13 +133,11 @@ namespace libxputty_std20 {
       Username = username;
       SecurePassword = password.ConvertToSecureString();
       XmlSecure = xmlSecure;
-      EncryptionKey = "";
     }
     public TCredential(string username, SecureString password, bool xmlSecure = true) : base() {
       Username = username;
       SecurePassword = password;
       XmlSecure = xmlSecure;
-      EncryptionKey = "";
     }
     public TCredential(ICredential credential) : base() {
       if ( credential == null ) {
@@ -152,7 +146,8 @@ namespace libxputty_std20 {
       Username = credential.Username ?? "";
       SecurePassword = credential.SecurePassword;
       XmlSecure = credential.XmlSecure;
-      EncryptionKey = "";
+      EncryptionKey = credential.EncryptionKey;
+      Parent = credential.Parent;
     }
     public TCredential(ICredential credential, IParent parent) : base() {
       if ( credential == null ) {
@@ -161,7 +156,7 @@ namespace libxputty_std20 {
       Username = credential.Username ?? "";
       SecurePassword = credential.SecurePassword;
       XmlSecure = credential.XmlSecure;
-      EncryptionKey = "";
+      EncryptionKey = credential.EncryptionKey;
       Parent = parent;
     }
     public TCredential(XElement credential, IParent parent) : base() {
@@ -176,10 +171,8 @@ namespace libxputty_std20 {
       Username = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_USERNAME, "");
       XmlSecure = credential.SafeReadAttribute<bool>(XML_ATTRIBUTE_XMLSECURE, false);
 
-      if ( parent == null || !(parent is IName) ) {
-        EncryptionKey = "";
-      } else {
-        EncryptionKey = MakeKey(((IName)parent).Name);
+      if ( parent is IName ParentWithName && ParentWithName != null ) {
+        EncryptionKey = MakeKey(ParentWithName.Name);
       }
 
       string PasswordFromXElement = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_PASSWORD, "");
@@ -203,9 +196,7 @@ namespace libxputty_std20 {
       }
       #endregion Validate parameters
       Username = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_USERNAME, "");
-      if ( encryptionKey != "" ) {
-        EncryptionKey = encryptionKey;
-      }
+      EncryptionKey = MakeKey(encryptionKey);
       XmlSecure = credential.SafeReadAttribute<bool>(XML_ATTRIBUTE_XMLSECURE, false);
 
       string PasswordFromXElement = credential.SafeReadAttribute<string>(XML_ATTRIBUTE_PASSWORD, "");
@@ -288,8 +279,8 @@ namespace libxputty_std20 {
       XmlSecure = value;
     }
 
-    private string MakeKey(string source) {
-      if ( source == null ) {
+    private string MakeKey(string source = "") {
+      if ( string.IsNullOrEmpty(source) ) {
         return "";
       }
       return new string(source.Reverse().ToArray());

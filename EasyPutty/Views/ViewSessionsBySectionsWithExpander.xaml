@@ -13,7 +13,6 @@
         d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySessionsGroupedBy.DesignSingleVMPuttySessionsGroupedBy}}">
 
     <ListView ItemsSource="{Binding Path=Items}"
-              Margin="10"
               SnapsToDevicePixels="True"
               SelectionMode="Extended"
               ScrollViewer.HorizontalScrollBarVisibility="Disabled"

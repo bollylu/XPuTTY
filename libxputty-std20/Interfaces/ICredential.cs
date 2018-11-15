@@ -12,10 +12,11 @@ namespace libxputty_std20.Interfaces {
     string Domain { get; }
     string UsernameWithoutDomain { get; }
     bool XmlSecure { get;}
-    string EncryptionKey { set; }
+    string EncryptionKey { get; }
     bool HasValue { get; }
     bool Inherited { get; }
     SecureString SecurePassword { get; }
+    IParent Parent { get; }
 
     void SetSecure(bool value);
     void Dispose();
