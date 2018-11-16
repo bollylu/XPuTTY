@@ -168,9 +168,13 @@ namespace libxputty_std20 {
     }
 
     private void PuttyProcess_OnExit(object sender, EventArgs e) {
-      if ( !string.IsNullOrWhiteSpace(TempFileForRemoteCommand) ) {
+      if ( !string.IsNullOrWhiteSpace(TempFileForRemoteCommand) && File.Exists(TempFileForRemoteCommand) ) {
         Log.Write($"Cleaning up temp file {TempFileForRemoteCommand}");
-        File.Delete(TempFileForRemoteCommand);
+        try {
+          File.Delete(TempFileForRemoteCommand);
+        } catch ( Exception ex ) {
+          Log.Write($"Unable to cleanup temp file {TempFileForRemoteCommand} : {ex.Message}");
+        }
       }
       if ( OnExit != null ) {
         OnExit(this, EventArgs.Empty);
@@ -195,6 +199,31 @@ namespace libxputty_std20 {
         yield return ProcessItem;
       }
       yield break;
+    }
+
+    public virtual IEnumerable<string> BuildCommandLineWithoutRemoteCommand() {
+      if ( Credential == null ) {
+        yield break;
+      }
+
+      yield return $"-l {Credential.Username}";
+      if ( !string.IsNullOrEmpty(Credential.SecurePassword.ConvertToUnsecureString()) ) {
+        yield return $"-pw {Credential.SecurePassword.ConvertToUnsecureString()}";
+      }
+    }
+
+    public virtual IEnumerable<string> BuildCommandLine() {
+
+      foreach ( string ArgItem in BuildCommandLineWithoutRemoteCommand() ) {
+        yield return ArgItem;
+      }
+      if ( !string.IsNullOrWhiteSpace(RemoteCommand) ) {
+        TempFileForRemoteCommand = Path.GetTempFileName();
+        Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
+        File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
+        yield return $"-m \"{TempFileForRemoteCommand}\"";
+      }
+
     }
     #endregion --- Windows processes -------------------------------------------- 
 

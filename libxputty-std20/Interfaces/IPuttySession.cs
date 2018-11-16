@@ -29,6 +29,9 @@ namespace libxputty_std20.Interfaces {
 
     void Stop();
 
+    IEnumerable<string> BuildCommandLine();
+    IEnumerable<string> BuildCommandLineWithoutRemoteCommand();
+
     event EventHandler OnStart;
     event EventHandler OnExit;
 

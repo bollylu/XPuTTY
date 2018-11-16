@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -71,43 +72,34 @@ namespace libxputty_std20 {
     #endregion --- Converters -------------------------------------------------------------------------------------
 
     public async override void Start(string arguments = "") {
-      TempFileForRemoteCommand = Path.GetTempFileName();
-      Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
-      File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
 
-      List<string> Params = new List<string> {
-        "-t",
-        "-ssh",
-        $"-P {Port}",
-        $"-m \"{TempFileForRemoteCommand}\"",
-        HostName
-      };
-      if ( Credential != null ) {
-        Params.Add($"-l {Credential.Username}");
-        if ( !string.IsNullOrEmpty(Credential.SecurePassword.ConvertToUnsecureString()) ) {
-          Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
-        }
+      if ( arguments == "" ) {
+        IEnumerable<string> Parameters = BuildCommandLine();
+        base.Start(Parameters);
+      } else {
+        base.Start(arguments);
       }
-
-      base.Start(Params);
 
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
 
     public async override void StartPlink(string arguments = "") {
-      TempFileForRemoteCommand = Path.GetTempFileName();
-      Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
-      File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
-      Log.Write(File.ReadAllText(TempFileForRemoteCommand));
 
       List<string> Params = new List<string> {
         "-t",
         "-ssh",
         $"-P {Port}",
-        $"-m \"{TempFileForRemoteCommand}\"",
         HostName
       };
+
+      if ( !string.IsNullOrWhiteSpace(RemoteCommand) ) {
+        TempFileForRemoteCommand = Path.GetTempFileName();
+        Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
+        File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
+        Params.Add($"-m \"{TempFileForRemoteCommand}\"");
+      }
+
       if ( Credential != null ) {
         Params.Add($"-l {Credential.Username}");
         if ( !string.IsNullOrEmpty(Credential.SecurePassword.ConvertToUnsecureString()) ) {
@@ -120,5 +112,18 @@ namespace libxputty_std20 {
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
+
+    public override IEnumerable<string> BuildCommandLineWithoutRemoteCommand() {
+      List<string> Params = new List<string> {
+        "-t",
+        "-ssh",
+        $"-P {Port}",
+        HostName
+        };
+
+      return Params.Concat(base.BuildCommandLineWithoutRemoteCommand());
+    }
+
+
   }
 }

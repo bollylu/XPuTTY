@@ -411,8 +411,8 @@ namespace EasyPutty.ViewModels {
                                                      .OfType<IHostAndPort>()
                                                      .Where(x => !string.IsNullOrWhiteSpace(x.HostName))
                                                      ) {
-
-        Process RunningSession = CurrentlyRunningSessions.FirstOrDefault(x => TRunProcess.GetCommandLine(x.Id) == SessionItem.CommandLine);
+        string SessionCommandLineWithoutRemoteCommand = string.Join(" ", SessionItem.BuildCommandLineWithoutRemoteCommand());
+        Process RunningSession = CurrentlyRunningSessions.FirstOrDefault(x => TRunProcess.GetCommandLine(x.Id).Contains(SessionCommandLineWithoutRemoteCommand));
 
         TVMPuttySession NewPuttySessionVM;
         NewPuttySessionVM = new TVMPuttySession(SessionItem);
