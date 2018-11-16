@@ -210,5 +210,7 @@ namespace EasyPutty.ViewModels {
     public void AssignProcess(Process process) {
       PuttySession.PuttyProcess.AssignProcess(process);
     }
+
+    public void Clear() { }
   }
 }

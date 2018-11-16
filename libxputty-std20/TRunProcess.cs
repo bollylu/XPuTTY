@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Management;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using BLTools;
+
 using libxputty_std20.DllImports;
+
 using static System.Management.ManagementObjectCollection;
 
 namespace libxputty_std20 {
@@ -24,9 +24,10 @@ namespace libxputty_std20 {
     protected const int NO_PROCESS_PID = -1;
     #endregion --- Constants --------------------------------------------
 
-    public bool IsRunning => _Process != null && !_Process.HasExited; // Process.GetProcesses().Any(x => x.Id == PID);
+    public bool IsRunning => _Process != null && !_Process.HasExited;
     public int PID => _Process == null ? NO_PROCESS_PID : _Process.Id;
     public ProcessStartInfo StartInfo { get; set; }
+    public bool IsRedirected { get; private set; }
 
     protected Process _Process;
 
@@ -49,20 +50,32 @@ namespace libxputty_std20 {
     public event EventHandler OnExit;
     #endregion --- Event handlers --------------------------------------------
 
-    public void Start() {
+    public void Start(bool redirect = false) {
       if ( IsRunning ) {
         return;
       }
+
+      IsRedirected = redirect;
 
       _Process = new Process();
       if ( IsDebug ) {
         Log.Write($"Process = {StartInfo.FileName}, Args = {StartInfo.Arguments}");
       }
 
+      if ( IsRedirected ) {
+        StartInfo.RedirectStandardError = true;
+        StartInfo.RedirectStandardOutput = true;
+      }
       _Process.StartInfo = StartInfo;
-      _Process.ErrorDataReceived += _Process_ErrorDataReceived;
+      if ( IsRedirected ) {
+        _Process.ErrorDataReceived += _Process_ErrorDataReceived;
+        _Process.OutputDataReceived += _Process_OutputDataReceived;
+      }
       _Process.Start();
-      _Process.BeginErrorReadLine();
+      if ( IsRedirected ) {
+        _Process.BeginErrorReadLine();
+        _Process.BeginOutputReadLine();
+      }
 
       if ( OnStart != null ) {
         OnStart(this, EventArgs.Empty);
@@ -73,8 +86,14 @@ namespace libxputty_std20 {
       Log.Write("Start completed.");
     }
 
+    private void _Process_OutputDataReceived(object sender, DataReceivedEventArgs e) {
+      Log.Write(e.Data, ErrorLevel.Info);
+    }
+
     private void _Process_ErrorDataReceived(object sender, DataReceivedEventArgs e) {
-      Log.Write(e.Data);
+      if ( !string.IsNullOrEmpty(e.Data) ) {
+        Log.Write(e.Data, ErrorLevel.Error);
+      }
     }
 
     protected void _StartWatcher() {
@@ -86,9 +105,11 @@ namespace libxputty_std20 {
               SetProcessTitle(_Process, ProcessTitle);
               await Task.Delay(WATCH_DELAY_MS);
               _Process.Refresh();
-              
             } catch {
-              _Process.OutputDataReceived -= _Process_ErrorDataReceived;
+              if ( IsRedirected ) {
+                _Process.ErrorDataReceived -= _Process_ErrorDataReceived;
+                _Process.OutputDataReceived -= _Process_OutputDataReceived;
+              }
               _Process.Dispose();
               _Process = null;
             }

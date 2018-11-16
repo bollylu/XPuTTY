@@ -64,6 +64,11 @@ namespace EasyPutty.ViewModels {
     }
 
     public override void Dispose() {
+      lock ( _Lock ) {
+        foreach ( TVMPuttyGroup PuttyGroupItem in Items ) {
+          PuttyGroupItem.Dispose(true);
+        }
+      }
       Clear();
       Dispose(true);
     }
@@ -102,8 +107,12 @@ namespace EasyPutty.ViewModels {
     }
 
     public void Clear() {
+      foreach(IHeader PuttyGroupItem in Items) {
+        PuttyGroupItem.Clear();
+      }
       Items.Clear();
       NotifyPropertyChanged(nameof(Count));
+      NotifyPropertyChanged(nameof(Items));
     }
 
     protected void _SelectItem() {

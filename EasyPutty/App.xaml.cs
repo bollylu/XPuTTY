@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,13 +20,16 @@ namespace EasyPutty {
     public const string PARAM_LOGBASE = "logbase";
     public const string PARAM_CONFIG = "config";
 
-    public const string DEFAULT_PROD_LOGBASE = @"c:\Logs\EasyPutty";
-    public const string DEFAULT_DEV_LOGBASE = @"c:\Logs\EasyPutty";
+    public static readonly string AppName = Assembly.GetExecutingAssembly().GetName().Name;
+
+    public static readonly string DEFAULT_PROD_LOGBASE = $@"c:\Logs\{AppName}";
+    public static readonly string DEFAULT_DEV_LOGBASE = $@"c:\Logs\{AppName}";
     public const string DEFAULT_CONFIG = "config.xml";
 
     public static SplitArgs Args;
     public static NetworkCredential CurrentUserCredential;
-    public static string AppUsername => string.IsNullOrWhiteSpace(Environment.UserDomainName) ? Environment.UserName : $@"{Environment.UserDomainName}\{Environment.UserName}";
+    
+    public static readonly string AppUsername = string.IsNullOrWhiteSpace(Environment.UserDomainName) ? Environment.UserName : $@"{Environment.UserDomainName}\{Environment.UserName}";
 
     public static bool AppIsStartingUp = true;
 
@@ -43,9 +47,7 @@ namespace EasyPutty {
       CurrentUserCredential = CredentialCache.DefaultNetworkCredentials;
     }
 
-    public static string GetPictureFullname(string name = "default") {
-      return $"/{Assembly.GetExecutingAssembly().GetName().Name};component/Pictures/{name}.png";
-    }
+    public static string GetPictureFullname(string name = "default") => $"/{AppName};component/Pictures/{name}.png";
 
     public static void SetLogDestination() {
       string LogBase;
@@ -60,15 +62,21 @@ namespace EasyPutty {
       Trace.Listeners.Clear();
 
       if ( LogFile != "" ) {
-        Trace.Listeners.Add(new TimeStampTraceListener(Path.Combine(LogBase, LogFile)));
+        Trace.Listeners.Add(new TimeStampTraceListener(Path.Combine(LogBase, LogFile), "default"));
       } else {
         string LogFilename = Path.Combine(LogBase, $"{Path.GetFileNameWithoutExtension(TraceFactory.GetTraceDefaultLogFilename())}.log");
-        Trace.Listeners.Add(new TimeStampTraceListener(LogFilename));
+        Trace.Listeners.Add(new TimeStampTraceListener(LogFilename,"default"));
       }
       //foreach ( TimeStampTraceListener TraceListenerItem in Trace.Listeners.OfType<TimeStampTraceListener>() ) {
       //  TraceListenerItem.DisplayUserId = true;
       //  TraceListenerItem.DisplayComputerName = true;
       //}
+    }
+
+    public static TimeStampTraceListener DefaultLog {
+      get {
+        return Trace.Listeners["default"] as TimeStampTraceListener;
+      }
     }
   }
 }

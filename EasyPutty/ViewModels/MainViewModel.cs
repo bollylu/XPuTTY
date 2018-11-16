@@ -101,10 +101,14 @@ namespace EasyPutty.ViewModels {
       set {
         _SessionSource = value;
         Settings CurrentSettings = new Settings();
-        if ( CurrentSettings.LastDataSource != _SessionSource.DataSourceName ) {
-          CurrentSettings.LastDataSource = $"{_SessionSource.DataSourceName}";
-          CurrentSettings.Save();
+        if ( _SessionSource != null ) {
+          if ( CurrentSettings.LastDataSource != _SessionSource.DataSourceName ) {
+            CurrentSettings.LastDataSource = $"{_SessionSource.DataSourceName}";
+          }
+        } else {
+          CurrentSettings.LastDataSource = "";
         }
+        CurrentSettings.Save();
         NotifyPropertyChanged(nameof(SessionSourceName));
         NotifyPropertyChanged(nameof(ApplicationTitle));
       }
@@ -165,6 +169,7 @@ namespace EasyPutty.ViewModels {
     private void _FileNew() {
       MainWindow.DataIsDirty = false;
       PuttyGroup.Clear();
+      SessionSource = null;
     }
 
     #region --- File Open --------------------------------------------

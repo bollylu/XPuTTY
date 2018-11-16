@@ -8,5 +8,6 @@ using System.Threading.Tasks;
 namespace EasyPutty.Interfaces {
   public interface IHeader {
     string Header { get; }
+    void Clear();
   }
 }

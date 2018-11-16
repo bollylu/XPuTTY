@@ -115,33 +115,29 @@ namespace libxputty_std20 {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
         Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
-        UseShellExecute = false,
-        RedirectStandardError = true
+        UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
 
-      PuttyProcess.Start();
+      PuttyProcess.Start(true);
     }
 
     public virtual void Start(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
-        UseShellExecute = false,
-        RedirectStandardError = true
+        UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
 
-      PuttyProcess.Start();
+      PuttyProcess.Start(true);
     }
 
     public virtual void StartPlink(IEnumerable<string> arguments) {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
         Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
-        UseShellExecute = false,
-        RedirectStandardOutput = false,
-        RedirectStandardError = true
+        UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
 
@@ -152,9 +148,7 @@ namespace libxputty_std20 {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
-        UseShellExecute = false,
-        RedirectStandardOutput = false,
-        RedirectStandardError = true
+        UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
 
