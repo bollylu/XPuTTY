@@ -51,7 +51,7 @@ namespace EasyPutty.ViewModels {
     }
     private string _ApplicationTitle;
 
-    private readonly string _ApplicationTitleBase = "EasyPutty v0.1";
+    private readonly string _ApplicationTitleBase = $"{App.AppName} v0.1";
 
     public TVMPuttyGroup SelectedItem {
       get {

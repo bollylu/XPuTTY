@@ -242,6 +242,9 @@
     <Compile Include="Views\PopupDisplaySupportContact.xaml.cs">
       <DependentUpon>PopupDisplaySupportContact.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ViewEditSession.xaml.cs">
+      <DependentUpon>ViewEditSession.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ViewGroupLevel1ByTabs.xaml.cs">
       <DependentUpon>ViewGroupLevel1ByTabs.xaml</DependentUpon>
     </Compile>
@@ -282,6 +285,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\SmallVisuals.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ViewEditSession.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

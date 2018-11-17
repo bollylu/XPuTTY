@@ -88,7 +88,7 @@ namespace libxputty_std20 {
             RetVal = new TPuttySessionSerial(BaseSession) {
               SerialLine = PuttySessionKey.GetValue(REG_SERIAL_LINE, "") as string,
               SerialSpeed = (int)PuttySessionKey.GetValue(REG_SERIAL_SPEED, 0),
-              SerialParity = Convert.ToByte(PuttySessionKey.GetValue(REG_SERIAL_PARITY, 0)),
+              SerialParity = PuttySessionKey.GetValue(REG_SERIAL_PARITY, "") as string,
               SerialStopBits = Convert.ToByte(PuttySessionKey.GetValue(REG_SERIAL_STOP_BITS, 0)),
               SerialDataBits = Convert.ToByte(PuttySessionKey.GetValue(REG_SERIAL_DATA_BITS, 0)),
               SerialFlowControl = PuttySessionKey.GetValue(REG_SERIAL_FLOW_CONTROL, "") as string

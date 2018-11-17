@@ -17,7 +17,7 @@ namespace libxputty_std20 {
     public int SerialSpeed { get; set; }
     public byte SerialDataBits { get; set; }
     public byte SerialStopBits { get; set; }
-    public byte SerialParity { get; set; }
+    public string SerialParity { get; set; }
     public string SerialFlowControl { get; set; }
 
     #endregion --- Public properties ---------------------------------------------------------------------------

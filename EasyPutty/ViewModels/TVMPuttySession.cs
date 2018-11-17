@@ -13,6 +13,9 @@ namespace EasyPutty.ViewModels {
 
     public IPuttySession PuttySession => _Data as IPuttySession;
 
+    public TPuttySessionSerial PuttySessionSerial => PuttySession as TPuttySessionSerial;
+    public IHostAndPort PuttySessionHAP => PuttySession as IHostAndPort;
+
     #region RelayCommand
     public TRelayCommand CommandEditSessionRemoteCommand { get; private set; }
     public TRelayCommand CommandEditSessionRemoteCommandOk { get; private set; }
@@ -66,33 +69,151 @@ namespace EasyPutty.ViewModels {
     }
     private string _Section;
 
-    public string HostName {
+    public string RemoteCommand {
       get {
-        if ( PuttySession is TPuttySessionSSH PuttySessionSSH ) {
-          return $"{PuttySessionSSH.HostName ?? ""}:{PuttySessionSSH.Port}";
+        if ( PuttySession != null ) {
+          return PuttySession.RemoteCommand;
         }
         return "";
       }
-    }
-    public string RemoteCommand {
-      get {
-        return PuttySession is TPuttySessionSSH PuttySessionSSH ? PuttySessionSSH.RemoteCommand : "";
-      }
       set {
-        if ( PuttySession is TPuttySessionSSH PuttySessionSSH ) {
-          PuttySessionSSH.RemoteCommand = value;
-          MainWindow.DataIsDirty = true;
+        if ( PuttySession != null ) {
+          PuttySession.RemoteCommand = value;
+          NotifyPropertyChanged(nameof(RemoteCommand));
         }
       }
     }
     public bool CanEditRemoteCommand => RemoteCommand != "";
-    public bool IsRemoteCommandInProgress { get; private set; }
+    public bool IsEditRemoteCommandInProgress { get; private set; }
     public bool IsRunning => PuttySession.IsRunning;
     public string PuttyCommandLine => PuttySession.CommandLine;
     public int PID => PuttySession.PID;
     public string RunningIcon => IsRunning ? App.GetPictureFullname("putty_icon") : App.GetPictureFullname("connect_icon");
 
     public bool IsSelected { get; set; }
+
+    #region --- Session IHostAndPort --------------------------------------------
+    public bool SessionIsHAP => PuttySessionHAP != null;
+    public string DisplayHostnameAndPort => $"{HostName}:{Port}";
+    public string HostName {
+      get {
+        if ( SessionIsHAP ) {
+          return PuttySessionHAP.HostName ?? "";
+        }
+        return "";
+      }
+      set {
+        if ( SessionIsHAP ) {
+          PuttySessionHAP.HostName = value;
+          NotifyPropertyChanged(nameof(HostName));
+          NotifyPropertyChanged(nameof(DisplayHostnameAndPort));
+        }
+      }
+    }
+    public int Port {
+      get {
+        if ( SessionIsHAP ) {
+          return PuttySessionHAP.Port;
+        }
+        return 0;
+      }
+      set {
+        if ( SessionIsHAP ) {
+          PuttySessionHAP.Port = value;
+          NotifyPropertyChanged(nameof(Port));
+          NotifyPropertyChanged(nameof(DisplayHostnameAndPort));
+        }
+      }
+    }
+    #endregion --- Session IHostAndPort --------------------------------------------
+
+    #region --- Serial session --------------------------------------------
+    public bool SessionIsSerial => PuttySessionSerial != null;
+    public string SerialLine {
+      get {
+        if ( SessionIsSerial ) {
+          return PuttySessionSerial.SerialLine ?? "";
+        }
+        return "";
+      }
+      set {
+        if ( SessionIsSerial ) {
+          PuttySessionSerial.SerialLine = value;
+          NotifyPropertyChanged(nameof(SerialLine));
+        }
+      }
+    }
+    public int SerialSpeed {
+      get {
+        if ( SessionIsSerial ) {
+          return PuttySessionSerial.SerialSpeed;
+        }
+        return 0;
+      }
+      set {
+        if ( SessionIsSerial ) {
+          PuttySessionSerial.SerialSpeed = value;
+          NotifyPropertyChanged(nameof(SerialSpeed));
+        }
+      }
+    }
+    public byte SerialDataBits {
+      get {
+        if ( SessionIsSerial ) {
+          return PuttySessionSerial.SerialDataBits;
+        }
+        return 0;
+      }
+      set {
+        if ( SessionIsSerial ) {
+          PuttySessionSerial.SerialDataBits = value;
+          NotifyPropertyChanged(nameof(SerialDataBits));
+        }
+      }
+    }
+    public byte SerialStopbits {
+      get {
+        if ( SessionIsSerial ) {
+          return PuttySessionSerial.SerialStopBits;
+        }
+        return 0;
+      }
+      set {
+        if ( SessionIsSerial ) {
+          PuttySessionSerial.SerialStopBits = value;
+          NotifyPropertyChanged(nameof(SerialStopbits));
+        }
+      }
+    }
+    public string SerialParity {
+      get {
+        if ( SessionIsSerial ) {
+          return PuttySessionSerial.SerialParity;
+        }
+        return "";
+      }
+      set {
+        if ( SessionIsSerial ) {
+          PuttySessionSerial.SerialParity = value;
+          NotifyPropertyChanged(nameof(SerialParity));
+        }
+      }
+    }
+    public string SerialFlowControl {
+      get {
+        if ( SessionIsSerial ) {
+          return PuttySessionSerial.SerialFlowControl ?? "";
+        }
+        return "";
+      }
+      set {
+        if ( SessionIsSerial ) {
+          PuttySessionSerial.SerialFlowControl = value;
+          NotifyPropertyChanged(nameof(SerialFlowControl));
+        }
+      }
+    }
+    #endregion --- Serial session --------------------------------------------
 
     private Views.WindowEditRemoteCommand EditRemoteCommandWindow;
 
@@ -133,9 +254,9 @@ namespace EasyPutty.ViewModels {
     private string OldRemoteCommand;
 
     private void _EditRemoteCommand() {
-      if ( !IsRemoteCommandInProgress ) {
+      if ( !IsEditRemoteCommandInProgress ) {
         EditRemoteCommandWindow = new Views.WindowEditRemoteCommand();
-        IsRemoteCommandInProgress = true;
+        IsEditRemoteCommandInProgress = true;
         OldRemoteCommand = RemoteCommand;
         EditRemoteCommandWindow.DataContext = this;
         EditRemoteCommandWindow.Show();
@@ -146,12 +267,12 @@ namespace EasyPutty.ViewModels {
       EditRemoteCommandWindow.Close();
       //PuttySession.SaveToRegistry();
       NotifyPropertyChanged(nameof(RemoteCommand));
-      IsRemoteCommandInProgress = false;
+      IsEditRemoteCommandInProgress = false;
     }
     private void _EditRemoteCommandCancel() {
       RemoteCommand = OldRemoteCommand;
       EditRemoteCommandWindow.Close();
-      IsRemoteCommandInProgress = false;
+      IsEditRemoteCommandInProgress = false;
     }
 
     private void _PuttySession_OnExit(object sender, EventArgs e) {
@@ -205,6 +326,28 @@ namespace EasyPutty.ViewModels {
     }
 
     private static TVMPuttySession _DesignVMPuttySession2;
+
+    public static TVMPuttySession DesignVMPuttySessionSerial {
+      get {
+        if ( _DesignVMPuttySessionSerial == null ) {
+          TPuttySessionSerial FakeSession = new TPuttySessionSerial("Serial session") {
+            GroupLevel1 = "Sharenet",
+            GroupLevel2 = "CMD",
+            Section = "DMZ",
+            SerialLine="COM4",
+            SerialSpeed=9600,
+            SerialDataBits=8,
+            SerialStopBits=1,
+            SerialParity="None",
+            RemoteCommand = "tail -n 200 -f /var/log/syslog"
+          };
+          _DesignVMPuttySessionSerial = new TVMPuttySession(FakeSession);
+        }
+        return _DesignVMPuttySessionSerial;
+      }
+    }
+
+    private static TVMPuttySession _DesignVMPuttySessionSerial;
     #endregion --- For design time --------------------------------------------
 
     public void AssignProcess(Process process) {
