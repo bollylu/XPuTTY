@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using BLTools;
 using libxputty_std20.DllImports;
 
 using static System.Management.ManagementObjectCollection;
+using static libxputty_std20.DllImports.Kernel32dll;
 
 namespace libxputty_std20 {
   public class TRunProcess {
@@ -76,6 +78,9 @@ namespace libxputty_std20 {
         _Process.BeginErrorReadLine();
         _Process.BeginOutputReadLine();
       }
+
+      //SetConsoleColor(_Process, Color.Black, Color.White);
+      
 
       if ( OnStart != null ) {
         OnStart(this, EventArgs.Empty);
@@ -182,5 +187,14 @@ namespace libxputty_std20 {
         }
       } catch { }
     }
+
+    //public void SetConsoleColor(Process process, Color foregroundColor, Color backgroundColor) {
+    //  try {
+    //    if ( process != null ) {
+    //      IntPtr handle = process.MainWindowHandle;
+    //      SetConsoleTextAttribute(handle, (ushort)((new COLORREF(foregroundColor)).ColorDWORD| (new COLORREF(backgroundColor)).ColorDWORD));
+    //    }
+    //  } catch { }
+    //}
   }
 }

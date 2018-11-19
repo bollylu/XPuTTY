@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BLTools;
-using BLTools.ConsoleExtension;
+using static BLTools.ConsoleExtension.ConsoleExtension;
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
@@ -49,7 +49,7 @@ namespace XPuTTY_cli {
             if ( Source.ToLower().StartsWith(CMD_START_MENU) ) {
               IEnumerable<IPuttySession> Menu = (new List<IPuttySession>() { new TPuttySessionSSH() { Name = "Cancel" } }).Concat(Sessions.Where(x => x.Protocol.IsSSH));
               Console.Clear();
-              int Choice = ConsoleExtension.InputList(Menu.Select(x => x.CleanName), "Sessions list", "Please select session to start : ", "Please select only numbers available in the list");
+              int Choice = InputList(Menu.Select(x => x.CleanName), "Sessions list", "Please select session to start : ", "Please select only numbers available in the list");
               if ( Choice == 1 ) {
                 NeedRunning = false;
                 break;
@@ -71,7 +71,7 @@ namespace XPuTTY_cli {
         }
       } while ( NeedRunning );
 
-      ConsoleExtension.Pause();
+      Pause();
       Environment.Exit(0);
     }
 

@@ -26,57 +26,67 @@
     </Grid.RowDefinitions>
     <StackPanel Orientation="Vertical"
                 Grid.Row="0">
-      <StackPanel Orientation="Horizontal"
-                  Margin="5">
-        <TextBlock Width="100"
-                   Text="Name" />
-        <TextBox Text="{Binding Path=Name, Mode=OneWay}" />
-      </StackPanel>
-      <StackPanel Orientation="Horizontal"
-                  Margin="5">
-        <TextBlock Width="100"
-                   Text="Description" />
-        <TextBox Text="{Binding Path=Description}" />
-      </StackPanel>
-      <StackPanel Orientation="Horizontal"
-                  Margin="5">
-        <TextBlock Width="100"
-                   Text="Comment" />
-        <TextBox Text="{Binding Path=Comment}" />
-      </StackPanel>
-      <StackPanel Orientation="Horizontal"
-                  Margin="5">
-        <TextBlock Width="100"
-                   Text="Session type" />
-        <StackPanel Orientation="Horizontal">
-          <RadioButton GroupName="SessionType"
-                       Content="SSH"
-                       Command="{Binding Path=CommandSetSessionType}"
-                       CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
-          <RadioButton GroupName="SessionType"
-                       Margin="15,0,0,0"
-                       Content="Telnet"
-                       Command="{Binding Path=CommandSetSessionType}"
-                       CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
-          <RadioButton GroupName="SessionType"
-                       Margin="15,0,0,0"
-                       Content="RLogin"
-                       Command="{Binding Path=CommandSetSessionType}"
-                       CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
-          <RadioButton GroupName="SessionType"
-                       Margin="15,0,0,0"
-                       Content="Raw"
-                       Command="{Binding Path=CommandSetSessionType}"
-                       CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
-          <RadioButton GroupName="SessionType"
-                       Margin="15,0,0,0"
-                       Content="Serial"
-                       Command="{Binding Path=CommandSetSessionType}"
-                       CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
+      
+      <GroupBox Header="Common parameters"
+                Padding="5"
+                Margin="5">
+        <StackPanel Orientation="Vertical">
+          <StackPanel Orientation="Horizontal"
+                      Margin="5">
+            <TextBlock Width="100"
+                       Text="Name" />
+            <TextBox Text="{Binding Path=Name, Mode=OneWay}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal"
+                      Margin="5">
+            <TextBlock Width="100"
+                       Text="Description" />
+            <TextBox Text="{Binding Path=Description}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal"
+                      Margin="5">
+            <TextBlock Width="100"
+                       Text="Comment" />
+            <TextBox Text="{Binding Path=Comment}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal"
+                      Margin="5">
+            <TextBlock Width="100"
+                       Text="Session type" />
+            <StackPanel Orientation="Horizontal">
+              <RadioButton GroupName="SessionType"
+                           Content="SSH"
+                           Command="{Binding Path=CommandSetSessionType}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
+              <RadioButton GroupName="SessionType"
+                           Margin="15,0,0,0"
+                           Content="Telnet"
+                           Command="{Binding Path=CommandSetSessionType}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
+              <RadioButton GroupName="SessionType"
+                           Margin="15,0,0,0"
+                           Content="RLogin"
+                           Command="{Binding Path=CommandSetSessionType}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
+              <RadioButton GroupName="SessionType"
+                           Margin="15,0,0,0"
+                           Content="Raw"
+                           Command="{Binding Path=CommandSetSessionType}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
+              <RadioButton GroupName="SessionType"
+                           Margin="15,0,0,0"
+                           Content="Serial"
+                           Command="{Binding Path=CommandSetSessionType}"
+                           CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
+            </StackPanel>
+          </StackPanel>
         </StackPanel>
-      </StackPanel>
+      </GroupBox>
+      
       <GroupBox Header="Network parameters"
-                Visibility="{Binding Path=SessionIsHAP, Converter={StaticResource BoolToVisibility}}" Padding="5" Margin="5">
+                Visibility="{Binding Path=SessionIsHAP, Converter={StaticResource BoolToVisibility}}"
+                Padding="5"
+                Margin="5">
         <StackPanel Orientation="Vertical">
           <StackPanel Orientation="Horizontal"
                       Margin="5">
@@ -92,8 +102,10 @@
           </StackPanel>
         </StackPanel>
       </GroupBox>
-      
+
       <GroupBox Header="COM parameters"
+                Padding="5"
+                Margin="5"
                 Visibility="{Binding Path=SessionIsSerial, Converter={StaticResource BoolToVisibility}}"
                 d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySessionSerial}}">
         <StackPanel Orientation="Vertical">
@@ -107,13 +119,15 @@
                       Margin="5">
             <TextBlock Width="100"
                        Text="Speed" />
-            <ComboBox SelectedValue="{Binding Path=SerialSpeed}" Text="{Binding Path=SerialSpeed, Mode=OneWay}">
+            <ComboBox SelectedValue="{Binding Path=SerialSpeed}"
+                      Text="{Binding Path=SerialSpeed, Mode=OneWay}">
               <ComboBoxItem Content="1200" />
               <ComboBoxItem Content="2400" />
               <ComboBoxItem Content="9600" />
               <ComboBoxItem Content="14400" />
               <ComboBoxItem Content="57600" />
-              <ComboBoxItem Content="115200" IsSelected="true"/>
+              <ComboBoxItem Content="115200"
+                            IsSelected="true" />
             </ComboBox>
           </StackPanel>
           <StackPanel Orientation="Horizontal"
@@ -132,10 +146,12 @@
                       Margin="5">
             <TextBlock Width="100"
                        Text="Parity" />
-            <ComboBox SelectedValue="{Binding Path=SerialParity}" Text="{Binding Path=SerialParity, Mode=OneWay}">
+            <ComboBox SelectedValue="{Binding Path=SerialParity}"
+                      Text="{Binding Path=SerialParity, Mode=OneWay}">
               <ComboBoxItem Content="Odd" />
               <ComboBoxItem Content="Even" />
-              <ComboBoxItem Content="None" IsSelected="True"/>
+              <ComboBoxItem Content="None"
+                            IsSelected="True" />
             </ComboBox>
           </StackPanel>
           <StackPanel Orientation="Horizontal"
@@ -146,7 +162,7 @@
           </StackPanel>
         </StackPanel>
       </GroupBox>
-      
+
       <GroupBox Header="Remote command"
                 Margin="5"
                 Padding="5">
