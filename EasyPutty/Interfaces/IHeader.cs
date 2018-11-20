@@ -7,7 +7,12 @@ using System.Threading.Tasks;
 
 namespace EasyPutty.Interfaces {
   public interface IHeader {
-    string Header { get; }
+    string Header {
+      get;
+    }
+    TRelayCommand CommandSelectItem {
+      get;
+    }
     void Clear();
   }
 }

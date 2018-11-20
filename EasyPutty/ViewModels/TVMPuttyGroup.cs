@@ -8,7 +8,7 @@ using EasyPutty.Interfaces;
 namespace EasyPutty.ViewModels {
   public class TVMPuttyGroup : TVMEasyPuttyBase, IHeader {
 
-    public TRelayCommand CommandSelectItem { get; private set; }
+    public TRelayCommand CommandSelectItem { get; protected set; }
 
     public TVMPuttyGroup ParentGroup => GetParent<TVMPuttyGroup>();
     public MainViewModel ParentRoot => GetParent<MainViewModel>();
@@ -35,7 +35,6 @@ namespace EasyPutty.ViewModels {
       }
       set {
         _SelectedItem = value;
-        NotifyPropertyChanged(nameof(SelectedItem));
         if ( ParentRoot != null ) {
           StringBuilder Display = new StringBuilder();
           TVMPuttyGroup GroupIterator = ParentRoot.PuttyGroup.SelectedItem;
@@ -45,6 +44,7 @@ namespace EasyPutty.ViewModels {
           }
           ParentRoot.ContentLocation = Display.ToString();
         }
+        NotifyPropertyChanged(nameof(SelectedItem));
       }
     }
     private TVMPuttyGroup _SelectedItem;
@@ -83,7 +83,7 @@ namespace EasyPutty.ViewModels {
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
 
-    public void Add(IHeader item) {
+    public void Add(TVMPuttyGroup item) {
       if ( item == null ) {
         return;
       }
@@ -94,13 +94,13 @@ namespace EasyPutty.ViewModels {
       NotifyPropertyChanged(nameof(Count));
     }
 
-    public void Add(IEnumerable<IHeader> items) {
+    public void Add(IEnumerable<TVMPuttyGroup> items) {
       #region === Validate parameters ===
       if ( items == null ) {
         return;
       }
       #endregion === Validate parameters ===
-      foreach ( IHeader ItemItem in items ) {
+      foreach ( TVMPuttyGroup ItemItem in items ) {
         Add(ItemItem);
       }
       NotifyPropertyChanged(nameof(Count));

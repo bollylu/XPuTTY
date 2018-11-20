@@ -391,7 +391,7 @@ namespace EasyPutty.ViewModels {
         foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.OrderBy(x => x.GroupLevel2).GroupBy(x => x.GroupLevel2) ) {
 
           string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<unnamed>";
-          TVMPuttyGroup GroupL2 = new TVMPuttyGroup(L2Header) {
+          TVMPuttySessionsGroupedBy GroupL2 = new TVMPuttySessionsGroupedBy(L2Header) {
             Parent = GroupL1
           };
 

@@ -149,7 +149,6 @@ namespace libxputty_std20 {
         default:
           Log.Write($"Unable to get PuttySessionSource : sourceUri is invalid : {sourceUri}");
           return null;
-          break;
       }
     }
 

@@ -21,6 +21,9 @@ namespace EasyPutty.ViewModels {
     public TRelayCommand CommandEditSessionRemoteCommandOk { get; private set; }
     public TRelayCommand CommandEditSessionRemoteCommandCancel { get; private set; }
     public TRelayCommand CommandStartSession { get; private set; }
+    public TRelayCommand CommandSelectItem {
+      get; private set;
+    }
     #endregion RelayCommand
 
     public string CleanName => PuttySession == null ? "" : PuttySession.CleanName;

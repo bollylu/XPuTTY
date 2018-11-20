@@ -13,7 +13,7 @@
     <ResourceDictionary Source="SmallVisuals.xaml" />
   </UserControl.Resources>-->
 
-  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttyGroup.DesignVMPuttyGroup}}"
+  <Grid d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttyGroup.DesignVMPuttyGroupWithNestedGroups}}"
         DataContext="{Binding}">
 
     <Grid.RowDefinitions>

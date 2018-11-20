@@ -8,7 +8,9 @@ using BLTools;
 namespace EasyPutty.ViewModels {
   public class TVMPuttySessionsGroupedBy : TVMPuttyGroup {
 
-    public CollectionView ItemsView { get; protected set; }
+    public CollectionView ItemsView {
+      get; protected set;
+    }
 
     public new TVMPuttySessionsGroupedBy SelectedItem {
       get {
@@ -33,6 +35,7 @@ namespace EasyPutty.ViewModels {
     }
 
     protected override void _InitializeCommands() {
+      CommandSelectItem = new TRelayCommand(() => _SelectItem(), _ => true);
     }
 
     protected override void _Initialize() {
@@ -53,6 +56,29 @@ namespace EasyPutty.ViewModels {
       StringBuilder RetVal = new StringBuilder();
       RetVal.Append($"{Header} - {Count} sessions");
       return RetVal.ToString();
+    }
+
+    public void Add(TVMPuttySession item) {
+      if ( item == null ) {
+        return;
+      }
+      if ( item is IParent ItemWithParent ) {
+        ItemWithParent.Parent = this;
+      }
+      Items.Add(item);
+      NotifyPropertyChanged(nameof(Count));
+    }
+
+    public void Add(IEnumerable<TVMPuttySession> items) {
+      #region === Validate parameters ===
+      if ( items == null ) {
+        return;
+      }
+      #endregion === Validate parameters ===
+      foreach ( TVMPuttySession ItemItem in items ) {
+        Add(ItemItem);
+      }
+      NotifyPropertyChanged(nameof(Count));
     }
 
     #region --- Design statics --------------------------------------------
@@ -79,7 +105,7 @@ namespace EasyPutty.ViewModels {
         L3Group2.Add(TVMPuttySession.DesignVMPuttySession2);
         yield return L3Group2;
       }
-    } 
+    }
     #endregion --- Design statics --------------------------------------------
   }
 }
