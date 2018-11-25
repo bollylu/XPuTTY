@@ -9,12 +9,14 @@ using libxputty_std20;
 using libxputty_std20.Interfaces;
 
 namespace EasyPutty.ViewModels {
-  public sealed class TVMPuttySession : TVMEasyPuttyBase, IHeader {
+  public sealed class TVMPuttySession : TVMEasyPuttyBase, IHeaderedAndSelectable {
 
     public IPuttySession PuttySession => _Data as IPuttySession;
 
     public TPuttySessionSerial PuttySessionSerial => PuttySession as TPuttySessionSerial;
     public IHostAndPort PuttySessionHAP => PuttySession as IHostAndPort;
+
+    public bool DisplaySelectionButton => true;
 
     #region RelayCommand
     public TRelayCommand CommandEditSessionRemoteCommand { get; private set; }
@@ -247,11 +249,7 @@ namespace EasyPutty.ViewModels {
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     private void _Start() {
-      if ( RemoteCommand != "" ) {
-        PuttySession.StartPlink();
-      } else {
-        PuttySession.Start();
-      }
+      PuttySession.Start();
     }
 
     private string OldRemoteCommand;

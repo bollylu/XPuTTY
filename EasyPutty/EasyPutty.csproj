@@ -29,7 +29,7 @@
     <UpdateUrl>http://localhost/XPuttyMan/</UpdateUrl>
     <ProductName>EasyPutty</ProductName>
     <PublisherName>Luc Bolly</PublisherName>
-    <ApplicationRevision>4</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -225,7 +225,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Interfaces\IHeader.cs" />
+    <Compile Include="Interfaces\IHeaderedAndSelectable.cs" />
     <Compile Include="ViewModels\TVMEasyPuttyBase.cs" />
     <Compile Include="Base classes\TGroup.cs" />
     <Compile Include="Base classes\TRelayCommand.cs" />

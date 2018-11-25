@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+
 using BLTools;
+
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
@@ -15,6 +17,8 @@ namespace libxputty_std20 {
     public static XName XML_ELEMENT_SESSIONS => GetXName("Sessions");
 
     public static XName XML_ELEMENT_SESSION = GetXName("Session");
+
+    protected const string XML_ATTRIBUTE_SESSION_TYPE = "SessionType";
 
     protected const string XML_ATTRIBUTE_GROUP_LEVEL1 = "GroupLevel1";
     protected const string XML_ATTRIBUTE_GROUP_LEVEL2 = "GroupLevel2";
@@ -66,9 +70,10 @@ namespace libxputty_std20 {
       }
 
       TPuttySession BaseSession = new TPuttySession(Name) {
-        GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, "<empty>"),
-        GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, "<empty>"),
-        Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, "<empty>"),
+        SessionType = (ESessionType)Enum.Parse(typeof(ESessionType), session.SafeReadAttribute<string>(XML_ATTRIBUTE_SESSION_TYPE, ESessionType.Auto.ToString()), true),
+        GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, LocalExtensions.EMPTY),
+        GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, LocalExtensions.EMPTY),
+        Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, LocalExtensions.EMPTY),
         RemoteCommand = session.SafeReadElementValue<string>(XML_ELEMENT_SSH_REMOTE_COMMAND, "")
       };
 
@@ -145,6 +150,9 @@ namespace libxputty_std20 {
 
       XElement RetVal = new XElement(XML_ELEMENT_SESSION);
 
+      if ( session.SessionType != ESessionType.Auto ) {
+        RetVal.SetAttributeValue(XML_ATTRIBUTE_SESSION_TYPE, session.SessionType.ToString());
+      }
       string StrippedName = session.CleanName.Replace($"[{session.GroupLevel1}]", "")
                                              .Replace($"[{session.GroupLevel2}]", "")
                                              .Replace($"{{{session.Section}}}", "");
@@ -156,13 +164,13 @@ namespace libxputty_std20 {
         RetVal.Add(session.Credential.ToXml());
       }
 
-      if ( !string.IsNullOrWhiteSpace(session.GroupLevel1) && session.GroupLevel1 != "<empty>" ) {
+      if ( !session.GroupLevel1.IsEmpty() ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_GROUP_LEVEL1, session.GroupLevel1);
       }
-      if ( !string.IsNullOrWhiteSpace(session.GroupLevel2) && session.GroupLevel2!="<empty>") {
+      if ( !session.GroupLevel2.IsEmpty() ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_GROUP_LEVEL2, session.GroupLevel2);
       }
-      if ( !string.IsNullOrWhiteSpace(session.Section) && session.Section != "<empty>" ) {
+      if ( !session.Section.IsEmpty() ) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SECTION, session.Section);
       }
 

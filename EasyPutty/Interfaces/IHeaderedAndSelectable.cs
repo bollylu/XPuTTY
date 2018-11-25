@@ -6,13 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace EasyPutty.Interfaces {
-  public interface IHeader {
+  public interface IHeaderedAndSelectable {
     string Header {
       get;
     }
     TRelayCommand CommandSelectItem {
       get;
     }
-    void Clear();
+    bool DisplaySelectionButton {
+      get;
+    }
   }
 }

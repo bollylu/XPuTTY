@@ -322,10 +322,10 @@ namespace EasyPutty.ViewModels {
 
     private void _HelpAbout() {
       StringBuilder Usage = new StringBuilder();
-      Usage.AppendLine($"xPuttyMan v{Assembly.GetEntryAssembly().GetName().Version.ToString()}");
-      Usage.AppendLine(@"Usage: xPuttyMan [/config=<config.xml> (default=<none>)]");
-      Usage.AppendLine(@"                 [/logbase=<[\\server\share\]path> (default=c:\logs\xputtyman)]");
-      Usage.AppendLine(@"                 [/log=<filename.log> (default=xputtyman.log)]");
+      Usage.AppendLine($"EasyPutty v{Assembly.GetEntryAssembly().GetName().Version.ToString()}");
+      Usage.AppendLine(@"Usage: EasyPutty [/config=<config.xml> (default=<none>)]");
+      Usage.AppendLine(@"                 [/logbase=<[\\server\share\]path> (default=c:\logs\easyputty)]");
+      Usage.AppendLine(@"                 [/log=<filename.log> (default=easyputty.log)]");
       MessageBox.Show(Usage.ToString());
     }
     #endregion --- Menu --------------------------------------------
@@ -383,14 +383,14 @@ namespace EasyPutty.ViewModels {
 
       foreach ( IGrouping<string, IPuttySession> SessionsByGroupL1Item in SessionsByGroupL1 ) {
 
-        string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "<unnamed>";
+        string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "<empty>";
         TVMPuttyGroup GroupL1 = new TVMPuttyGroup(L1Header) {
           Parent = PuttyGroup
         };
 
         foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.OrderBy(x => x.GroupLevel2).GroupBy(x => x.GroupLevel2) ) {
 
-          string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<unnamed>";
+          string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<empty>";
           TVMPuttySessionsGroupedBy GroupL2 = new TVMPuttySessionsGroupedBy(L2Header) {
             Parent = GroupL1
           };
@@ -416,7 +416,10 @@ namespace EasyPutty.ViewModels {
                                                      .OfType<IHostAndPort>()
                                                      .Where(x => !string.IsNullOrWhiteSpace(x.HostName))
                                                      ) {
-        string SessionCommandLineWithoutRemoteCommand = string.Join(" ", SessionItem.BuildCommandLineWithoutRemoteCommand());
+        IHostAndPort SessionHAP = SessionItem as IHostAndPort;
+        string SessionCommandLineWithoutRemoteCommand = string.Join(" ", CommandLineBuilder.BuildSSHCommandLine()
+                                                                                           .AddCredentialsToCommandLine(SessionItem.Credential)
+                                                                                           .AddHostnameAndPort(SessionHAP.HostName, SessionHAP.Port));
         Process RunningSession = CurrentlyRunningSessions.FirstOrDefault(x => TRunProcess.GetCommandLine(x.Id).Contains(SessionCommandLineWithoutRemoteCommand));
 
         TVMPuttySession NewPuttySessionVM;

@@ -19,10 +19,7 @@ namespace libxputty_std20 {
     public const string EXECUTABLE_PLINK = "plink.exe";
     public static string EXECUTABLE_PLINK_WITHOUT_EXTENSION = Path.GetFileNameWithoutExtension(EXECUTABLE_PLINK);
     public const string EXECUTABLE_PSCP = "pscp.exe";
-
-    public const string JSON_THIS_ELEMENT = "Session";
-    public const string JSON_NAME = "Name";
-    public const string JSON_PROTOCOL = "Protocol";
+    public static string EXECUTABLE_PSCP_WITHOUT_EXTENSION = Path.GetFileNameWithoutExtension(EXECUTABLE_PSCP);
     #endregion --- Constants --------------------------------------------
 
     public static IPuttySession Empty {
@@ -38,6 +35,8 @@ namespace libxputty_std20 {
     #region --- Public properties ------------------------------------------------------------------------------
     public string CleanName => Name.Replace("%20", " ");
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
+
+    public ESessionType SessionType { get; set; }
 
     public string RemoteCommand { get; set; }
     public string CleanedRemoteCommand => (RemoteCommand ?? "").Replace("\"", "\\\"");
@@ -58,16 +57,16 @@ namespace libxputty_std20 {
       return RetVal.ToString();
     }
 
-    public virtual IJsonValue ToJson() {
-      JsonObject RetVal = new JsonObject {
-        { JSON_THIS_ELEMENT, new JsonObject {
-            { JSON_NAME, Json.JsonEncode(Name) },
-            { JSON_PROTOCOL, Protocol }
-          }
-        }
-      };
-      return RetVal;
-    }
+    //public virtual IJsonValue ToJson() {
+    //  JsonObject RetVal = new JsonObject {
+    //    { JSON_THIS_ELEMENT, new JsonObject {
+    //        { JSON_NAME, Json.JsonEncode(Name) },
+    //        { JSON_PROTOCOL, Protocol }
+    //      }
+    //    }
+    //  };
+    //  return RetVal;
+    //}
     #endregion --- Converters -------------------------------------------------------------------------------------
 
     #region --- Event handlers --------------------------------------------
@@ -78,12 +77,15 @@ namespace libxputty_std20 {
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySession() : base() {
       Name = "<no name>";
+      SessionType = ESessionType.Auto;
     }
 
     public TPuttySession(string name) : base(name) {
+      SessionType = ESessionType.Auto;
     }
 
     public TPuttySession(IPuttySession session) {
+      SessionType = session.SessionType;
       Name = session.Name;
       Description = session.Description;
       Comment = session.Comment;
@@ -111,18 +113,43 @@ namespace libxputty_std20 {
 
     public ISupportContact SupportContact => throw new NotImplementedException();
 
-    public virtual void Start(IEnumerable<string> arguments) {
-      ProcessStartInfo StartInfo = new ProcessStartInfo {
-        FileName = EXECUTABLE_PUTTY,
-        Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
-        UseShellExecute = false
-      };
-      PuttyProcess.StartInfo = StartInfo;
 
-      PuttyProcess.Start(true);
+    public virtual void Start(IEnumerable<string> arguments) {
+      Start(string.Join(" ", arguments));
+    }
+    public virtual void Start(string arguments = "") {
+
+      if ( RemoteCommand != "" ) {
+        string TempFileForRemoteCommand = Path.GetTempFileName();
+        Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
+        File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
+      }
+
+      switch ( SessionType ) {
+
+        case ESessionType.Putty:
+          _StartPutty(arguments);
+          break;
+
+        case ESessionType.Plink:
+          _StartPlink(arguments);
+          break;
+
+        case ESessionType.Auto:
+        default: {
+            if ( RemoteCommand != "" ) {
+              _StartPlink(arguments);
+            } else {
+              _StartPutty(arguments);
+            }
+            break;
+          }
+
+      }
+
     }
 
-    public virtual void Start(string arguments = "") {
+    protected virtual void _StartPutty(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
@@ -132,19 +159,7 @@ namespace libxputty_std20 {
 
       PuttyProcess.Start(true);
     }
-
-    public virtual void StartPlink(IEnumerable<string> arguments) {
-      ProcessStartInfo StartInfo = new ProcessStartInfo {
-        FileName = EXECUTABLE_PLINK,
-        Arguments = !arguments.Any() ? $"-load {"\"" + CleanName + "\""}" : string.Join(" ", arguments),
-        UseShellExecute = false
-      };
-      PuttyProcess.StartInfo = StartInfo;
-
-      PuttyProcess.Start();
-    }
-
-    public virtual void StartPlink(string arguments = "") {
+    protected virtual void _StartPlink(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
@@ -195,34 +210,45 @@ namespace libxputty_std20 {
       yield break;
     }
 
-    public virtual IEnumerable<string> BuildCommandLineWithoutRemoteCommand() {
-      if ( Credential == null ) {
-        yield break;
-      }
-
-      yield return $"-l {Credential.Username}";
-      if ( !string.IsNullOrEmpty(Credential.SecurePassword.ConvertToUnsecureString()) ) {
-        yield return $"-pw {Credential.SecurePassword.ConvertToUnsecureString()}";
-      }
-    }
-
-    public virtual IEnumerable<string> BuildCommandLine() {
-
-      foreach ( string ArgItem in BuildCommandLineWithoutRemoteCommand() ) {
-        yield return ArgItem;
-      }
-      if ( !string.IsNullOrWhiteSpace(RemoteCommand) ) {
-        TempFileForRemoteCommand = Path.GetTempFileName();
-        Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
-        File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
-        yield return $"-m \"{TempFileForRemoteCommand}\"";
-      }
-
-    }
     #endregion --- Windows processes -------------------------------------------- 
 
+  }
+  public static class CommandLineBuilder {
+    public static IList<string> BuildSSHCommandLine() {
+      IList<string> RetVal = new List<string>() {
+        "-t",
+        "-ssh"
+        };
+      return RetVal;
+    }
 
+    public static IList<string> AddHostnameAndPort(this IList<string> commandLine, string hostname, int port) {
+      IList<string> RetVal = commandLine;
+      RetVal.Add($"-P {port}");
+      RetVal.Add(hostname);
+      return RetVal;
+    }
+    public static IList<string> AddCredentialsToCommandLine(this IList<string> commandLine, ICredential credential) {
+      IList<string> RetVal = commandLine;
 
+      if ( credential == null ) {
+        return RetVal;
+      }
+
+      RetVal.Add($"-l {credential.Username}");
+      if ( !string.IsNullOrEmpty(credential.SecurePassword.ConvertToUnsecureString()) ) {
+        RetVal.Add($"-pw {credential.SecurePassword.ConvertToUnsecureString()}");
+      }
+      return RetVal;
+    }
+
+    public static IList<string> AddRemoteCommandToCommandLine(this IList<string> commandLine, string tempFilename = "") {
+      IList<string> RetVal = commandLine;
+      if ( !string.IsNullOrWhiteSpace(tempFilename) ) {
+        RetVal.Add($"-m \"{tempFilename}\"");
+      }
+      return RetVal;
+    }
 
   }
 }

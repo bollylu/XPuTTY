@@ -75,6 +75,7 @@ namespace libxputty_std20 {
           BaseSession.GroupLevel2 = Group.After(GROUP_SEPARATOR);
         } else {
           BaseSession.GroupLevel1 = Group;
+          BaseSession.GroupLevel2 = LocalExtensions.EMPTY;
         }
         #endregion --- Read common data -----------------------------------------
 
@@ -141,9 +142,9 @@ namespace libxputty_std20 {
 
     protected override void _SaveSession(IPuttySession session) {
 
-      string GL1 = session.GroupLevel1 == "" ? "" : $"[{session.GroupLevel1}]";
-      string GL2 = session.GroupLevel2 == "" ? "" : $"[{session.GroupLevel2}]";
-      string SCT = session.Section == "" ? "" : $"[{session.Section}]";
+      string GL1 = session.GroupLevel1.IsEmpty() ? "" : $"[{session.GroupLevel1}]";
+      string GL2 = session.GroupLevel2.IsEmpty() ? "" : $"[{session.GroupLevel2}]";
+      string SCT = session.Section.IsEmpty() ? "" : $"[{session.Section}]";
 
       string KeyName = $"{GL1}{GL2}{SCT}{session.Name.Replace(" ", "%20")}";
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -62,68 +63,83 @@ namespace libxputty_std20 {
       return RetVal.ToString();
     }
 
-    public override IJsonValue ToJson() {
-      JsonObject RetVal = base.ToJson() as JsonObject;
-      JsonObject Session = RetVal.SafeGetValueFirst<JsonObject>(TPuttySession.JSON_THIS_ELEMENT);
-      RetVal.Clear();
-      RetVal.Add(TPuttySession.JSON_THIS_ELEMENT, Session);
-      return RetVal;
-    }
+    //public override IJsonValue ToJson() {
+    //  JsonObject RetVal = base.ToJson() as JsonObject;
+    //  JsonObject Session = RetVal.SafeGetValueFirst<JsonObject>(TPuttySession.JSON_THIS_ELEMENT);
+    //  RetVal.Clear();
+    //  RetVal.Add(TPuttySession.JSON_THIS_ELEMENT, Session);
+    //  return RetVal;
+    //}
     #endregion --- Converters -------------------------------------------------------------------------------------
 
-    public async override void Start(string arguments = "") {
+    public override void Start(string arguments = "") {
 
-      if ( arguments == "" ) {
-        IEnumerable<string> Parameters = BuildCommandLine();
-        base.Start(Parameters);
-      } else {
-        base.Start(arguments);
-      }
-
-      await Task.Delay(500);
-      SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
-    }
-
-    public async override void StartPlink(string arguments = "") {
-
-      List<string> Params = new List<string> {
-        "-t",
-        "-ssh",
-        $"-P {Port}",
-        HostName
-      };
-
-      if ( !string.IsNullOrWhiteSpace(RemoteCommand) ) {
+      if ( RemoteCommand != "" ) {
         TempFileForRemoteCommand = Path.GetTempFileName();
         Log.Write($"Created Tempfile {TempFileForRemoteCommand}");
         File.WriteAllText(TempFileForRemoteCommand, RemoteCommand);
-        Params.Add($"-m \"{TempFileForRemoteCommand}\"");
       }
 
-      if ( Credential != null ) {
-        Params.Add($"-l {Credential.Username}");
-        if ( !string.IsNullOrEmpty(Credential.SecurePassword.ConvertToUnsecureString()) ) {
-          Params.Add($"-pw {Credential.SecurePassword.ConvertToUnsecureString()}");
-        }
+      string Args;
+      if ( arguments == "" ) {
+        IList<string> BaseArguments = CommandLineBuilder.BuildSSHCommandLine()
+                                                        .AddCredentialsToCommandLine(Credential)
+                                                        .AddHostnameAndPort(HostName, Port)
+                                                        .AddRemoteCommandToCommandLine(TempFileForRemoteCommand);
+
+        Args = string.Join(" ", BaseArguments);
+      } else {
+        Args = arguments;
       }
 
-      base.StartPlink(Params);
+      switch ( SessionType ) {
+
+        case ESessionType.Putty:
+          _StartPutty(Args);
+          break;
+
+        case ESessionType.Plink:
+          _StartPlink(Args);
+          break;
+
+        case ESessionType.Auto:
+        default: {
+            if ( RemoteCommand != "" ) {
+              _StartPlink(Args);
+            } else {
+              _StartPutty(Args);
+            }
+            break;
+          }
+
+      }
+
+    }
+
+    protected override void _StartPutty(string arguments) {
+      ProcessStartInfo StartInfo = new ProcessStartInfo {
+        FileName = EXECUTABLE_PUTTY,
+        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
+        UseShellExecute = false
+      };
+      PuttyProcess.StartInfo = StartInfo;
+
+      PuttyProcess.Start(true);
+
+    }
+    protected async override void _StartPlink(string arguments = "") {
+      ProcessStartInfo StartInfo = new ProcessStartInfo {
+        FileName = EXECUTABLE_PLINK,
+        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
+        UseShellExecute = false
+      };
+      PuttyProcess.StartInfo = StartInfo;
+
+      PuttyProcess.Start();
 
       await Task.Delay(500);
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
-
-    public override IEnumerable<string> BuildCommandLineWithoutRemoteCommand() {
-      List<string> Params = new List<string> {
-        "-t",
-        "-ssh",
-        $"-P {Port}",
-        HostName
-        };
-
-      return Params.Concat(base.BuildCommandLineWithoutRemoteCommand());
-    }
-
 
   }
 }

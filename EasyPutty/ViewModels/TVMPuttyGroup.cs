@@ -2,17 +2,18 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+
 using BLTools;
+
 using EasyPutty.Interfaces;
 
 namespace EasyPutty.ViewModels {
-  public class TVMPuttyGroup : TVMEasyPuttyBase, IHeader {
-
-    public TRelayCommand CommandSelectItem { get; protected set; }
+  public class TVMPuttyGroup : TVMEasyPuttyBase, IHeaderedAndSelectable {
 
     public TVMPuttyGroup ParentGroup => GetParent<TVMPuttyGroup>();
     public MainViewModel ParentRoot => GetParent<MainViewModel>();
 
+    #region --- IHeaderedAndSelectable --------------------------------------------
     public string Header {
       get {
         return _Header;
@@ -23,14 +24,38 @@ namespace EasyPutty.ViewModels {
       }
     }
     private string _Header;
+    public bool DisplaySelectionButton {
+      get {
+        if ( ParentGroup == null ) {
+          return true;
+        }
+        if ( !ParentGroup.Items.Any() ) {
+          return false;
+        }
 
-    public ObservableCollection<IHeader> Items { get; private set; } = new ObservableCollection<IHeader>();
+        if ( ParentGroup.Items.Count() == 1 ) {
+          ParentGroup.SelectedItem = this;
+          return false;
+        }
+
+        return true;
+      }
+    }
+    public TRelayCommand CommandSelectItem {
+      get; protected set;
+    }
+    #endregion --- IHeaderedAndSelectable -----------------------------------------
+
+    public ObservableCollection<IHeaderedAndSelectable> Items { get; private set; } = new ObservableCollection<IHeaderedAndSelectable>();
 
     public IEnumerable<TVMPuttyGroup> Groups => Items.OfType<TVMPuttyGroup>();
     public IEnumerable<TVMPuttySession> Sessions => Items.OfType<TVMPuttySession>();
 
     public TVMPuttyGroup SelectedItem {
       get {
+        if ( _SelectedItem == null && Items.Any()) {
+          _SelectedItem = Items.First() as TVMPuttyGroup;
+        }
         return _SelectedItem;
       }
       set {
@@ -39,7 +64,9 @@ namespace EasyPutty.ViewModels {
           StringBuilder Display = new StringBuilder();
           TVMPuttyGroup GroupIterator = ParentRoot.PuttyGroup.SelectedItem;
           while ( GroupIterator != null ) {
-            Display.AppendFormat($" > {GroupIterator.Header}");
+            if ( GroupIterator.Header != "<empty>" ) {
+              Display.AppendFormat($" > {GroupIterator.Header}");
+            }
             GroupIterator = GroupIterator.SelectedItem;
           }
           ParentRoot.ContentLocation = Display.ToString();
@@ -107,7 +134,7 @@ namespace EasyPutty.ViewModels {
     }
 
     public void Clear() {
-      foreach(IHeader PuttyGroupItem in Items) {
+      foreach(TVMPuttyGroup PuttyGroupItem in Groups) {
         PuttyGroupItem.Clear();
       }
       Items.Clear();
