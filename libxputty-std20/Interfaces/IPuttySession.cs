@@ -30,6 +30,8 @@ namespace libxputty_std20.Interfaces {
 
     void Stop();
 
+    IPuttySession Duplicate();
+
     event EventHandler OnStart;
     event EventHandler OnExit;
 

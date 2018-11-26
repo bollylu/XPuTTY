@@ -10,7 +10,7 @@ using Microsoft.Win32;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionSerial : TPuttySession, IDisposable {
+  public class TPuttySessionSerial : TPuttySession, ISerial, IDisposable {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string SerialLine { get; set; }
@@ -33,7 +33,7 @@ namespace libxputty_std20 {
 
     public TPuttySessionSerial(IPuttySession session) : base(session) {
       Protocol = TPuttyProtocol.Serial;
-      if ( session is TPuttySessionSerial SessionSerial ) {
+      if ( session is ISerial SessionSerial ) {
         SerialLine = SessionSerial.SerialLine;
         SerialSpeed = SessionSerial.SerialSpeed;
         SerialDataBits = SessionSerial.SerialDataBits;
@@ -43,6 +43,16 @@ namespace libxputty_std20 {
       }
     }
 
+    public override IPuttySession Duplicate() {
+      TPuttySessionSerial RetVal = new TPuttySessionSerial(base.Duplicate());
+      RetVal.SerialLine = SerialLine;
+      RetVal.SerialSpeed = SerialSpeed;
+      RetVal.SerialDataBits = SerialDataBits;
+      RetVal.SerialStopBits = SerialStopBits;
+      RetVal.SerialParity = SerialParity;
+      RetVal.SerialFlowControl = SerialFlowControl;
+      return RetVal;
+    }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Converters -------------------------------------------------------------------------------------
@@ -63,8 +73,7 @@ namespace libxputty_std20 {
     public override void Stop() {
       throw new NotImplementedException();
     }
-
-    #endregion Public methods
+        #endregion Public methods
 
   }
 }

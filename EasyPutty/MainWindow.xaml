@@ -6,6 +6,7 @@
         xmlns:bltoolswpfctrl="clr-namespace:BLTools.WPF.Controls;assembly=BLTools.WPF.Controls.45"
         xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
         xmlns:localViews="clr-namespace:EasyPutty.Views"
+        xmlns:easyputty="clr-namespace:EasyPutty"
         mc:Ignorable="d"
         Title="{Binding Path=ApplicationTitle}"
         Height="800"
@@ -35,11 +36,24 @@
               Margin="10"
               BorderThickness="0,0,0,2"
               BorderBrush="Red">
-        <TextBlock Text="{Binding Path=ContentLocation, Mode=OneWay}"
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="20" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Text="{Binding Path=ContentLocation, Mode=OneWay}"
                    FontSize="18"
                    FontFamily="Arial"
                    FontWeight="Bold"
                    Margin="0,0,0,5" />
+          <Image Grid.Column="1"
+                 Source="{Binding Path=FileSavePicture, Mode=OneWay}"
+                 Width="24"
+                 Height="24"
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Center"
+                 Visibility="{Binding Path=DataIsDirty, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+        </Grid>
       </Border>
       <localViews:ViewGroupLevel1ByTabs Grid.Row="1" DataContext="{Binding Path=PuttyGroup}" />
     </Grid>

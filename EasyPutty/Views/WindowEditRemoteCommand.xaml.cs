@@ -19,7 +19,6 @@ namespace EasyPutty.Views {
   public partial class WindowEditRemoteCommand : Window {
     public WindowEditRemoteCommand() {
       InitializeComponent();
-      MainWindow.DataIsDirty = true;
     }
   }
 }

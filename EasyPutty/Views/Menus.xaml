@@ -9,7 +9,7 @@
                     mc:Ignorable="d">
 
   <bltoolswpf:BoolToVisibilityConverter x:Key="BoolToVisibility" />
-  
+
   <ControlTemplate x:Key="MainMenu">
     <Menu Height="23"
           HorizontalAlignment="Stretch"
@@ -119,11 +119,9 @@
   </ControlTemplate>
 
   <ContextMenu  x:Key="OneSessionContextMenu"
-                d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySession}}"
-                Visibility="{Binding CanEditRemoteCommand, Converter={StaticResource BoolToVisibility}}">
-    <MenuItem Header="Edit remote command"
-              Command="{Binding Path=CommandEditSessionRemoteCommand}"
-              IsEnabled="{Binding Path=CanEditRemoteCommand}" />
+                d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySession}}">
+    <MenuItem Header="Edit session"
+              Command="{Binding Path=CommandEditSession}" />
   </ContextMenu>
 
 </ResourceDictionary>

@@ -17,6 +17,8 @@ namespace libxputty_std20 {
     public static XName XML_ELEMENT_SESSIONS => GetXName("Sessions");
 
     public static XName XML_ELEMENT_SESSION = GetXName("Session");
+    public static XName XML_ELEMENT_DESCRIPTION = GetXName("Description");
+    public static XName XML_ELEMENT_COMMENT = GetXName("Comment");
 
     protected const string XML_ATTRIBUTE_SESSION_TYPE = "SessionType";
 
@@ -70,6 +72,8 @@ namespace libxputty_std20 {
       }
 
       TPuttySession BaseSession = new TPuttySession(Name) {
+        Description = session.SafeReadElementValue<string>(XML_ELEMENT_DESCRIPTION, ""),
+        Comment = session.SafeReadElementValue<string>(XML_ELEMENT_COMMENT, ""),
         SessionType = (ESessionType)Enum.Parse(typeof(ESessionType), session.SafeReadAttribute<string>(XML_ATTRIBUTE_SESSION_TYPE, ESessionType.Auto.ToString()), true),
         GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, LocalExtensions.EMPTY),
         GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, LocalExtensions.EMPTY),
@@ -157,6 +161,14 @@ namespace libxputty_std20 {
                                              .Replace($"[{session.GroupLevel2}]", "")
                                              .Replace($"{{{session.Section}}}", "");
       RetVal.SetAttributeValue(XML_ATTRIBUTE_NAME, StrippedName);
+
+      if ( session.Description != "" ) {
+        RetVal.SetElementValue(XML_ELEMENT_DESCRIPTION, session.Description);
+      }
+
+      if ( session.Comment != "" ) {
+        RetVal.SetElementValue(XML_ELEMENT_COMMENT, session.Comment);
+      }
 
       RetVal.SetAttributeValue(XML_ATTRIBUTE_PROTOCOL_TYPE, session.Protocol);
 

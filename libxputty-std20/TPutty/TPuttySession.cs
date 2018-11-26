@@ -93,6 +93,8 @@ namespace libxputty_std20 {
       GroupLevel2 = session.GroupLevel2;
       Section = session.Section;
       RemoteCommand = session.RemoteCommand;
+      Parent = session.Parent;
+      SetLocalCredential(session.Credential);
     }
 
     protected override void _Initialize() {
@@ -102,6 +104,10 @@ namespace libxputty_std20 {
     public override void Dispose() {
       PuttyProcess.OnExit -= PuttyProcess_OnExit;
       PuttyProcess.OnStart -= PuttyProcess_OnStart;
+    }
+
+    public virtual IPuttySession Duplicate() {
+      return new TPuttySession(this);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 

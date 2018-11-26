@@ -40,6 +40,17 @@ namespace EasyPutty.ViewModels {
     //public TRelayCommand CommandToolsExportSelected { get; private set; }
     #endregion RelayCommand
 
+    public bool DataIsDirty {
+      get {
+        return _DataIsDirty;
+      }
+      set {
+        _DataIsDirty = value;
+        NotifyPropertyChanged(nameof(DataIsDirty));
+      }
+    }
+    private bool _DataIsDirty;
+
     public string ApplicationTitle {
       get {
         return $"{_ApplicationTitleBase} : {_ApplicationTitle} : {SessionSourceName}";
@@ -167,7 +178,7 @@ namespace EasyPutty.ViewModels {
 
     #region --- Menu --------------------------------------------
     private void _FileNew() {
-      MainWindow.DataIsDirty = false;
+      DataIsDirty = false;
       PuttyGroup.Clear();
       SessionSource = null;
     }
@@ -241,10 +252,10 @@ namespace EasyPutty.ViewModels {
 
     #region --- File Save --------------------------------------------
     private void _FileSave() {
-      if ( MainWindow.DataIsDirty ) {
+      if ( DataIsDirty ) {
         WorkInProgress = true;
         SessionSource.SaveSessions(AllPuttySessions);
-        MainWindow.DataIsDirty = false;
+        DataIsDirty = false;
         WorkInProgress = false;
       }
     }
@@ -267,11 +278,11 @@ namespace EasyPutty.ViewModels {
       if ( SFD.ShowDialog() == true ) {
         SessionSource = new TPuttySessionSourceXml(SFD.FileName);
         SessionSource.SaveSessions(AllPuttySessions);
-        MainWindow.DataIsDirty = false;
+        DataIsDirty = false;
       }
 
       NotifyExecutionCompleted("Done.");
-      MainWindow.DataIsDirty = false;
+      DataIsDirty = false;
       WorkInProgress = false;
     }
 
@@ -306,7 +317,7 @@ namespace EasyPutty.ViewModels {
       SessionSource = new TPuttySessionSourceRegistry();
       SessionSource.SaveSessions(AllPuttySessions);
       NotifyExecutionCompleted("Done.");
-      MainWindow.DataIsDirty = false;
+      DataIsDirty = false;
 
       WorkInProgress = false;
     }

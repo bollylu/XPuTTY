@@ -22,7 +22,6 @@ namespace libxputty_std20 {
     public int Port { get; set; }
     #endregion --- Public properties ---------------------------------------------------------------------------
 
-
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionSSH() : base() {
       Protocol = TPuttyProtocol.SSH;
@@ -37,12 +36,18 @@ namespace libxputty_std20 {
         HostName = SessionHAP.HostName;
         Port = SessionHAP.Port;
       }
-      Parent = session.Parent;
-      SetLocalCredential(session.Credential);
+      
     }
 
     public override void Dispose() {
       base.Dispose();
+    }
+
+    public override IPuttySession Duplicate() {
+      TPuttySessionSSH RetVal = new TPuttySessionSSH(base.Duplicate());
+      RetVal.HostName = HostName;
+      RetVal.Port = Port;
+      return RetVal;
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -62,14 +67,6 @@ namespace libxputty_std20 {
 
       return RetVal.ToString();
     }
-
-    //public override IJsonValue ToJson() {
-    //  JsonObject RetVal = base.ToJson() as JsonObject;
-    //  JsonObject Session = RetVal.SafeGetValueFirst<JsonObject>(TPuttySession.JSON_THIS_ELEMENT);
-    //  RetVal.Clear();
-    //  RetVal.Add(TPuttySession.JSON_THIS_ELEMENT, Session);
-    //  return RetVal;
-    //}
     #endregion --- Converters -------------------------------------------------------------------------------------
 
     public override void Start(string arguments = "") {

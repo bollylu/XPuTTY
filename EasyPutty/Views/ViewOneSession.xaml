@@ -19,6 +19,7 @@
 
     <Border BorderBrush="DarkBlue"
             BorderThickness="1"
+            Background="White"
             CornerRadius="5"
             Margin="2"
             Name="InnerBorder"
@@ -45,7 +46,8 @@
             </Style.Triggers>
           </Style>
         </Grid.Style>
-        <Grid Grid.Row="0" ContextMenu="{StaticResource ResourceKey=OneSessionContextMenu}">
+        <Grid Grid.Row="0"
+              ContextMenu="{StaticResource ResourceKey=OneSessionContextMenu}">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60" />
             <ColumnDefinition Width="*" />
@@ -54,7 +56,8 @@
           <StackPanel Orientation="Horizontal"
                       Grid.Column="0"
                       Margin="5,0,0,0"
-                      VerticalAlignment="Center" HorizontalAlignment="Center">
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Center">
             <StackPanel.Resources>
               <Style TargetType="Button">
                 <Setter Property="HorizontalAlignment"
@@ -90,8 +93,10 @@
               </Button.Content>
             </Button>
           </StackPanel>
-          
-          <StackPanel Orientation="Vertical" Grid.Column="1">
+
+          <StackPanel Orientation="Vertical"
+                      Grid.Column="1"
+                      ToolTip="{Binding Path=Comment, FallbackValue=null}">
             <StackPanel.Resources>
               <Style TargetType="TextBlock">
                 <Setter Property="FontSize"
@@ -106,9 +111,14 @@
                        Width="550"
                        FontWeight="Bold"
                        Margin="10,0,0,0" />
-            <TextBlock Text="{Binding Path=HostName}"
+            <TextBlock Text="{Binding Path=Description}"
+                       Width="550"
+                       Margin="10,2,0,5"
+                       FontStyle="Italic" />
+            <TextBlock Text="{Binding Path=HostName, StringFormat='Connection to {0}'}"
                        Width="550"
                        Margin="10,2,0,5" />
+
 
           </StackPanel>
 

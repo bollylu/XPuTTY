@@ -11,12 +11,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using libxputty_std20.Interfaces;
 
 namespace EasyPutty.Views {
   /// <summary>
   /// Interaction logic for ViewEditSession.xaml
   /// </summary>
-  public partial class ViewEditSession : Window {
+  public partial class ViewEditSession : Window, IView {
     public ViewEditSession() {
       InitializeComponent();
     }

@@ -7,16 +7,95 @@
         xmlns:libxputty="clr-namespace:libxputty_std20;assembly=libxputty-std20"
         xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
         xmlns:bltoolswpf="clr-namespace:BLTools.WPF;assembly=BLTools.WPF.45"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="ViewEditSession"
         Height="800"
         Width="600"
-        d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySession}}"
+        d:DataContext="{Binding Source={x:Static localViewModels:TVMEditedPuttySession.DesignVMEditedPuttySession}}"
         WindowStyle="SingleBorderWindow"
         WindowStartupLocation="CenterOwner">
 
   <Window.Resources>
     <bltoolswpf:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+
+    <Style x:Key="LabelSize"
+           TargetType="ColumnDefinition">
+      <Setter Property="Width"
+              Value="85" />
+    </Style>
+
+    <Style x:Key="TextField"
+           TargetType="TextBox">
+      <Setter Property="VerticalAlignment"
+              Value="Center" />
+      <Setter Property="Foreground"
+              Value="Black" />
+      <Setter Property="Background"
+              Value="#FFE6F4F9" />
+      <Setter Property="BorderThickness"
+              Value="0,0,0,1" />
+      <Setter Property="BorderBrush"
+              Value="Black" />
+    </Style>
+
+    <Style x:Key="MultiLineTextField"
+           TargetType="TextBox">
+      <Setter Property="VerticalAlignment"
+              Value="Top" />
+      <Setter Property="Foreground"
+              Value="Black" />
+      <Setter Property="AcceptsReturn"
+              Value="True" />
+      <Setter Property="Background"
+              Value="#FFE6F4F9" />
+    </Style>
+
+    <Style x:Key="TextFieldRO"
+           TargetType="TextBlock">
+      <Setter Property="VerticalAlignment"
+              Value="Center" />
+      <Setter Property="Foreground"
+              Value="Black" />
+    </Style>
+
+    <Style x:Key="FieldLabel"
+           TargetType="Label">
+      <Setter Property="VerticalAlignment"
+              Value="Center" />
+      <Setter Property="Foreground"
+              Value="Blue" />
+      <Setter Property="FontFamily"
+              Value="Arial" />
+      <Setter Property="FontWeight"
+              Value="Bold" />
+    </Style>
+
+    <Style x:Key="GroupLabel"
+           TargetType="GroupBox">
+      <Setter Property="VerticalAlignment"
+              Value="Center" />
+      <Setter Property="Foreground"
+              Value="Chocolate" />
+      <Setter Property="Margin"
+              Value="5" />
+      <Setter Property="Padding"
+              Value="5" />
+      <Setter Property="BorderBrush"
+              Value="Chocolate" />
+    </Style>
+
+    <Style x:Key="InputField"
+           TargetType="Grid">
+      <Setter Property="Margin"
+              Value="2" />
+    </Style>
+
+    <Style x:Key="ComboboxField" TargetType="ComboBoxItem">
+      <Setter Property="Background"
+              Value="#FFE6F4F9" />
+    </Style>
+
   </Window.Resources>
 
   <Grid>
@@ -24,36 +103,64 @@
       <RowDefinition Height="*" />
       <RowDefinition Height="auto" />
     </Grid.RowDefinitions>
+
     <StackPanel Orientation="Vertical"
                 Grid.Row="0">
-      
+
       <GroupBox Header="Common parameters"
-                Padding="5"
-                Margin="5">
+                Style="{StaticResource GroupLabel}">
         <StackPanel Orientation="Vertical">
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Name" />
-            <TextBox Text="{Binding Path=Name, Mode=OneWay}" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Description" />
-            <TextBox Text="{Binding Path=Description}" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Comment" />
-            <TextBox Text="{Binding Path=Comment}" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Session type" />
-            <StackPanel Orientation="Horizontal">
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Name" />
+            <TextBlock Grid.Column="1"
+                       Style="{StaticResource ResourceKey=TextFieldRO}"
+                       Text="{Binding Path=Name, Mode=OneWay}" />
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Description" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=Description}" />
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Comment" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=Comment}" />
+          </Grid>
+
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Session type" />
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
               <RadioButton GroupName="SessionType"
                            Content="SSH"
                            Command="{Binding Path=CommandSetSessionType}"
@@ -79,48 +186,77 @@
                            Command="{Binding Path=CommandSetSessionType}"
                            CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Content}" />
             </StackPanel>
-          </StackPanel>
+          </Grid>
         </StackPanel>
       </GroupBox>
-      
+
       <GroupBox Header="Network parameters"
-                Visibility="{Binding Path=SessionIsHAP, Converter={StaticResource BoolToVisibility}}"
-                Padding="5"
-                Margin="5">
+                Style="{StaticResource GroupLabel}"
+                Visibility="{Binding Path=SessionIsHAP, Converter={StaticResource BoolToVisibility}}">
+
         <StackPanel Orientation="Vertical">
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Host name" />
-            <TextBox Text="{Binding Path=HostName}" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5,5,5,0">
-            <TextBlock Width="100"
-                       Text="Port" />
-            <TextBox Text="{Binding Path=Port}" />
-          </StackPanel>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="HostName" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=HostName}" />
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Port" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=Port}" />
+          </Grid>
+
         </StackPanel>
       </GroupBox>
 
       <GroupBox Header="COM parameters"
-                Padding="5"
-                Margin="5"
+                Style="{StaticResource GroupLabel}"
                 Visibility="{Binding Path=SessionIsSerial, Converter={StaticResource BoolToVisibility}}"
                 d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySessionSerial}}">
         <StackPanel Orientation="Vertical">
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Port name" />
-            <TextBox Text="{Binding Path=SerialLine}" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Speed" />
-            <ComboBox SelectedValue="{Binding Path=SerialSpeed}"
-                      Text="{Binding Path=SerialSpeed, Mode=OneWay}">
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Port name" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=SerialLine}" />
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Speed" />
+            <ComboBox Grid.Column="1" SelectedValue="{Binding Path=SerialSpeed}"
+                      Text="{Binding Path=SerialSpeed, Mode=OneWay}"
+                      ItemContainerStyle="{StaticResource ResourceKey=ComboboxField}"
+                      >
+              
               <ComboBoxItem Content="1200" />
               <ComboBoxItem Content="2400" />
               <ComboBoxItem Content="9600" />
@@ -129,51 +265,84 @@
               <ComboBoxItem Content="115200"
                             IsSelected="true" />
             </ComboBox>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Data bits" />
-            <TextBox Text="{Binding Path=SerialDataBits}" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Stop bits" />
-            <TextBox Text="{Binding Path=SerialStopbits}" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5">
-            <TextBlock Width="100"
-                       Text="Parity" />
-            <ComboBox SelectedValue="{Binding Path=SerialParity}"
-                      Text="{Binding Path=SerialParity, Mode=OneWay}">
+          </Grid>
+          
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Data bits" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=SerialDataBits}" />
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Stop bits" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=SerialStopbits}" />
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Parity" />
+            <ComboBox Grid.Column="1"
+                      SelectedValue="{Binding Path=SerialParity}"
+                      Text="{Binding Path=SerialParity, Mode=OneWay}"
+                      ItemContainerStyle="{StaticResource ResourceKey=ComboboxField}">
               <ComboBoxItem Content="Odd" />
               <ComboBoxItem Content="Even" />
               <ComboBoxItem Content="None"
                             IsSelected="True" />
             </ComboBox>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Margin="5,5,5,0">
-            <TextBlock Width="100"
-                       Text="Flow control" />
-            <TextBox Text="{Binding Path=SerialFlowControl}" />
-          </StackPanel>
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Flow control" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=SerialFlowControl}" />
+          </Grid>
+
+          
         </StackPanel>
       </GroupBox>
 
       <GroupBox Header="Remote command"
+                Style="{StaticResource GroupLabel}"
                 Margin="5"
                 Padding="5">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                      VerticalScrollBarVisibility="Auto">
-          <TextBox Text="{Binding Path=RemoteCommand}"
-                   BorderThickness="0" />
+                      VerticalScrollBarVisibility="Visible">
+          <TextBox Text="{Binding Path=RemoteCommand}" Style="{StaticResource MultiLineTextField}"
+                   BorderThickness="0"
+                   MaxLines="10" />
         </ScrollViewer>
       </GroupBox>
 
     </StackPanel>
+
     <Grid Grid.Row="1"
           Margin="0,0,0,10">
       <Grid.ColumnDefinitions>

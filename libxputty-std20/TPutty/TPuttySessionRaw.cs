@@ -35,6 +35,13 @@ namespace libxputty_std20 {
     public override void Dispose() {
       base.Dispose();
     }
+
+    public override IPuttySession Duplicate() {
+      TPuttySessionRaw RetVal = new TPuttySessionRaw(base.Duplicate());
+      RetVal.HostName = HostName;
+      RetVal.Port = Port;
+      return RetVal;
+    }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Converters -------------------------------------------------------------------------------------
