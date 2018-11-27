@@ -6,6 +6,7 @@ using System.Text;
 using BLTools;
 
 using EasyPutty.Interfaces;
+using libxputty_std20;
 
 namespace EasyPutty.ViewModels {
   public class TVMPuttyGroup : TVMEasyPuttyBase, IHeaderedAndSelectable {
@@ -51,10 +52,10 @@ namespace EasyPutty.ViewModels {
     public IEnumerable<TVMPuttyGroup> Groups => Items.OfType<TVMPuttyGroup>();
     public IEnumerable<TVMPuttySession> Sessions => Items.OfType<TVMPuttySession>();
 
-    public TVMPuttyGroup SelectedItem {
+    public IHeaderedAndSelectable SelectedItem {
       get {
         if ( _SelectedItem == null && Items.Any()) {
-          _SelectedItem = Items.First() as TVMPuttyGroup;
+          _SelectedItem = Items.First() as IHeaderedAndSelectable;
         }
         return _SelectedItem;
       }
@@ -62,19 +63,20 @@ namespace EasyPutty.ViewModels {
         _SelectedItem = value;
         if ( ParentRoot != null ) {
           StringBuilder Display = new StringBuilder();
-          TVMPuttyGroup GroupIterator = ParentRoot.PuttyGroup.SelectedItem;
-          while ( GroupIterator != null ) {
-            if ( GroupIterator.Header != "<empty>" ) {
-              Display.AppendFormat($" > {GroupIterator.Header}");
+          if ( ParentRoot.PuttyGroup.SelectedItem is TVMPuttyGroup GroupIterator ) {
+            while ( GroupIterator != null ) {
+              if ( !GroupIterator.Header.IsEmpty() ) {
+                Display.AppendFormat($" > {GroupIterator.Header}");
+              }
+              GroupIterator = GroupIterator.SelectedItem as TVMPuttyGroup;
             }
-            GroupIterator = GroupIterator.SelectedItem;
           }
           ParentRoot.ContentLocation = Display.ToString();
         }
         NotifyPropertyChanged(nameof(SelectedItem));
       }
     }
-    private TVMPuttyGroup _SelectedItem;
+    private IHeaderedAndSelectable _SelectedItem;
 
     public int Count => Items.Count;
 
@@ -92,11 +94,14 @@ namespace EasyPutty.ViewModels {
 
     public override void Dispose() {
       lock ( _Lock ) {
-        foreach ( TVMPuttyGroup PuttyGroupItem in Items ) {
+        foreach ( TVMPuttyGroup PuttyGroupItem in Items.OfType<TVMPuttyGroup>() ) {
           PuttyGroupItem.Dispose(true);
         }
+        foreach ( TVMPuttySession PuttySessionItem in Items.OfType<TVMPuttySession>() ) {
+          PuttySessionItem.Dispose();
+        }
+        Clear();
       }
-      Clear();
       Dispose(true);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
@@ -134,12 +139,11 @@ namespace EasyPutty.ViewModels {
     }
 
     public void Clear() {
-      foreach(TVMPuttyGroup PuttyGroupItem in Groups) {
+      foreach(IHeaderedAndSelectable PuttyGroupItem in Items) {
         PuttyGroupItem.Clear();
       }
       Items.Clear();
       NotifyPropertyChanged(nameof(Count));
-      NotifyPropertyChanged(nameof(Items));
     }
 
     protected void _SelectItem() {

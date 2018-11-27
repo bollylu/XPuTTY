@@ -86,8 +86,8 @@ namespace EasyPutty.ViewModels {
     }
 
     public TVMEasyPuttyBase(object data) : base() {
-      _InitializeCommands();
       _Data = data;
+      _InitializeCommands();
       _Initialize();
     }
 

@@ -39,6 +39,20 @@
               Value="Black" />
     </Style>
 
+    <Style x:Key="PasswordField"
+           TargetType="PasswordBox">
+      <Setter Property="VerticalAlignment"
+              Value="Center" />
+      <Setter Property="Foreground"
+              Value="Black" />
+      <Setter Property="Background"
+              Value="#FFE6F4F9" />
+      <Setter Property="BorderThickness"
+              Value="0,0,0,1" />
+      <Setter Property="BorderBrush"
+              Value="Black" />
+    </Style>
+
     <Style x:Key="MultiLineTextField"
            TargetType="TextBox">
       <Setter Property="VerticalAlignment"
@@ -190,6 +204,41 @@
         </StackPanel>
       </GroupBox>
 
+      <GroupBox Header="Credentials"
+                Style="{StaticResource GroupLabel}"
+                Visibility="{Binding Path=SessionIsHAP, Converter={StaticResource BoolToVisibility}}">
+
+        <StackPanel Orientation="Vertical">
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Username" />
+            <TextBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=TextField}"
+                     Text="{Binding Path=Username}" />
+          </Grid>
+
+          <Grid Style="{StaticResource InputField}">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Style="{StaticResource LabelSize}" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Style="{StaticResource FieldLabel}"
+                   Content="Password" />
+            <PasswordBox Grid.Column="1"
+                     Style="{StaticResource ResourceKey=PasswordField}"
+                     />
+          </Grid>
+
+        </StackPanel>
+      </GroupBox>
+      
       <GroupBox Header="Network parameters"
                 Style="{StaticResource GroupLabel}"
                 Visibility="{Binding Path=SessionIsHAP, Converter={StaticResource BoolToVisibility}}">

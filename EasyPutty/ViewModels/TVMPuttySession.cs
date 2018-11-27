@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 
 using BLTools;
@@ -29,6 +30,8 @@ namespace EasyPutty.ViewModels {
     public string CleanName => PuttySession == null ? "" : PuttySession.CleanName;
 
     public string Header => CleanName.Replace($"[{string.Join("//", GroupLevel1, GroupLevel2).TrimEnd('/')}]", "").Replace($"{{{Section}}}", "");
+
+    public string TooltipComment => string.IsNullOrWhiteSpace(base.Comment) ? null : base.Comment;
 
     public string GroupLevel1 {
       get {
@@ -83,9 +86,11 @@ namespace EasyPutty.ViewModels {
         if ( PuttySession != null ) {
           PuttySession.RemoteCommand = value;
           NotifyPropertyChanged(nameof(RemoteCommand));
+          NotifyPropertyChanged(nameof(HasRemoteCommand));
         }
       }
     }
+    public bool HasRemoteCommand => !string.IsNullOrEmpty(RemoteCommand);
 
     public bool IsRunning => PuttySession.IsRunning;
     public string PuttyCommandLine => PuttySession.CommandLine;
@@ -217,8 +222,10 @@ namespace EasyPutty.ViewModels {
     }
     #endregion --- Serial session --------------------------------------------
 
-    private Views.ViewEditSession EditSessionWindow;
+    private IView EditSessionWindow;
+
     public bool IsEditSessionInProgress { get; private set; }
+    protected TVMEditedPuttySession VMEditedPuttySession;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TVMPuttySession(IPuttySession puttySession) : base(puttySession) {
@@ -271,37 +278,51 @@ namespace EasyPutty.ViewModels {
       }
       IsEditSessionInProgress = true;
 
-      EditSessionWindow = new Views.ViewEditSession();
-    
       IPuttySession EditedPuttySession = PuttySession.Duplicate();
-      TVMEditedPuttySession VMEditedPuttySession = new TVMEditedPuttySession(EditedPuttySession, EditSessionWindow);
-      EditSessionWindow.DataContext = VMEditedPuttySession;
-      EditSessionWindow.ShowDialog();
 
-      if ( EditSessionWindow.DialogResult == true ) {
+      EditSessionWindow = new Views.ViewEditSession();
+      
+      VMEditedPuttySession = new TVMEditedPuttySession(EditedPuttySession, EditSessionWindow);
+      VMEditedPuttySession.OnEditCompleted += VMEditedPuttySession_OnEditCompleted;
+
+      EditSessionWindow.DataContext = VMEditedPuttySession;
+
+      EditSessionWindow.Show();
+      if ( EditSessionWindow is IPassword EditSessionWithPassword ) {
+        EditSessionWithPassword.SetPassword(EditedPuttySession.Credential.SecurePassword);
+      }
+    }
+
+    private void VMEditedPuttySession_OnEditCompleted(object sender, bool e) {
+      VMEditedPuttySession.OnEditCompleted -= VMEditedPuttySession_OnEditCompleted;
+      if ( e ) {
         RootVM.DataIsDirty = true;
-        Description = EditedPuttySession.Description;
-        Comment = EditedPuttySession.Comment;
-        RemoteCommand = EditedPuttySession.RemoteCommand;
-        if ( EditedPuttySession is IHostAndPort SessionHAP ) {
-          HostName = SessionHAP.HostName;
-          Port = SessionHAP.Port;
+        Description = VMEditedPuttySession.Description;
+        Comment = VMEditedPuttySession.Comment;
+        RemoteCommand = VMEditedPuttySession.RemoteCommand;
+        if ( VMEditedPuttySession.PuttySessionHAP != null ) {
+          HostName = VMEditedPuttySession.PuttySessionHAP.HostName;
+          Port = VMEditedPuttySession.PuttySessionHAP.Port;
         }
-        if (EditedPuttySession is ISerial SessionSerial) {
-          SerialLine = SessionSerial.SerialLine;
-          SerialSpeed = SessionSerial.SerialSpeed;
-          SerialDataBits = SessionSerial.SerialDataBits;
-          SerialStopBits = SessionSerial.SerialStopBits;
-          SerialParity = SessionSerial.SerialParity;
-          SerialFlowControl = SessionSerial.SerialFlowControl;
+        if ( VMEditedPuttySession.PuttySessionSerial != null ) {
+          SerialLine = VMEditedPuttySession.PuttySessionSerial.SerialLine;
+          SerialSpeed = VMEditedPuttySession.PuttySessionSerial.SerialSpeed;
+          SerialDataBits = VMEditedPuttySession.PuttySessionSerial.SerialDataBits;
+          SerialStopBits = VMEditedPuttySession.PuttySessionSerial.SerialStopBits;
+          SerialParity = VMEditedPuttySession.PuttySessionSerial.SerialParity;
+          SerialFlowControl = VMEditedPuttySession.PuttySessionSerial.SerialFlowControl;
+        }
+        if (VMEditedPuttySession.PuttySession.Credential!=null) {
+          PuttySession.Credential.Username = VMEditedPuttySession.PuttySession.Credential.Username;
+          PuttySession.Credential.SecurePassword = VMEditedPuttySession.PuttySession.Credential.SecurePassword;
         }
       }
 
+      VMEditedPuttySession.Dispose();
       IsEditSessionInProgress = false;
     }
+
     #endregion --- Edit session and events -----------------------------------------
-
-
 
     #region --- For design time --------------------------------------------
     public static TVMPuttySession DesignVMPuttySession {
@@ -361,6 +382,8 @@ namespace EasyPutty.ViewModels {
       }
     }
 
+    
+
     private static TVMPuttySession _DesignVMPuttySessionSerial;
     #endregion --- For design time --------------------------------------------
 
@@ -368,6 +391,7 @@ namespace EasyPutty.ViewModels {
       PuttySession.PuttyProcess.AssignProcess(process);
     }
 
+    public ObservableCollection<IHeaderedAndSelectable> Items { get; }
     public void Clear() { }
   }
 }

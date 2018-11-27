@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace libxputty_std20.Interfaces {
   public interface ICredential : IToXml {
-    string Username { get; }
+    string Username { get; set; }
     string Domain { get; }
     string UsernameWithoutDomain { get; }
     bool XmlSecure { get;}
     string EncryptionKey { get; }
     bool HasValue { get; }
     bool Inherited { get; }
-    SecureString SecurePassword { get; }
+    SecureString SecurePassword { get; set; }
     IParent Parent { get; }
 
     void SetSecure(bool value);

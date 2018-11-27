@@ -32,45 +32,46 @@
             <Image Source="{Binding Path=FileOpenPicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <MenuItem Header="Open sessions XML data file"
+        <MenuItem Header="Open sessions from XML data file"
                   Command="{Binding Path=CommandFileOpenXml}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileOpenPicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <MenuItem Header="Open sessions JSON data file">
+        <!--<MenuItem Header="Open sessions JSON data file">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileOpenPicture}" />
           </MenuItem.Icon>
-        </MenuItem>
+        </MenuItem>-->
         <Separator />
 
-        <MenuItem Header="Save sessions file"
-                  Command="{Binding Path=CommandFileSave}">
+        <MenuItem Header="Save current sessions file"
+                  Command="{Binding Path=CommandFileSave}"
+                  Visibility="{Binding Path=IsSessionSourceNotRegistry, Converter={StaticResource BoolToVisibility}}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
         <Separator />
 
-        <MenuItem Header="Save sessions into registry"
+        <!--<MenuItem Header="Save sessions into registry"
                   Command="{Binding Path=CommandFileSaveRegistry}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
-        </MenuItem>
-        <MenuItem Header="Save sessions XML data file"
+        </MenuItem>-->
+        <MenuItem Header="Save sessions into XML data file"
                   Command="{Binding Path=CommandFileSaveXml}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <MenuItem Header="Save sessions JSON data file"
+        <!--<MenuItem Header="Save sessions JSON data file"
                   Command="{Binding Path=CommandFileSaveJson}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
-        </MenuItem>
+        </MenuItem>-->
         <Separator />
 
         <MenuItem Name="mnuFileQuit"

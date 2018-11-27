@@ -16,5 +16,9 @@ namespace EasyPutty.Interfaces {
     bool DisplaySelectionButton {
       get;
     }
+
+    void Clear();
+
+    ObservableCollection<IHeaderedAndSelectable> Items { get; }
   }
 }

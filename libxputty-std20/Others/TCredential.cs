@@ -21,7 +21,7 @@ namespace libxputty_std20 {
     #endregion XML contants
 
     #region Public properties
-    public string Username { get; protected set; }
+    public string Username { get; set; }
 
     public string Domain {
       get {
@@ -65,7 +65,7 @@ namespace libxputty_std20 {
     }
     private bool _XmlSecure;
 
-    public SecureString SecurePassword { get; protected set; }
+    public SecureString SecurePassword { get; set; }
 
     public string EncryptionKey {
       get {
@@ -213,8 +213,9 @@ namespace libxputty_std20 {
 
     }
 
-    protected override void _Initialize() { }
-
+    protected override void _Initialize() {
+      
+    }
     public override void Dispose() {
       if ( SecurePassword != null ) {
         SecurePassword.Dispose();

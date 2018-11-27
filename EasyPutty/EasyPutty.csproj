@@ -29,7 +29,7 @@
     <UpdateUrl>http://localhost/XPuttyMan/</UpdateUrl>
     <ProductName>EasyPutty</ProductName>
     <PublisherName>Luc Bolly</PublisherName>
-    <ApplicationRevision>8</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -207,6 +207,7 @@
       <HintPath>..\packages\System.Threading.AccessControl.4.5.0\lib\net461\System.Threading.AccessControl.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -226,6 +227,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Interfaces\IHeaderedAndSelectable.cs" />
+    <Compile Include="Interfaces\IPassword.cs" />
+    <Compile Include="Interfaces\IView.cs" />
     <Compile Include="ViewModels\TVMEasyPuttyBase.cs" />
     <Compile Include="Base classes\TGroup.cs" />
     <Compile Include="Base classes\TRelayCommand.cs" />

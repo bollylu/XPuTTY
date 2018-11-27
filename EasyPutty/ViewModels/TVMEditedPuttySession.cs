@@ -16,32 +16,63 @@ namespace EasyPutty.ViewModels {
     public TRelayCommand CommandCancel { get; private set; }
     #endregion RelayCommand
 
-    private IView View;
+    public IView View;
+    public event EventHandler<bool> OnEditCompleted;
+
+    public string Username {
+      get {
+        if ( PuttySession != null ) {
+          if ( PuttySession.Credential != null ) {
+            return PuttySession.Credential.Username;
+          }
+        }
+        return "";
+      }
+      set {
+        if ( PuttySession != null ) {
+          if ( PuttySession.Credential != null ) {
+            PuttySession.Credential.Username = value;
+          }
+        }
+      }
+    }
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TVMEditedPuttySession(IPuttySession puttySession, IView view) : base(puttySession) {
       View = view;
     }
     protected override void _InitializeCommands() {
+      base._InitializeCommands();
       CommandOk = new TRelayCommand(() => _CommandOk(), _ => true);
       CommandCancel = new TRelayCommand(() => _CommandCancel(), _ => true);
     }
 
     protected override void _Initialize() {
+      base._Initialize();
     }
-
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Commands --------------------------------------------
     private void _CommandOk() {
-      View.DialogResult = true;
-      View.Close();
+      if ( View != null ) {
+        if ( View is IPassword ViewWithPassword ) {
+          PuttySession.Credential.SecurePassword = ViewWithPassword.GetPassword();
+        }
+        View.Close();
+      }
+      if (OnEditCompleted!=null) {
+        OnEditCompleted(this, true);
+      }
     }
 
     private void _CommandCancel() {
-      View.DialogResult = false;
-      View.Close();
-    } 
+      if ( View != null ) {
+        View.Close();
+      }
+      if ( OnEditCompleted != null ) {
+        OnEditCompleted(this, false);
+      }
+    }
     #endregion --- Commands -----------------------------------------
 
     #region --- For design time --------------------------------------------

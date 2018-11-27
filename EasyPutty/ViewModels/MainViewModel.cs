@@ -122,9 +122,12 @@ namespace EasyPutty.ViewModels {
         CurrentSettings.Save();
         NotifyPropertyChanged(nameof(SessionSourceName));
         NotifyPropertyChanged(nameof(ApplicationTitle));
+        NotifyPropertyChanged(nameof(IsSessionSourceNotRegistry));
       }
     }
     private IPuttySessionSource _SessionSource;
+
+    public bool IsSessionSourceNotRegistry => !(SessionSource is TPuttySessionSourceRegistry);
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel() : base() {
@@ -147,6 +150,10 @@ namespace EasyPutty.ViewModels {
       SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource);
       if ( SessionSource != null ) {
         _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+      }
+
+      if ( PuttyGroup.Items.Any() ) {
+        PuttyGroup.SelectedItem = PuttyGroup.Items.First();
       }
       #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
 
@@ -206,6 +213,10 @@ namespace EasyPutty.ViewModels {
       PuttyGroup.Clear();
 
       _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+
+      if (PuttyGroup.Items.Any()) {
+        PuttyGroup.SelectedItem = PuttyGroup.Items.First();
+      }
 
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
@@ -340,52 +351,6 @@ namespace EasyPutty.ViewModels {
       MessageBox.Show(Usage.ToString());
     }
     #endregion --- Menu --------------------------------------------
-
-    //private void _ExportAll() {
-    //  WorkInProgress = true;
-    //  Log.Write("Exporting all sessions...");
-    //  NotifyExecutionProgress("Exporting sessions...");
-
-    //  SaveFileDialog SFD = new SaveFileDialog {
-    //    DefaultExt = ".xml",
-    //    Title = "Select a filename to export your data",
-    //    OverwritePrompt = true,
-    //    AddExtension = true
-    //  };
-    //  SFD.DefaultExt = ".xml";
-    //  SFD.Filter = "XML files (.xml)|*.xml";
-
-    //  if ( SFD.ShowDialog() == true ) {
-    //    TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
-    //    SaveXmlSource.SaveSessions(AllPuttySessions);
-    //  }
-
-    //  NotifyExecutionCompleted("Done.");
-    //  WorkInProgress = false;
-    //}
-    //private void _ExportSelected() {
-    //  WorkInProgress = true;
-    //  Log.Write("Exporting selected sessions...");
-    //  NotifyExecutionProgress("Exporting selected sessions...");
-
-    //  SaveFileDialog SFD = new SaveFileDialog {
-    //    DefaultExt = ".xml",
-    //    Title = "Select a filename to export your data",
-    //    OverwritePrompt = true,
-    //    AddExtension = true
-    //  };
-    //  SFD.DefaultExt = ".xml";
-    //  SFD.Filter = "XML files (.xml)|*.xml";
-
-    //  if ( SFD.ShowDialog() == true ) {
-    //    TPuttySessionSourceXml SaveXmlSource = new TPuttySessionSourceXml(SFD.FileName);
-    //    SaveXmlSource.SaveSessions(AllVMPuttySessions.Where(x => x.IsSelected).Select(x => x.PuttySession));
-    //  }
-
-    //  NotifyExecutionCompleted("Done.");
-    //  WorkInProgress = false;
-    //}
-
 
     private void _DispatchSessions(IEnumerable<IPuttySession> sessions) {
 
