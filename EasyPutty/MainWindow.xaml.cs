@@ -62,6 +62,14 @@ namespace EasyPutty {
       this.DataContext = MainItem;
 
     }
-    
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+      if ( MainItem != null && MainItem.DataIsDirty ) {
+        if ( MessageBox.Show("Some data are still unsaved. Do you really want to quit now ?", "Quit confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) == MessageBoxResult.No ) {
+          e.Cancel = true;
+        }
+      }
+      return;
+    }
   }
 }

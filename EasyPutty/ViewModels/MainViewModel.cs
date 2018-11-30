@@ -139,23 +139,46 @@ namespace EasyPutty.ViewModels {
       }
       PuttyGroup.Parent = this;
 
-      #region --- Reload data from previous PuttySessionSource --------------------------------------------
-      Settings CurrentSettings = new Settings();
-      CurrentSettings.Reload();
+      if (App.AppArgs.IsDefined(App.PARAM_LOAD)) {
+        #region --- Load data from PuttySessionSource --------------------------------------------
+        Settings CurrentSettings = new Settings();
 
-      if ( string.IsNullOrWhiteSpace(CurrentSettings.LastDataSource) ) {
-        return;
-      }
+        string NewDataSource = App.AppArgs.GetValue<string>(App.PARAM_LOAD, "");
+        if (NewDataSource=="") {
+          Log.Write("Invalid parameter : /Load");
+          return;
+        }
 
-      SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource);
-      if ( SessionSource != null ) {
-        _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
-      }
+        SessionSource = TPuttySessionSource.GetPuttySessionSource(NewDataSource);
+        if ( SessionSource != null ) {
+          _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+        }
+        CurrentSettings.LastDataSource = NewDataSource;
+        CurrentSettings.Save();
 
-      if ( PuttyGroup.Items.Any() ) {
-        PuttyGroup.SelectedItem = PuttyGroup.Items.First();
+        if ( PuttyGroup.Items.Any() ) {
+          PuttyGroup.SelectedItem = PuttyGroup.Items.First();
+        }
+        #endregion --- Load data from PuttySessionSource --------------------------------------------
+      } else {
+        #region --- Reload data from previous PuttySessionSource --------------------------------------------
+        Settings CurrentSettings = new Settings();
+        CurrentSettings.Reload();
+
+        if ( string.IsNullOrWhiteSpace(CurrentSettings.LastDataSource) ) {
+          return;
+        }
+
+        SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource);
+        if ( SessionSource != null ) {
+          _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+        }
+
+        if ( PuttyGroup.Items.Any() ) {
+          PuttyGroup.SelectedItem = PuttyGroup.Items.First();
+        }
+        #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
       }
-      #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
 
     }
 

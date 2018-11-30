@@ -288,8 +288,10 @@ namespace EasyPutty.ViewModels {
       EditSessionWindow.DataContext = VMEditedPuttySession;
 
       EditSessionWindow.Show();
-      if ( EditSessionWindow is IPassword EditSessionWithPassword ) {
-        EditSessionWithPassword.SetPassword(EditedPuttySession.Credential.SecurePassword);
+      if ( EditedPuttySession.Credential != null && EditedPuttySession.Credential.HasValue ) {
+        if ( EditSessionWindow is IPassword EditSessionWithPassword ) {
+          EditSessionWithPassword.SetPassword(EditedPuttySession.Credential.SecurePassword);
+        }
       }
     }
 

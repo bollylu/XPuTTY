@@ -56,11 +56,15 @@ namespace EasyPutty.ViewModels {
     private void _CommandOk() {
       if ( View != null ) {
         if ( View is IPassword ViewWithPassword ) {
-          PuttySession.Credential.SecurePassword = ViewWithPassword.GetPassword();
+          if ( PuttySession.Credential == null ) {
+            PuttySession.SetLocalCredential(TCredential.Create(Username, ViewWithPassword.GetPassword()));
+          } else {
+            PuttySession.Credential.SecurePassword = ViewWithPassword.GetPassword();
+          }
         }
         View.Close();
       }
-      if (OnEditCompleted!=null) {
+      if ( OnEditCompleted != null ) {
         OnEditCompleted(this, true);
       }
     }

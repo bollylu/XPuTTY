@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Windows;
 
 using BLTools;
 using BLTools.Debugging;
+
+using static EasyPutty.Helpers;
 
 namespace EasyPutty {
   /// <summary>
@@ -19,6 +19,7 @@ namespace EasyPutty {
     public const string PARAM_LOGFILE = "log";
     public const string PARAM_LOGBASE = "logbase";
     public const string PARAM_CONFIG = "config";
+    public const string PARAM_LOAD = "load";
 
     public static readonly string AppName = Assembly.GetExecutingAssembly().GetName().Name;
 
@@ -26,7 +27,7 @@ namespace EasyPutty {
     public static readonly string DEFAULT_DEV_LOGBASE = $@"c:\Logs\{AppName}";
     public const string DEFAULT_CONFIG = "config.xml";
 
-    public static SplitArgs Args;
+    public static SplitArgs AppArgs;
     public static NetworkCredential CurrentUserCredential;
     
     public static readonly string AppUsername = string.IsNullOrWhiteSpace(Environment.UserDomainName) ? Environment.UserName : $@"{Environment.UserDomainName}\{Environment.UserName}";
@@ -38,7 +39,7 @@ namespace EasyPutty {
     }
 
     private void Application_Startup(object sender, StartupEventArgs e) {
-      Args = Helpers.ReadAppArgs();
+      AppArgs = ReadAppArgs();
 
       Trace.AutoFlush = true;
 
@@ -52,12 +53,12 @@ namespace EasyPutty {
     public static void SetLogDestination() {
       string LogBase;
       if ( !System.Diagnostics.Debugger.IsAttached ) {
-        LogBase = Args.GetValue<string>(PARAM_LOGBASE, DEFAULT_PROD_LOGBASE);
+        LogBase = AppArgs.GetValue<string>(PARAM_LOGBASE, DEFAULT_PROD_LOGBASE);
       } else {
-        LogBase = Args.GetValue<string>(PARAM_LOGBASE, DEFAULT_DEV_LOGBASE);
+        LogBase = AppArgs.GetValue<string>(PARAM_LOGBASE, DEFAULT_DEV_LOGBASE);
       }
 
-      string LogFile = Args.GetValue<string>(PARAM_LOGFILE, "");
+      string LogFile = AppArgs.GetValue<string>(PARAM_LOGFILE, "");
 
       Trace.Listeners.Clear();
 
