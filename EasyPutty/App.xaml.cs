@@ -27,7 +27,7 @@ namespace EasyPutty {
     public static readonly string DEFAULT_DEV_LOGBASE = $@"c:\Logs\{AppName}";
     public const string DEFAULT_CONFIG = "config.xml";
 
-    public static SplitArgs AppArgs;
+    public static ISplitArgs AppArgs;
     public static NetworkCredential CurrentUserCredential;
     
     public static readonly string AppUsername = string.IsNullOrWhiteSpace(Environment.UserDomainName) ? Environment.UserName : $@"{Environment.UserDomainName}\{Environment.UserName}";

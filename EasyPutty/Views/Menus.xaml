@@ -13,7 +13,6 @@
   <ControlTemplate x:Key="MainMenu">
     <Menu Height="23"
           HorizontalAlignment="Stretch"
-          Name="mnuMain"
           VerticalAlignment="Top"
           d:DataContext="{Binding Source={x:Static localViewModels:MainViewModel.DesignMainViewModel}}">
 
@@ -38,11 +37,7 @@
             <Image Source="{Binding Path=FileOpenPicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <!--<MenuItem Header="Open sessions JSON data file">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileOpenPicture}" />
-          </MenuItem.Icon>
-        </MenuItem>-->
+
         <Separator />
 
         <MenuItem Header="Save current sessions file"
@@ -54,65 +49,46 @@
         </MenuItem>
         <Separator />
 
-        <!--<MenuItem Header="Save sessions into registry"
-                  Command="{Binding Path=CommandFileSaveRegistry}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileSavePicture}" />
-          </MenuItem.Icon>
-        </MenuItem>-->
         <MenuItem Header="Save sessions into XML data file"
                   Command="{Binding Path=CommandFileSaveXml}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <!--<MenuItem Header="Save sessions JSON data file"
-                  Command="{Binding Path=CommandFileSaveJson}">
-          <MenuItem.Icon>
-            <Image Source="{Binding Path=FileSavePicture}" />
-          </MenuItem.Icon>
-        </MenuItem>-->
+
         <Separator />
 
-        <MenuItem Name="mnuFileQuit"
-                  Header="Quit"
+        <MenuItem Header="Quit"
                   Command="{Binding Path=CommandFileQuit}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileQuitPicture}" />
           </MenuItem.Icon>
         </MenuItem>
       </MenuItem>
-      <MenuItem Header="View"
-                Name="mnuView">
+
+      <MenuItem Header="View">
 
       </MenuItem>
-      <MenuItem Header="Tools"
-                Name="mnuTools">
+      <MenuItem Header="Tools">
 
-        <!--<MenuItem Name="mnuToolsExportAll"
-                  Header="Export all"
-                  Command="{Binding Path=CommandToolsExportAll}">
-        </MenuItem>
-        <MenuItem Name="mnuToolsExportSelectedItems"
-                  Header="Export selected items"
-                  Command="{Binding Path=CommandToolsExportSelected}">
-        </MenuItem>-->
+        <MenuItem Header="Create new session"
+                  Command="{Binding CommandToolsNewSession}" />
+
         <Separator />
-        <MenuItem Name="mnuToolsOptions"
-                  Header="Options">
+
+        <MenuItem Header="Options">
         </MenuItem>
+
       </MenuItem>
-      <MenuItem Header="Help"
-                Name="mnuHelp">
-        <MenuItem Name="mnuHelpContact"
-                  Header="Contact"
+
+      <MenuItem Header="Help">
+        <MenuItem Header="Contact"
                   Command="{Binding Path=CommandHelpContact}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=ContactPicture}" />
           </MenuItem.Icon>
         </MenuItem>
-        <MenuItem Name="mnuHelpAbout"
-                  Header="About"
+        <MenuItem Header="About"
                   Command="{Binding Path=CommandHelpAbout}" />
       </MenuItem>
 

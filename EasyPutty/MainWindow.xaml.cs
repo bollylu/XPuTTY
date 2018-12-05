@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using BLTools.MVVM;
 using EasyPutty.ViewModels;
+using static EasyPutty.Helpers;
 
 namespace EasyPutty {
   /// <summary>
@@ -58,7 +59,7 @@ namespace EasyPutty {
         stsBar.ProgressBarValue = e.Value;
       };
 
-      MainItem = new MainViewModel();
+      MainItem = new MainViewModel(ReadAppArgs());
       this.DataContext = MainItem;
 
     }

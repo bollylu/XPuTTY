@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-
+using System.Windows.Input;
 using BLTools;
 
 using EasyPutty.Interfaces;
@@ -42,7 +42,7 @@ namespace EasyPutty.ViewModels {
         return true;
       }
     }
-    public TRelayCommand CommandSelectItem {
+    public ICommand CommandSelectItem {
       get; protected set;
     }
     #endregion --- IHeaderedAndSelectable -----------------------------------------

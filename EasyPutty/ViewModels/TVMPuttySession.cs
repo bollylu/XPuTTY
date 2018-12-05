@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-
+using System.Windows.Input;
 using BLTools;
 
 using EasyPutty.Interfaces;
@@ -22,9 +22,9 @@ namespace EasyPutty.ViewModels {
     public MainViewModel RootVM => GetParent<MainViewModel>() as MainViewModel;
 
     #region RelayCommand
-    public TRelayCommand CommandStartSession { get; private set; }
-    public TRelayCommand CommandSelectItem { get; private set; }
-    public TRelayCommand CommandEditSession { get; private set; }
+    public ICommand CommandStartSession { get; private set; }
+    public ICommand CommandSelectItem { get; private set; }
+    public ICommand CommandEditSession { get; private set; }
     #endregion RelayCommand
 
     public string CleanName => PuttySession == null ? "" : PuttySession.CleanName;
@@ -232,8 +232,8 @@ namespace EasyPutty.ViewModels {
     }
 
     protected override void _InitializeCommands() {
-      CommandStartSession = new TRelayCommand(() => _Start(), _ => true);
-      CommandEditSession = new TRelayCommand(() => _EditSession(), _ => true);
+      CommandStartSession = new TRelayCommand(() => _Start());
+      CommandEditSession = new TRelayCommand(() => _EditSession());
     }
 
     protected override void _Initialize() {

@@ -5,8 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows;
-
+using System.Windows.Input;
 using BLTools;
+
 
 using EasyPutty.Properties;
 
@@ -19,26 +20,28 @@ namespace EasyPutty.ViewModels {
   public class MainViewModel : TVMEasyPuttyBase {
 
     #region RelayCommand
-    public TRelayCommand CommandFileNew { get; private set; }
+    public ICommand CommandFileNew { get; private set; }
 
-    public TRelayCommand CommandFileOpenRegistry { get; private set; }
-    public TRelayCommand CommandFileOpenXml { get; private set; }
-    public TRelayCommand CommandFileOpenJson { get; private set; }
+    public ICommand CommandFileOpenRegistry { get; private set; }
+    public ICommand CommandFileOpenXml { get; private set; }
+    public ICommand CommandFileOpenJson { get; private set; }
 
-    public TRelayCommand CommandFileSave { get; private set; }
+    public ICommand CommandFileSave { get; private set; }
 
-    public TRelayCommand CommandFileSaveRegistry { get; private set; }
-    public TRelayCommand CommandFileSaveXml { get; private set; }
-    public TRelayCommand CommandFileSaveJson { get; private set; }
+    public ICommand CommandFileSaveRegistry { get; private set; }
+    public ICommand CommandFileSaveXml { get; private set; }
+    public ICommand CommandFileSaveJson { get; private set; }
 
-    public TRelayCommand CommandFileQuit { get; private set; }
+    public ICommand CommandFileQuit { get; private set; }
 
-    public TRelayCommand CommandHelpContact { get; private set; }
-    public TRelayCommand CommandHelpAbout { get; private set; }
-    //public TRelayCommand CommandStartSession { get; private set; }
-    //public TRelayCommand CommandToolsExportAll { get; private set; }
-    //public TRelayCommand CommandToolsExportSelected { get; private set; }
+    public ICommand CommandToolsNewSession { get; set; }
+
+    public ICommand CommandHelpContact { get; private set; }
+    public ICommand CommandHelpAbout { get; private set; }
+    
     #endregion RelayCommand
+
+    private ISplitArgs AppArgs;
 
     public bool DataIsDirty {
       get {
@@ -130,21 +133,15 @@ namespace EasyPutty.ViewModels {
     public bool IsSessionSourceNotRegistry => !(SessionSource is TPuttySessionSourceRegistry);
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public MainViewModel() : base() {
-    }
+    public MainViewModel(ISplitArgs appArgs) : base() {
+      AppArgs = appArgs;
 
-    protected override void _Initialize() {
-      if ( App.CurrentUserCredential != null ) {
-        ApplicationTitle = App.AppUsername;
-      }
-      PuttyGroup.Parent = this;
-
-      if (App.AppArgs.IsDefined(App.PARAM_LOAD)) {
+      if ( App.AppArgs.IsDefined(App.PARAM_LOAD) ) {
         #region --- Load data from PuttySessionSource --------------------------------------------
         Settings CurrentSettings = new Settings();
 
-        string NewDataSource = App.AppArgs.GetValue<string>(App.PARAM_LOAD, "");
-        if (NewDataSource=="") {
+        string NewDataSource = AppArgs.GetValue<string>(App.PARAM_LOAD, "");
+        if ( NewDataSource == "" ) {
           Log.Write("Invalid parameter : /Load");
           return;
         }
@@ -179,6 +176,15 @@ namespace EasyPutty.ViewModels {
         }
         #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
       }
+    }
+
+    protected override void _Initialize() {
+      if ( App.CurrentUserCredential != null ) {
+        ApplicationTitle = App.AppUsername;
+      }
+      PuttyGroup.Parent = this;
+
+     
 
     }
 
@@ -195,10 +201,11 @@ namespace EasyPutty.ViewModels {
       CommandFileSaveXml = new TRelayCommand(() => _FileSaveXml(), _ => { return !WorkInProgress; });
       CommandFileSaveJson = new TRelayCommand(() => _FileSaveJson(), _ => { return !WorkInProgress; });
 
-      CommandFileQuit = new TRelayCommand(() => _FileQuit(), _ => { return true; });
+      CommandFileQuit = new TRelayCommand(() => _FileQuit());
 
-      CommandHelpContact = new TRelayCommand(() => _HelpContact(), _ => { return true; });
-      CommandHelpAbout = new TRelayCommand(() => _HelpAbout(), _ => { return true; });
+      CommandToolsNewSession = new TRelayCommand(() => _ToolsNewSession(), _ => !WorkInProgress);
+      CommandHelpContact = new TRelayCommand(() => _HelpContact());
+      CommandHelpAbout = new TRelayCommand(() => _HelpAbout());
     }
 
     public override void Dispose() {
@@ -268,7 +275,6 @@ namespace EasyPutty.ViewModels {
       WorkInProgress = true;
       SessionSource = new TPuttySessionSourceRegistry();
       NotifyPropertyChanged(nameof(ApplicationTitle));
-      CommandFileOpenRegistry.NotifyCanExecuteChanged();
       Log.Write("Refreshing sessions from registry ...");
       NotifyExecutionProgress("Reading sessions ...");
 
@@ -279,7 +285,6 @@ namespace EasyPutty.ViewModels {
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
       WorkInProgress = false;
-      CommandFileOpenRegistry.NotifyCanExecuteChanged();
       NotifyExecutionCompleted("Done.", true);
     }
     #endregion --- File Open --------------------------------------------
@@ -359,6 +364,14 @@ namespace EasyPutty.ViewModels {
 
     private void _FileQuit() {
       Application.Current.Shutdown();
+    }
+
+    private void _ToolsNewSession() {
+      //TVMPuttySession VMPuttySession = new TVMPuttySession(new TPuttySession());
+      //VMPuttySession.CommandEditSession.Execute(null);
+      //if (VMPuttySession.CleanName!="") {
+      //  PuttyGroup.AddSession(VMPuttySession.PuttySession);
+      //}
     }
 
     private void _HelpContact() {
@@ -475,7 +488,7 @@ namespace EasyPutty.ViewModels {
     public static MainViewModel DesignMainViewModel {
       get {
         if ( _DesignMainViewModel == null ) {
-          _DesignMainViewModel = new MainViewModel();
+          _DesignMainViewModel = new MainViewModel(new SplitArgs("") );
         }
         return _DesignMainViewModel;
       }

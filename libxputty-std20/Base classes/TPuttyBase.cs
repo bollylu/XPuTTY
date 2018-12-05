@@ -222,8 +222,6 @@ namespace libxputty_std20 {
     }
     #endregion IParent
 
-    
-
     #region IDisposable Support
     private bool disposedValue = false; // To detect redundant calls
 
