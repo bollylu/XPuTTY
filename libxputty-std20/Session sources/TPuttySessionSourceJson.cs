@@ -36,7 +36,7 @@ namespace libxputty_std20 {
 
     #endregion --- Constants --------------------------------------------
 
-    public override string DataSourceName => $@"{DATASOURCE_PREFIX}://{Location ?? ""}";
+    public override string DataSourceName => $@"{DATASOURCE_PREFIX}://{StorageLocation ?? ""}";
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionSourceJson() : base() {
@@ -44,7 +44,7 @@ namespace libxputty_std20 {
     }
     public TPuttySessionSourceJson(string location) : base() {
       SourceType = ESourceType.Json;
-      Location = location;
+      StorageLocation = location;
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -78,94 +78,132 @@ namespace libxputty_std20 {
       //return RetVal;
       return JsonNull.Default;
     }
+
+
     #endregion --- Converters -------------------------------------------------------------------------------------
 
-    protected override IEnumerable<(string, TPuttyProtocol)> _GetSessionList() {
-      if ( !File.Exists(Location) ) {
-        Log.Write($"Unable to get the sessions list from {Location} : File is missing or access is denied");
-        yield break;
-      }
+    //protected override IEnumerable<(string, TPuttyProtocol)> _GetSessionList() {
+    //  if ( !File.Exists(Location) ) {
+    //    Log.Write($"Unable to get the sessions list from {Location} : File is missing or access is denied");
+    //    yield break;
+    //  }
 
-      JsonArray Sessions;
-      try {
-        JsonPair Root = JsonValue.Parse(File.ReadAllText(Location)) as JsonPair;
-        if ( Root.Key != JSON_ELEMENT_SESSIONS ) {
-          throw new ApplicationException("Json file content is invalid");
-        }
-        Sessions = Root.ArrayContent;
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to read data from Json file {Location} : {ex.Message}");
-        yield break;
-      }
+    //  JsonArray Sessions;
+    //  try {
+    //    JsonPair Root = JsonValue.Parse(File.ReadAllText(Location)) as JsonPair;
+    //    if ( Root.Key != JSON_ELEMENT_SESSIONS ) {
+    //      throw new ApplicationException("Json file content is invalid");
+    //    }
+    //    Sessions = Root.ArrayContent;
+    //  } catch ( Exception ex ) {
+    //    Log.Write($"Unable to read data from Json file {Location} : {ex.Message}");
+    //    yield break;
+    //  }
 
-      foreach ( JsonObject JsonItem in Sessions) {
-        string SessionName = JsonItem.SafeGetValueSingle<string>(JSON_ATTRIBUTE_NAME);
-        TPuttyProtocol SessionProtocol = JsonItem.SafeGetValueSingle<string>(JSON_ATTRIBUTE_PROTOCOL_TYPE);
-        yield return (SessionName, SessionProtocol);
-      }
+    //  foreach ( JsonObject JsonItem in Sessions) {
+    //    string SessionName = JsonItem.SafeGetValueSingle<string>(JSON_ATTRIBUTE_NAME);
+    //    TPuttyProtocol SessionProtocol = JsonItem.SafeGetValueSingle<string>(JSON_ATTRIBUTE_PROTOCOL_TYPE);
+    //    yield return (SessionName, SessionProtocol);
+    //  }
 
+    //}
+
+    //protected override IPuttySession _ReadSession(string name, TPuttyProtocol protocol) {
+
+    //  if ( !File.Exists(Location) ) {
+    //    Log.Write($"Unable to get the sessions list from {Location} : File is missing or access is denied");
+    //    return TPuttySession.Empty;
+    //  }
+
+    //  JsonArray Sessions;
+    //  try {
+    //    JsonPair Root = JsonValue.Parse(File.ReadAllText(Location)) as JsonPair;
+    //    if ( Root.Key != JSON_ELEMENT_SESSIONS ) {
+    //      throw new ApplicationException("Json file content is invalid");
+    //    }
+    //    Sessions = Root.ArrayContent;
+    //  } catch ( Exception ex ) {
+    //    Log.Write($"Unable to read data from Json file {Location} : {ex.Message}");
+    //    return TPuttySession.Empty;
+    //  }
+
+    //  //JsonObject RequestedSession = Sessions.Cast<JsonPair>().FirstOrDefault(x => x.SafeGetValueFirst._ATTRIBUTE_NAME).Value == name && x.Attribute(XML_ATTRIBUTE_PROTOCOL_TYPE).Value == protocol.ToString());
+
+    //  //if ( RequestedSession == null ) {
+    //    return TPuttySession.Empty;
+    //  //}
+
+    //  //return _ConvertFromJson(RequestedSession);
+
+    //}
+
+    //protected override IEnumerable<IPuttySession> _ReadSessions() {
+    //  if ( !File.Exists(Location) ) {
+    //    Log.Write($"Unable to get the sessions list from {Location} : File is missing or access is denied");
+    //    yield break;
+    //  }
+
+
+    //}
+
+    //protected override void _SaveSession(IPuttySession session) {
+    //  #region === Validate parameters ===
+    //  if ( string.IsNullOrWhiteSpace(Location) ) {
+    //    return;
+    //  }
+    //  #endregion === Validate parameters ===
+
+
+
+    //}
+
+    //protected override void _SaveSessions(IEnumerable<IPuttySession> sessions) {
+    //  #region === Validate parameters ===
+    //  if ( string.IsNullOrWhiteSpace(Location) ) {
+    //    return;
+    //  }
+    //  #endregion === Validate parameters ===
+
+
+    //}
+
+    //protected override IEnumerable<TPuttySessionGroup> _ReadGroups() {
+    //  throw new NotImplementedException();
+    //}
+
+    public override IEnumerable<IPuttySessionsGroup> GetGroupsFrom(string groupId, bool recurse = false) {
+      throw new NotImplementedException();
     }
 
-    protected override IPuttySession _ReadSession(string name, TPuttyProtocol protocol) {
-
-      if ( !File.Exists(Location) ) {
-        Log.Write($"Unable to get the sessions list from {Location} : File is missing or access is denied");
-        return TPuttySession.Empty;
-      }
-
-      JsonArray Sessions;
-      try {
-        JsonPair Root = JsonValue.Parse(File.ReadAllText(Location)) as JsonPair;
-        if ( Root.Key != JSON_ELEMENT_SESSIONS ) {
-          throw new ApplicationException("Json file content is invalid");
-        }
-        Sessions = Root.ArrayContent;
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to read data from Json file {Location} : {ex.Message}");
-        return TPuttySession.Empty;
-      }
-
-      //JsonObject RequestedSession = Sessions.Cast<JsonPair>().FirstOrDefault(x => x.SafeGetValueFirst._ATTRIBUTE_NAME).Value == name && x.Attribute(XML_ATTRIBUTE_PROTOCOL_TYPE).Value == protocol.ToString());
-
-      //if ( RequestedSession == null ) {
-        return TPuttySession.Empty;
-      //}
-
-      //return _ConvertFromJson(RequestedSession);
-
+    public override IPuttySessionsGroup GetGroup(string groupId, bool recurse = true) {
+      throw new NotImplementedException();
     }
 
-    protected override IEnumerable<IPuttySession> _ReadSessions() {
-      if ( !File.Exists(Location) ) {
-        Log.Write($"Unable to get the sessions list from {Location} : File is missing or access is denied");
-        yield break;
-      }
-
-      
+    public override IEnumerable<(string, TPuttyProtocol)> GetSessionsList(string groupId, bool recurse) {
+      throw new NotImplementedException();
     }
 
-    protected override void _SaveSession(IPuttySession session) {
-      #region === Validate parameters ===
-      if ( string.IsNullOrWhiteSpace(Location) ) {
-        return;
-      }
-      #endregion === Validate parameters ===
-
-      
-
+    public override IEnumerable<(string, TPuttyProtocol)> GetSessionsList(IPuttySessionsGroup group, bool recurse) {
+      throw new NotImplementedException();
     }
 
-    protected override void _SaveSessions(IEnumerable<IPuttySession> sessions) {
-      #region === Validate parameters ===
-      if ( string.IsNullOrWhiteSpace(Location) ) {
-        return;
-      }
-      #endregion === Validate parameters ===
-
-      
+    public override IEnumerable<IPuttySession> GetSessions(string groupId, bool recurse = false) {
+      throw new NotImplementedException();
     }
 
-    protected override IEnumerable<TPuttySessionGroup> _ReadGroups() {
+    public override IEnumerable<IPuttySession> GetSessions(IPuttySessionsGroup group, bool recurse = false) {
+      throw new NotImplementedException();
+    }
+
+    public override IPuttySession GetSession(IPuttySessionsGroup group, string sessionId, bool recurse = true) {
+      throw new NotImplementedException();
+    }
+
+    public override void SaveGroup(IPuttySessionsGroup group) {
+      throw new NotImplementedException();
+    }
+
+    public override void UpdateSession(IPuttySession session) {
       throw new NotImplementedException();
     }
   }

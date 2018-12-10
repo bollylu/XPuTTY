@@ -37,7 +37,7 @@ namespace XPuTTY_cli {
 
         TPuttySessionSourceRegistry RegSource = new TPuttySessionSourceRegistry();
 
-        IEnumerable<IPuttySession> Sessions = RegSource.GetSessions();
+        IEnumerable<IPuttySession> Sessions = RegSource.GetSessions("");
 
         switch ( Command ) {
           case CMD_LIST:
@@ -49,13 +49,13 @@ namespace XPuTTY_cli {
             if ( Source.ToLower().StartsWith(CMD_START_MENU) ) {
               IEnumerable<IPuttySession> Menu = (new List<IPuttySession>() { new TPuttySessionSSH() { Name = "Cancel" } }).Concat(Sessions.Where(x => x.Protocol.IsSSH));
               Console.Clear();
-              int Choice = InputList(Menu.Select(x => x.CleanName), "Sessions list", "Please select session to start : ", "Please select only numbers available in the list");
+              int Choice = InputList(Menu.Select(x => x.Name), "Sessions list", "Please select session to start : ", "Please select only numbers available in the list");
               if ( Choice == 1 ) {
                 NeedRunning = false;
                 break;
               }
               IPuttySession Selected = Menu.ElementAt(Choice);
-              Console.WriteLine($"You have select session {Selected.CleanName}");
+              Console.WriteLine($"You have select session {Selected.Name}");
               Selected.Start();
               break;
             }

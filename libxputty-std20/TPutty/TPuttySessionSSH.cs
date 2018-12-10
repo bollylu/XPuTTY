@@ -15,7 +15,7 @@ using libxputty_std20.Interfaces;
 using Microsoft.Win32;
 
 namespace libxputty_std20 {
-  public class TPuttySessionSSH : TPuttySession, IHostAndPort {
+  public class TPuttySessionSSH : TPuttySession, ISessionTypeNetwork {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -32,7 +32,7 @@ namespace libxputty_std20 {
 
     public TPuttySessionSSH(IPuttySession session) : base(session) {
       Protocol = TPuttyProtocol.SSH;
-      if ( session is IHostAndPort SessionHAP ) {
+      if ( session is ISessionTypeNetwork SessionHAP ) {
         HostName = SessionHAP.HostName;
         Port = SessionHAP.Port;
       }
@@ -116,7 +116,7 @@ namespace libxputty_std20 {
     protected override void _StartPutty(string arguments) {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
-        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
+        Arguments = arguments == "" ? $"-load {"\"" + Name + "\""}" : arguments,
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
@@ -127,7 +127,7 @@ namespace libxputty_std20 {
     protected async override void _StartPlink(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
-        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
+        Arguments = arguments == "" ? $"-load {"\"" + Name + "\""}" : arguments,
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;

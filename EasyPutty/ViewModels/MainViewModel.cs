@@ -148,7 +148,7 @@ namespace EasyPutty.ViewModels {
 
         SessionSource = TPuttySessionSource.GetPuttySessionSource(NewDataSource);
         if ( SessionSource != null ) {
-          _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+          _DispatchSessions(SessionSource.GetSessions("").Where(x => x.Protocol.IsSSH));
         }
         CurrentSettings.LastDataSource = NewDataSource;
         CurrentSettings.Save();
@@ -293,7 +293,7 @@ namespace EasyPutty.ViewModels {
     private void _FileSave() {
       if ( DataIsDirty ) {
         WorkInProgress = true;
-        SessionSource.SaveSessions(AllPuttySessions);
+        //SessionSource.SaveSessions(AllPuttySessions);
         DataIsDirty = false;
         WorkInProgress = false;
       }
@@ -316,7 +316,7 @@ namespace EasyPutty.ViewModels {
 
       if ( SFD.ShowDialog() == true ) {
         SessionSource = new TPuttySessionSourceXml(SFD.FileName);
-        SessionSource.SaveSessions(AllPuttySessions);
+        //SessionSource.SaveSessions(AllPuttySessions);
         DataIsDirty = false;
       }
 
@@ -354,7 +354,7 @@ namespace EasyPutty.ViewModels {
       Log.Write("Saving all sessions to XML");
       NotifyExecutionProgress("Save sessions to XML");
       SessionSource = new TPuttySessionSourceRegistry();
-      SessionSource.SaveSessions(AllPuttySessions);
+      //SessionSource.SaveSessions(AllPuttySessions);
       NotifyExecutionCompleted("Done.");
       DataIsDirty = false;
 
@@ -425,10 +425,10 @@ namespace EasyPutty.ViewModels {
       IEnumerable<Process> CurrentlyRunningSessions = TPuttySession.GetAllPuttyProcess();
 
       foreach ( IPuttySession SessionItem in sessions.Where(x => x.Protocol.Value == protocol)
-                                                     .OfType<IHostAndPort>()
+                                                     .OfType<ISessionTypeNetwork>()
                                                      .Where(x => !string.IsNullOrWhiteSpace(x.HostName))
                                                      ) {
-        IHostAndPort SessionHAP = SessionItem as IHostAndPort;
+        ISessionTypeNetwork SessionHAP = SessionItem as ISessionTypeNetwork;
         string SessionCommandLineWithoutRemoteCommand = string.Join(" ", CommandLineBuilder.BuildSSHCommandLine()
                                                                                            .AddCredentialsToCommandLine(SessionItem.Credential)
                                                                                            .AddHostnameAndPort(SessionHAP.HostName, SessionHAP.Port));

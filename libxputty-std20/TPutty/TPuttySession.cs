@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 
 using BLTools;
+using BLTools.Encryption;
 using BLTools.Json;
 
 using libxputty_std20.Interfaces;
+using static libxputty_std20.LocalExtensions;
 
 namespace libxputty_std20 {
   public class TPuttySession : TPuttyBase, IPuttySession, IDisposable, ISupportContactContainer {
@@ -25,7 +27,7 @@ namespace libxputty_std20 {
     public static IPuttySession Empty {
       get {
         if ( _Empty == null ) {
-          _Empty = new TPuttySession("<empty>");
+          _Empty = new TPuttySession(EMPTY);
         }
         return _Empty;
       }
@@ -33,7 +35,25 @@ namespace libxputty_std20 {
     private static IPuttySession _Empty;
 
     #region --- Public properties ------------------------------------------------------------------------------
-    public string CleanName => Name.Replace("%20", " ");
+    public string ID {
+      get {
+        if (string.IsNullOrEmpty(_ID)) {
+          StringBuilder IdMaker = new StringBuilder(Name);
+          IPuttySessionsGroup Owner = GetParent<IPuttySessionsGroup>();
+          while (Owner!=null) {
+            IdMaker.Append(Owner.Name);
+            Owner = Owner.GetParent<IPuttySessionsGroup>();
+          }
+          _ID = IdMaker.ToString().HashToBase64(THashingMethods.MD5);
+        }
+        return _ID;
+      }
+      set {
+        _ID = value;
+      }
+    }
+    private string _ID;
+
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
 
     public ESessionType SessionType { get; set; }
@@ -46,6 +66,9 @@ namespace libxputty_std20 {
     public string Section { get; set; }
 
     protected string SessionTitle;
+
+    public IList<ISupportContact> SupportContacts { get; } = new List<ISupportContact>();
+
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     protected string TempFileForRemoteCommand;
@@ -53,20 +76,9 @@ namespace libxputty_std20 {
     #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
       StringBuilder RetVal = new StringBuilder();
-      RetVal.Append($"Session {CleanName.PadRight(80, '.')} : ");
+      RetVal.Append($"Session {Name.PadRight(80, '.')} : ");
       return RetVal.ToString();
     }
-
-    //public virtual IJsonValue ToJson() {
-    //  JsonObject RetVal = new JsonObject {
-    //    { JSON_THIS_ELEMENT, new JsonObject {
-    //        { JSON_NAME, Json.JsonEncode(Name) },
-    //        { JSON_PROTOCOL, Protocol }
-    //      }
-    //    }
-    //  };
-    //  return RetVal;
-    //}
     #endregion --- Converters -------------------------------------------------------------------------------------
 
     #region --- Event handlers --------------------------------------------
@@ -117,9 +129,6 @@ namespace libxputty_std20 {
     public int PID => PuttyProcess.PID;
     public string CommandLine => TRunProcess.GetCommandLine(PID);
 
-    public ISupportContact SupportContact => throw new NotImplementedException();
-
-
     public virtual void Start(IEnumerable<string> arguments) {
       Start(string.Join(" ", arguments));
     }
@@ -158,7 +167,7 @@ namespace libxputty_std20 {
     protected virtual void _StartPutty(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PUTTY,
-        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
+        Arguments = arguments == "" ? $"-load {"\"" + Name + "\""}" : arguments,
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
@@ -168,7 +177,7 @@ namespace libxputty_std20 {
     protected virtual void _StartPlink(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
         FileName = EXECUTABLE_PLINK,
-        Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
+        Arguments = arguments == "" ? $"-load {"\"" + Name + "\""}" : arguments,
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;

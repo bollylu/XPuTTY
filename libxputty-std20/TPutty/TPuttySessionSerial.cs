@@ -10,7 +10,7 @@ using Microsoft.Win32;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionSerial : TPuttySession, ISerial, IDisposable {
+  public class TPuttySessionSerial : TPuttySession, ISessionTypeSerial, IDisposable {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string SerialLine { get; set; }
@@ -33,7 +33,7 @@ namespace libxputty_std20 {
 
     public TPuttySessionSerial(IPuttySession session) : base(session) {
       Protocol = TPuttyProtocol.Serial;
-      if ( session is ISerial SessionSerial ) {
+      if ( session is ISessionTypeSerial SessionSerial ) {
         SerialLine = SessionSerial.SerialLine;
         SerialSpeed = SessionSerial.SerialSpeed;
         SerialDataBits = SessionSerial.SerialDataBits;

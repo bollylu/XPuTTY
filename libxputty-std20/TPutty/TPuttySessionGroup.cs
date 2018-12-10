@@ -7,16 +7,16 @@ using BLTools;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionGroup : TPuttyBase, IGroupItem {
+  public class TPuttySessionGroup : TPuttyBase, IPuttySessionsGroup {
 
-    public IList<IGroupItem> Groups {
+    public IList<IPuttySessionsGroup> Groups {
       get {
         lock ( _LockGroups ) {
           return _Groups;
         }
       }
     }
-    private readonly IList<IGroupItem> _Groups = new List<IGroupItem>();
+    private readonly IList<IPuttySessionsGroup> _Groups = new List<IPuttySessionsGroup>();
 
     public IList<IPuttySession> Sessions {
       get {
@@ -25,6 +25,9 @@ namespace libxputty_std20 {
         }
       }
     }
+
+    public string ID { get; set; }
+
     private readonly IList<IPuttySession> _Sessions = new List<IPuttySession>();
 
     private readonly object _LockGroups = new object();
@@ -51,7 +54,7 @@ namespace libxputty_std20 {
     #endregion --- Converters ----------------------------------------------------------------------------------
 
     #region --- Groups management --------------------------------------------
-    public void AddOrUpdateGroup(IGroupItem group) {
+    public void AddOrUpdateGroup(IPuttySessionsGroup group) {
       if ( group == null ) {
         return;
       }
@@ -61,18 +64,18 @@ namespace libxputty_std20 {
       }
     }
 
-    public void AddGroups(IEnumerable<IGroupItem> groups) {
+    public void AddGroups(IEnumerable<IPuttySessionsGroup> groups) {
       if ( groups == null ) {
         return;
       }
       lock ( _LockGroups ) {
-        foreach ( IGroupItem GroupItem in groups ) {
+        foreach ( IPuttySessionsGroup GroupItem in groups ) {
           Groups.Add(GroupItem);
         }
       }
     }
 
-    public void RemoveGroup(IGroupItem group) {
+    public void RemoveGroup(IPuttySessionsGroup group) {
       if ( group == null ) {
         return;
       }
@@ -85,18 +88,51 @@ namespace libxputty_std20 {
       }
     }
 
-    public IEnumerable<IGroupItem> GetAllGroups(bool recurse = true) {
+    public IEnumerable<IPuttySessionsGroup> GetAllGroups(bool recurse = true) {
       if ( !Groups.Any() ) {
         yield break;
       }
-      foreach ( IGroupItem GroupItem in Groups ) {
+      foreach ( IPuttySessionsGroup GroupItem in Groups ) {
         yield return GroupItem;
         if ( recurse ) {
-          foreach ( IGroupItem RecurseGroupItem in GroupItem.GetAllGroups(recurse) ) {
+          foreach ( IPuttySessionsGroup RecurseGroupItem in GroupItem.GetAllGroups(recurse) ) {
             yield return RecurseGroupItem;
           }
         }
       }
+    }
+
+    public IPuttySessionsGroup GetGroup(string groupId, bool recurse = true) {
+      #region === Validate parameters ===
+      if ( groupId == null ) {
+        return null;
+      }
+
+      if ( groupId == "" ) {
+        return this;
+      }
+      #endregion === Validate parameters ===
+
+      if ( ID == groupId ) {
+        return this;
+      }
+
+      foreach ( IPuttySessionsGroup GroupItem in Groups ) {
+        if ( ID == groupId ) {
+          return GroupItem;
+        }
+      }
+
+      if ( recurse ) {
+        foreach ( IPuttySessionsGroup GroupItem in Groups ) {
+          IPuttySessionsGroup SubGroup = GroupItem.GetGroup(groupId, recurse);
+          if ( SubGroup != null ) {
+            return SubGroup;
+          }
+        }
+      }
+
+      return null;
     }
 
     public void ClearGroups() {
@@ -149,7 +185,7 @@ namespace libxputty_std20 {
         if ( !Groups.Any() ) {
           yield break;
         }
-        foreach ( IGroupItem GroupItem in Groups ) {
+        foreach ( IPuttySessionsGroup GroupItem in Groups ) {
           foreach ( IPuttySession SessionItem in GroupItem.GetAllSessions(recurse) ) {
             yield return SessionItem;
           }
@@ -178,7 +214,7 @@ namespace libxputty_std20 {
     }
 
     protected void _ClearGroups() {
-      foreach ( IGroupItem GroupItem in Groups ) {
+      foreach ( IPuttySessionsGroup GroupItem in Groups ) {
         GroupItem.Clear();
         GroupItem.Dispose();
       }

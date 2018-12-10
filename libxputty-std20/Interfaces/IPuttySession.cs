@@ -15,7 +15,7 @@ namespace libxputty_std20.Interfaces {
     string Section { get; set; }
     string RemoteCommand { get; set; }
 
-    string CleanName { get; }
+    string ID { get; set; }
     int PID { get; }
     string CommandLine { get; }
     bool IsRunning { get; }

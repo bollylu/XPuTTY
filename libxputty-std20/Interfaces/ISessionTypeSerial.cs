@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace libxputty_std20.Interfaces {
-  public interface ISerial {
+  public interface ISessionTypeSerial {
 
     string SerialLine { get; set; }
     int SerialSpeed { get; set; }

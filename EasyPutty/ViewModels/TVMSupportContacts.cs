@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BLTools.MVVM;
-using EasyPutty.ViewModels;
+﻿using System.Collections.Generic;
+
 using EasyPutty.Views;
+
 using libxputty_std20;
 using libxputty_std20.Interfaces;
 
 namespace EasyPutty.ViewModels {
   public class TVMSupportContacts : TVMEasyPuttyBase {
 
-    public List<TVMSupportContact> Items { get; } = new List<TVMSupportContact>();
+    public IList<TVMSupportContact> Items { get; } = new List<TVMSupportContact>();
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TVMSupportContacts() : base() { }

@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace libxputty_std20.Interfaces {
   public interface ISupportContactContainer {
-    ISupportContact SupportContact { get; }
+    IList<ISupportContact> SupportContacts { get; }
   }
 }

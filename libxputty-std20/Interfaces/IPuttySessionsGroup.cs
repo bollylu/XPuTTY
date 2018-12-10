@@ -4,27 +4,30 @@ using System.Text;
 using BLTools;
 
 namespace libxputty_std20.Interfaces {
-  public interface IGroupItem : IName, IParent, ICredentialContainer, IDisposable {
+  public interface IPuttySessionsGroup : IName, IParent, ICredentialContainer, IDisposable {
 
-    IList<IGroupItem> Groups { get; }
+    string ID { get; set; }
+    IList<IPuttySessionsGroup> Groups { get; }
     IList<IPuttySession> Sessions { get; }
 
-    void AddOrUpdateGroup(IGroupItem group);
+    void AddOrUpdateGroup(IPuttySessionsGroup group);
     void AddOrUpdateSession(IPuttySession session);
 
-    void AddGroups(IEnumerable<IGroupItem> groups);
+    void AddGroups(IEnumerable<IPuttySessionsGroup> groups);
     void AddSessions(IEnumerable<IPuttySession> sessions);
 
-    void RemoveGroup(IGroupItem group);
+    void RemoveGroup(IPuttySessionsGroup group);
     void RemoveGroup(string groupName);
     void RemoveSession(IPuttySession session);
     void RemoveSession(string sessionName);
+
+    IPuttySessionsGroup GetGroup(string groupId, bool recurse);
 
     void ClearGroups();
     void ClearSessions();
     void Clear();
 
-    IEnumerable<IGroupItem> GetAllGroups(bool recurse = true);
+    IEnumerable<IPuttySessionsGroup> GetAllGroups(bool recurse = true);
     IEnumerable<IPuttySession> GetAllSessions(bool recurse = true);
 
   }

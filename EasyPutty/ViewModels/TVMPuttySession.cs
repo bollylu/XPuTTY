@@ -14,8 +14,8 @@ namespace EasyPutty.ViewModels {
 
     public IPuttySession PuttySession => _Data as IPuttySession;
 
-    public ISerial PuttySessionSerial => PuttySession as ISerial;
-    public IHostAndPort PuttySessionHAP => PuttySession as IHostAndPort;
+    public ISessionTypeSerial PuttySessionSerial => PuttySession as ISessionTypeSerial;
+    public ISessionTypeNetwork PuttySessionNetwork => PuttySession as ISessionTypeNetwork;
 
     public bool DisplaySelectionButton => true;
 
@@ -27,9 +27,7 @@ namespace EasyPutty.ViewModels {
     public ICommand CommandEditSession { get; private set; }
     #endregion RelayCommand
 
-    public string CleanName => PuttySession == null ? "" : PuttySession.CleanName;
-
-    public string Header => CleanName.Replace($"[{string.Join("//", GroupLevel1, GroupLevel2).TrimEnd('/')}]", "").Replace($"{{{Section}}}", "");
+    public string Header => Name;
 
     public string TooltipComment => string.IsNullOrWhiteSpace(base.Comment) ? null : base.Comment;
 
@@ -99,19 +97,20 @@ namespace EasyPutty.ViewModels {
 
     public bool IsSelected { get; set; }
 
-    #region --- Session IHostAndPort --------------------------------------------
-    public bool SessionIsHAP => PuttySessionHAP != null;
+    #region --- ISessionTypeNetwork --------------------------------------------
+    public bool SessionTypeIsNetwork => PuttySession is ISessionTypeNetwork;
+
     public string DisplayHostnameAndPort => $"{HostName}:{Port}";
     public string HostName {
       get {
-        if ( SessionIsHAP ) {
-          return PuttySessionHAP.HostName ?? "";
+        if ( SessionTypeIsNetwork ) {
+          return PuttySessionNetwork.HostName ?? "";
         }
         return "";
       }
       set {
-        if ( SessionIsHAP ) {
-          PuttySessionHAP.HostName = value;
+        if ( SessionTypeIsNetwork ) {
+          PuttySessionNetwork.HostName = value;
           NotifyPropertyChanged(nameof(HostName));
           NotifyPropertyChanged(nameof(DisplayHostnameAndPort));
         }
@@ -119,23 +118,23 @@ namespace EasyPutty.ViewModels {
     }
     public int Port {
       get {
-        if ( SessionIsHAP ) {
-          return PuttySessionHAP.Port;
+        if ( SessionTypeIsNetwork ) {
+          return PuttySessionNetwork.Port;
         }
         return 0;
       }
       set {
-        if ( SessionIsHAP ) {
-          PuttySessionHAP.Port = value;
+        if ( SessionTypeIsNetwork ) {
+          PuttySessionNetwork.Port = value;
           NotifyPropertyChanged(nameof(Port));
           NotifyPropertyChanged(nameof(DisplayHostnameAndPort));
         }
       }
     }
-    #endregion --- Session IHostAndPort --------------------------------------------
+    #endregion --- ISessionTypeNetwork --------------------------------------------
 
     #region --- Serial session --------------------------------------------
-    public bool SessionIsSerial => PuttySession is ISerial;
+    public bool SessionIsSerial => PuttySession is ISessionTypeSerial;
     public string SerialLine {
       get {
         if ( SessionIsSerial ) {
@@ -237,7 +236,7 @@ namespace EasyPutty.ViewModels {
     }
 
     protected override void _Initialize() {
-      NotifyPropertyChanged(nameof(CleanName));
+      NotifyPropertyChanged(nameof(Name));
       NotifyPropertyChanged(nameof(HostName));
       PuttySession.OnStart += _PuttySession_OnStart;
       PuttySession.OnExit += _PuttySession_OnExit;
@@ -257,14 +256,14 @@ namespace EasyPutty.ViewModels {
       PuttySession.Start();
     }
     private void _PuttySession_OnExit(object sender, EventArgs e) {
-      Log.Write($"Session {CleanName} exited.");
+      Log.Write($"Session {Name} exited.");
       NotifyPropertyChanged(nameof(IsRunning));
       NotifyPropertyChanged(nameof(RunningIcon));
       NotifyPropertyChanged(nameof(PuttyCommandLine));
     }
 
     private void _PuttySession_OnStart(object sender, EventArgs e) {
-      Log.Write($"=> Started session {CleanName}");
+      Log.Write($"=> Started session {Name}");
       NotifyPropertyChanged(nameof(IsRunning));
       NotifyPropertyChanged(nameof(RunningIcon));
       NotifyPropertyChanged(nameof(PuttyCommandLine));
@@ -302,9 +301,9 @@ namespace EasyPutty.ViewModels {
         Description = VMEditedPuttySession.Description;
         Comment = VMEditedPuttySession.Comment;
         RemoteCommand = VMEditedPuttySession.RemoteCommand;
-        if ( VMEditedPuttySession.PuttySessionHAP != null ) {
-          HostName = VMEditedPuttySession.PuttySessionHAP.HostName;
-          Port = VMEditedPuttySession.PuttySessionHAP.Port;
+        if ( VMEditedPuttySession.PuttySessionNetwork != null ) {
+          HostName = VMEditedPuttySession.PuttySessionNetwork.HostName;
+          Port = VMEditedPuttySession.PuttySessionNetwork.Port;
         }
         if ( VMEditedPuttySession.PuttySessionSerial != null ) {
           SerialLine = VMEditedPuttySession.PuttySessionSerial.SerialLine;

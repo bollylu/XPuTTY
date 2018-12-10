@@ -9,7 +9,7 @@ using Microsoft.Win32;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionRLogin : TPuttySession, IHostAndPort {
+  public class TPuttySessionRLogin : TPuttySession, ISessionTypeNetwork {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -26,7 +26,7 @@ namespace libxputty_std20 {
 
     public TPuttySessionRLogin(IPuttySession session) : base(session) {
       Protocol = TPuttyProtocol.RLogin;
-      if ( session is IHostAndPort SessionHAP ) {
+      if ( session is ISessionTypeNetwork SessionHAP ) {
         HostName = SessionHAP.HostName;
         Port = SessionHAP.Port;
       }
@@ -46,7 +46,7 @@ namespace libxputty_std20 {
     #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
       StringBuilder RetVal = new StringBuilder();
-      RetVal.Append($"Session {CleanName.PadRight(80, '.')} : ");
+      RetVal.Append($"Session {Name.PadRight(80, '.')} : ");
 
       RetVal.Append(Protocol.ToString().PadRight(8, '.'));
       if ( !string.IsNullOrWhiteSpace(HostName) ) {
