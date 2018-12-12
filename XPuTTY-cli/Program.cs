@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using BLTools;
-using static BLTools.ConsoleExtension.ConsoleExtension;
 using libxputty_std20;
 using libxputty_std20.Interfaces;
+using static BLTools.ConsoleExtension.ConsoleExtension;
 
 namespace XPuTTY_cli {
   internal class Program {
@@ -19,7 +19,6 @@ namespace XPuTTY_cli {
     private const string CMD_LIST = "list";
     private const string CMD_START = "start";
     private const string CMD_START_MENU = "menu";
-    private const string CMD_START_REG = "reg:";
     #endregion --- Command line arguments definition --------------------------------------------
 
     private static void Main(string[] args) {
@@ -35,13 +34,16 @@ namespace XPuTTY_cli {
       bool NeedRunning = true;
       do {
 
-        TPuttySessionSourceRegistry RegSource = new TPuttySessionSourceRegistry();
+        IPuttySessionSource SessionSource = TPuttySessionSource.GetPuttySessionSource(Source);
+        if ( SessionSource == null ) {
+          Usage($"Invalid session source : {Source}");
+        }
 
-        IEnumerable<IPuttySession> Sessions = RegSource.GetSessions("");
+        IEnumerable<IPuttySession> Sessions = SessionSource.GetSessions();
 
         switch ( Command ) {
           case CMD_LIST:
-            //Console.WriteLine(Sessions.SaveToJson());
+            Console.WriteLine(Sessions.ToString());
             NeedRunning = false;
             break;
 
@@ -59,7 +61,7 @@ namespace XPuTTY_cli {
               Selected.Start();
               break;
             }
-            if ( Source.ToLower().StartsWith(CMD_START_REG) ) {
+            if ( SessionSource.SourceType == ESourceType.Registry ) {
               break;
             }
             Usage("Invalid command");
@@ -80,7 +82,7 @@ namespace XPuTTY_cli {
         Console.WriteLine(message);
       }
 
-      Console.WriteLine("XPuTTY-cli v0.1 (c) 2018 Luc Bolly");
+      Console.WriteLine("XPuTTY-cli v0.2 (c) 2018 Luc Bolly");
       Console.WriteLine("Usage: xputty-cli [-cmd=list|add|delete|edit|export|import|start] (default=list)");
       Console.WriteLine("                  [-source=reg:<reg entry>|menu)");
 

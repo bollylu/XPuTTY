@@ -10,23 +10,17 @@ namespace libxputty_std20.Interfaces {
 
     string DataSourceName { get; }
 
-    IEnumerable<IPuttySessionsGroup> GetGroupsFrom(string groupId = "", bool recurse = false);
+    IEnumerable<IPuttySessionGroup> GetGroupsFrom(string groupId = "", bool recurse = false);
 
-    IPuttySessionsGroup GetGroup(string groupId = "", bool recurse = true);
+    IPuttySessionGroup GetGroup(string groupId = "", bool recurse = true);
 
     IEnumerable<(string, TPuttyProtocol)> GetSessionsList(string groupId, bool recurse);
-    IEnumerable<(string, TPuttyProtocol)> GetSessionsList(IPuttySessionsGroup group, bool recurse);
 
     IEnumerable<IPuttySession> GetSessions(string groupId = "", bool recurse = false);
-    IEnumerable<IPuttySession> GetSessions(IPuttySessionsGroup group, bool recurse = false);
 
-    IPuttySession GetSession(IPuttySessionsGroup group, string sessionId, bool recurse = true);
-
-    void SaveGroup(IPuttySessionsGroup group);
+    void SaveGroup(IPuttySessionGroup group);
 
     void UpdateSession(IPuttySession session);
-
-
 
   }
 }

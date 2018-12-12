@@ -73,7 +73,23 @@ namespace libxputty_std20 {
     public override void Stop() {
       throw new NotImplementedException();
     }
-        #endregion Public methods
+    #endregion Public methods
 
+    public static TPuttySessionSerial DemoPuttySessionSerial1 {
+      get {
+        if ( _DemoPuttySessionSerial1 == null ) {
+          _DemoPuttySessionSerial1 = new TPuttySessionSerial("Serial Demo1") {
+            SerialLine = "COM4",
+            SerialSpeed = 9600,
+            SerialDataBits = 8,
+            SerialStopBits = 1,
+            SerialParity = "None",
+            RemoteCommand = "tail -n 200 -f /var/log/syslog"
+          };
+        }
+        return _DemoPuttySessionSerial1;
+      }
+    }
+    private static TPuttySessionSerial _DemoPuttySessionSerial1;
   }
 }

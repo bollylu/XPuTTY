@@ -39,10 +39,10 @@ namespace libxputty_std20 {
       get {
         if (string.IsNullOrEmpty(_ID)) {
           StringBuilder IdMaker = new StringBuilder(Name);
-          IPuttySessionsGroup Owner = GetParent<IPuttySessionsGroup>();
+          IPuttySessionGroup Owner = GetParent<IPuttySessionGroup>();
           while (Owner!=null) {
             IdMaker.Append(Owner.Name);
-            Owner = Owner.GetParent<IPuttySessionsGroup>();
+            Owner = Owner.GetParent<IPuttySessionGroup>();
           }
           _ID = IdMaker.ToString().HashToBase64(THashingMethods.MD5);
         }
@@ -101,9 +101,9 @@ namespace libxputty_std20 {
       Name = session.Name;
       Description = session.Description;
       Comment = session.Comment;
-      GroupLevel1 = session.GroupLevel1;
-      GroupLevel2 = session.GroupLevel2;
-      Section = session.Section;
+      //GroupLevel1 = session.GroupLevel1;
+      //GroupLevel2 = session.GroupLevel2;
+      //Section = session.Section;
       RemoteCommand = session.RemoteCommand;
       Parent = session.Parent;
       SetLocalCredential(session.Credential);

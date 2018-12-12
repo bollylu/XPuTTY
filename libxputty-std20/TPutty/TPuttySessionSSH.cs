@@ -138,5 +138,32 @@ namespace libxputty_std20 {
       SetProcessTitle($"SSH {HostName}:{Port} \"{RemoteCommand}\"");
     }
 
+    public static TPuttySessionSSH DemoPuttySessionSSH1 {
+      get {
+        if (_DemoPuttySessionSSH1==null) {
+          _DemoPuttySessionSSH1 = new TPuttySessionSSH("SSH Demo1") {
+            Port = 22,
+            HostName = "demo1.test.priv"
+          };
+        }
+        return _DemoPuttySessionSSH1;
+      }
+    }
+    private static TPuttySessionSSH _DemoPuttySessionSSH1;
+
+    public static TPuttySessionSSH DemoPuttySessionSSH2 {
+      get {
+        if ( _DemoPuttySessionSSH2 == null ) {
+          _DemoPuttySessionSSH2 = new TPuttySessionSSH("SSH Demo2") {
+            Port = 22,
+            HostName = "demo2.test.priv",
+            RemoteCommand = "tail -n 200 -f /var/log/syslog"
+          };
+        }
+        return _DemoPuttySessionSSH2;
+      }
+    }
+    private static TPuttySessionSSH _DemoPuttySessionSSH2;
+
   }
 }

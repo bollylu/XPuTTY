@@ -8,6 +8,9 @@ using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
   public abstract class TPuttySessionSource : TPuttyBase, IPuttySessionSource, IDisposable {
+
+    public const string ROOT_GROUP_ID = "";
+
     #region --- Public properties ------------------------------------------------------------------------------
 
     public ESourceType SourceType { get; protected set; }
@@ -23,7 +26,7 @@ namespace libxputty_std20 {
     } 
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    public static TPuttySessionSource GetPuttySessionSource(string sourceUri) {
+    public static IPuttySessionSource GetPuttySessionSource(string sourceUri) {
       if ( string.IsNullOrWhiteSpace(sourceUri) ) {
         return null;
       }
@@ -40,14 +43,11 @@ namespace libxputty_std20 {
       }
     }
 
-    public abstract IEnumerable<IPuttySessionsGroup> GetGroupsFrom(string groupId, bool recurse = false);
-    public abstract IPuttySessionsGroup GetGroup(string groupId, bool recurse = true);
+    public abstract IEnumerable<IPuttySessionGroup> GetGroupsFrom(string groupId, bool recurse = false);
+    public abstract IPuttySessionGroup GetGroup(string groupId, bool recurse = true);
     public abstract IEnumerable<(string, TPuttyProtocol)> GetSessionsList(string groupId, bool recurse);
-    public abstract IEnumerable<(string, TPuttyProtocol)> GetSessionsList(IPuttySessionsGroup group, bool recurse);
     public abstract IEnumerable<IPuttySession> GetSessions(string groupId, bool recurse = false);
-    public abstract IEnumerable<IPuttySession> GetSessions(IPuttySessionsGroup group, bool recurse = false);
-    public abstract IPuttySession GetSession(IPuttySessionsGroup group, string sessionId, bool recurse = true);
-    public abstract void SaveGroup(IPuttySessionsGroup group);
+    public abstract void SaveGroup(IPuttySessionGroup group);
     public abstract void UpdateSession(IPuttySession session);
   }
 }

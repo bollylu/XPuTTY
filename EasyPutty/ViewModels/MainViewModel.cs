@@ -148,13 +148,13 @@ namespace EasyPutty.ViewModels {
 
         SessionSource = TPuttySessionSource.GetPuttySessionSource(NewDataSource);
         if ( SessionSource != null ) {
-          _DispatchSessions(SessionSource.GetSessions("").Where(x => x.Protocol.IsSSH));
+          PuttyGroup.Add(SessionSource.GetGroup(TPuttySessionSource.ROOT_GROUP_ID));
+          CurrentSettings.LastDataSource = NewDataSource;
+          CurrentSettings.Save();
         }
-        CurrentSettings.LastDataSource = NewDataSource;
-        CurrentSettings.Save();
 
-        if ( PuttyGroup.Items.Any() ) {
-          PuttyGroup.SelectedItem = PuttyGroup.Items.First();
+        if ( PuttyGroup.Groups.Any() ) {
+          PuttyGroup.SelectedGroup = PuttyGroup.Groups.First();
         }
         #endregion --- Load data from PuttySessionSource --------------------------------------------
       } else {
@@ -168,11 +168,11 @@ namespace EasyPutty.ViewModels {
 
         SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource);
         if ( SessionSource != null ) {
-          _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+          PuttyGroup.Add(SessionSource.GetGroup(TPuttySessionSource.ROOT_GROUP_ID));
         }
 
-        if ( PuttyGroup.Items.Any() ) {
-          PuttyGroup.SelectedItem = PuttyGroup.Items.First();
+          if ( PuttyGroup.Groups.Any() ) {
+          PuttyGroup.SelectedGroup = PuttyGroup.Groups.First();
         }
         #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
       }
@@ -183,9 +183,6 @@ namespace EasyPutty.ViewModels {
         ApplicationTitle = App.AppUsername;
       }
       PuttyGroup.Parent = this;
-
-     
-
     }
 
     protected override void _InitializeCommands() {
@@ -242,10 +239,10 @@ namespace EasyPutty.ViewModels {
       NotifyExecutionProgress("Reading sessions ...");
       PuttyGroup.Clear();
 
-      _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+      PuttyGroup.Add(SessionSource.GetGroup(TPuttySessionSource.ROOT_GROUP_ID));
 
-      if (PuttyGroup.Items.Any()) {
-        PuttyGroup.SelectedItem = PuttyGroup.Items.First();
+      if (PuttyGroup.Groups.Any()) {
+        PuttyGroup.SelectedGroup = PuttyGroup.Groups.First();
       }
 
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
@@ -280,7 +277,7 @@ namespace EasyPutty.ViewModels {
 
       PuttyGroup.Clear();
 
-      _DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
+      //_DispatchSessions(SessionSource.GetSessions().Where(x => x.Protocol.IsSSH));
 
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
@@ -367,11 +364,7 @@ namespace EasyPutty.ViewModels {
     }
 
     private void _ToolsNewSession() {
-      //TVMPuttySession VMPuttySession = new TVMPuttySession(new TPuttySession());
-      //VMPuttySession.CommandEditSession.Execute(null);
-      //if (VMPuttySession.CleanName!="") {
-      //  PuttyGroup.AddSession(VMPuttySession.PuttySession);
-      //}
+      
     }
 
     private void _HelpContact() {
@@ -388,34 +381,34 @@ namespace EasyPutty.ViewModels {
     }
     #endregion --- Menu --------------------------------------------
 
-    private void _DispatchSessions(IEnumerable<IPuttySession> sessions) {
+    //private void _DispatchSessions(IEnumerable<IPuttySession> sessions) {
 
-      IEnumerable<IGrouping<string, IPuttySession>> SessionsByGroupL1 = sessions.Where(x => !(string.IsNullOrWhiteSpace(x.GroupLevel1) && string.IsNullOrWhiteSpace(x.GroupLevel2)))
-                                                                                .GroupBy(x => x.GroupLevel1);
+    //  IEnumerable<IGrouping<string, IPuttySession>> SessionsByGroupL1 = sessions.Where(x => !(string.IsNullOrWhiteSpace(x.GroupLevel1) && string.IsNullOrWhiteSpace(x.GroupLevel2)))
+    //                                                                            .GroupBy(x => x.GroupLevel1);
 
-      foreach ( IGrouping<string, IPuttySession> SessionsByGroupL1Item in SessionsByGroupL1 ) {
+    //  foreach ( IGrouping<string, IPuttySession> SessionsByGroupL1Item in SessionsByGroupL1 ) {
 
-        string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "<empty>";
-        TVMPuttyGroup GroupL1 = new TVMPuttyGroup(L1Header) {
-          Parent = PuttyGroup
-        };
+    //    string L1Header = SessionsByGroupL1Item.First().GroupLevel1 ?? "<empty>";
+    //    TVMPuttyGroup GroupL1 = new TVMPuttyGroup(L1Header) {
+    //      Parent = PuttyGroup
+    //    };
 
-        foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.OrderBy(x => x.GroupLevel2).GroupBy(x => x.GroupLevel2) ) {
+    //    foreach ( IGrouping<string, IPuttySession> SessionsByGroupL2Item in SessionsByGroupL1Item.OrderBy(x => x.GroupLevel2).GroupBy(x => x.GroupLevel2) ) {
 
-          string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<empty>";
-          TVMPuttySessionsGroupedBy GroupL2 = new TVMPuttySessionsGroupedBy(L2Header) {
-            Parent = GroupL1
-          };
+    //      string L2Header = SessionsByGroupL2Item.First().GroupLevel2 ?? "<empty>";
+    //      TVMPuttySessionsGroupedBy GroupL2 = new TVMPuttySessionsGroupedBy(L2Header) {
+    //        Parent = GroupL1
+    //      };
 
-          GroupL2.Add(_CreateAndRecoverSessions(SessionsByGroupL2Item, EPuttyProtocol.SSH));
-          GroupL1.Add(GroupL2);
+    //      GroupL2.Add(_CreateAndRecoverSessions(SessionsByGroupL2Item, EPuttyProtocol.SSH));
+    //      GroupL1.Add(GroupL2);
 
-        }
+    //    }
 
-        PuttyGroup.Add(GroupL1);
-      }
-      NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
-    }
+    //    PuttyGroup.Add(GroupL1);
+    //  }
+    //  NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
+    //}
 
     private IEnumerable<TVMPuttySession> _CreateAndRecoverSessions(IEnumerable<IPuttySession> sessions, EPuttyProtocol protocol) {
       if ( sessions == null || !sessions.Any() ) {

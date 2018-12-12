@@ -241,7 +241,6 @@
     <Compile Include="ViewModels\TVMSupportContact.cs" />
     <Compile Include="ViewModels\TVMSupportContacts.cs" />
     <Compile Include="ViewModels\TVMPuttySession.cs" />
-    <Compile Include="ViewModels\TVMPuttySessionsGroupedBy.cs" />
     <Compile Include="Views\DisplaySupportInformationControl.xaml.cs">
       <DependentUpon>DisplaySupportInformationControl.xaml</DependentUpon>
     </Compile>

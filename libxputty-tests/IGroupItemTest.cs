@@ -13,7 +13,7 @@ namespace libxputty_tests {
     [TestCategory("Groups")]
     [TestMethod]
     public void CreateIGroupItem_NoParams_StructOk() {
-      IPuttySessionsGroup Test = new TPuttySessionGroup();
+      IPuttySessionGroup Test = new TPuttySessionGroup();
       Assert.IsFalse(Test.Groups.Any());
       Assert.IsFalse(Test.Sessions.Any());
     }
@@ -22,7 +22,7 @@ namespace libxputty_tests {
     [TestMethod]
     public void CreateIGroupItem_WithName_NameOk() {
       const string TestName = "Test group";
-      IPuttySessionsGroup Test = new TPuttySessionGroup(TestName);
+      IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
       Assert.AreEqual(TestName, Test.Name);
     }
 
@@ -31,7 +31,7 @@ namespace libxputty_tests {
     public void CreateIGroupItem_WithOneGroup_ContentOk() {
       const string TestName = "Test group";
       const string TestName2 = "Test group 2";
-      IPuttySessionsGroup Test = new TPuttySessionGroup(TestName);
+      IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
       Test.AddOrUpdateGroup(new TPuttySessionGroup(TestName2));
       
       Assert.AreEqual(TestName, Test.Name);
@@ -46,9 +46,9 @@ namespace libxputty_tests {
       const string TestName2 = "Test group 2";
       const string TestName3 = "Test group 3";
       const string TestName4 = "Test group 4";
-      IPuttySessionsGroup Test = new TPuttySessionGroup(TestName);
+      IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
       Test.AddOrUpdateGroup(new TPuttySessionGroup(TestName2));
-      IPuttySessionsGroup Test3 = new TPuttySessionGroup(TestName3);
+      IPuttySessionGroup Test3 = new TPuttySessionGroup(TestName3);
       Test3.AddOrUpdateGroup(new TPuttySessionGroup(TestName4));
       Test.AddOrUpdateGroup(Test3);
 
@@ -63,9 +63,9 @@ namespace libxputty_tests {
       const string TestName2 = "Test group 2";
       const string TestName3 = "Test group 3";
       const string TestName4 = "Test group 4";
-      IPuttySessionsGroup Test = new TPuttySessionGroup(TestName);
+      IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
       Test.AddOrUpdateGroup(new TPuttySessionGroup(TestName2));
-      IPuttySessionsGroup Test3 = new TPuttySessionGroup(TestName3);
+      IPuttySessionGroup Test3 = new TPuttySessionGroup(TestName3);
       Test3.AddOrUpdateGroup(new TPuttySessionGroup(TestName4));
       Test.AddOrUpdateGroup(Test3);
       Test.RemoveGroup(TestName2);
@@ -81,9 +81,9 @@ namespace libxputty_tests {
       const string TestName2 = "Test group 2";
       const string TestName3 = "Test group 3";
       const string TestName4 = "Test group 4";
-      IPuttySessionsGroup Test = new TPuttySessionGroup(TestName);
+      IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
       Test.AddOrUpdateGroup(new TPuttySessionGroup(TestName2));
-      IPuttySessionsGroup Test3 = new TPuttySessionGroup(TestName3);
+      IPuttySessionGroup Test3 = new TPuttySessionGroup(TestName3);
       Test3.AddOrUpdateGroup(new TPuttySessionGroup(TestName4));
       Test.AddOrUpdateGroup(Test3);
       Test.ClearGroups();
@@ -98,7 +98,7 @@ namespace libxputty_tests {
     public void CreateIGroupItem_WithOneSession_ContentOk() {
       const string TestName = "Test group";
       const string TestSession1 = "Session 1";
-      IPuttySessionsGroup Test = new TPuttySessionGroup(TestName);
+      IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
       Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
 
       Assert.AreEqual(1, Test.Sessions.Count);
@@ -112,7 +112,7 @@ namespace libxputty_tests {
       const string TestSession1 = "Session 1";
       const string TestSession2 = "Session 2";
       const string TestSession3 = "Session 3";
-      IPuttySessionsGroup Test = new TPuttySessionGroup(TestName);
+      IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
       Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
       Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
       Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));
@@ -129,8 +129,8 @@ namespace libxputty_tests {
       const string TestSession1 = "Session 1";
       const string TestSession2 = "Session 2";
       const string TestSession3 = "Session 3";
-      IPuttySessionsGroup Test1 = new TPuttySessionGroup(TestGroup1);
-      IPuttySessionsGroup Test2 = new TPuttySessionGroup(TestGroup2);
+      IPuttySessionGroup Test1 = new TPuttySessionGroup(TestGroup1);
+      IPuttySessionGroup Test2 = new TPuttySessionGroup(TestGroup2);
       Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
       Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
       Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));
@@ -149,8 +149,8 @@ namespace libxputty_tests {
       const string TestSession1 = "Session 1";
       const string TestSession2 = "Session 2";
       const string TestSession3 = "Session 3";
-      IPuttySessionsGroup Test1 = new TPuttySessionGroup(TestGroup1);
-      IPuttySessionsGroup Test2 = new TPuttySessionGroup(TestGroup2);
+      IPuttySessionGroup Test1 = new TPuttySessionGroup(TestGroup1);
+      IPuttySessionGroup Test2 = new TPuttySessionGroup(TestGroup2);
       Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
       Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
       Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));
@@ -169,8 +169,8 @@ namespace libxputty_tests {
       const string TestSession1 = "Session 1";
       const string TestSession2 = "Session 2";
       const string TestSession3 = "Session 3";
-      IPuttySessionsGroup Test1 = new TPuttySessionGroup(TestGroup1);
-      IPuttySessionsGroup Test2 = new TPuttySessionGroup(TestGroup2);
+      IPuttySessionGroup Test1 = new TPuttySessionGroup(TestGroup1);
+      IPuttySessionGroup Test2 = new TPuttySessionGroup(TestGroup2);
       Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
       Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
       Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));

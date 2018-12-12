@@ -7,16 +7,16 @@ using BLTools;
 using libxputty_std20.Interfaces;
 
 namespace libxputty_std20 {
-  public class TPuttySessionGroup : TPuttyBase, IPuttySessionsGroup {
+  public class TPuttySessionGroup : TPuttyBase, IPuttySessionGroup {
 
-    public IList<IPuttySessionsGroup> Groups {
+    public IList<IPuttySessionGroup> Groups {
       get {
         lock ( _LockGroups ) {
           return _Groups;
         }
       }
     }
-    private readonly IList<IPuttySessionsGroup> _Groups = new List<IPuttySessionsGroup>();
+    private readonly IList<IPuttySessionGroup> _Groups = new List<IPuttySessionGroup>();
 
     public IList<IPuttySession> Sessions {
       get {
@@ -54,7 +54,7 @@ namespace libxputty_std20 {
     #endregion --- Converters ----------------------------------------------------------------------------------
 
     #region --- Groups management --------------------------------------------
-    public void AddOrUpdateGroup(IPuttySessionsGroup group) {
+    public void AddOrUpdateGroup(IPuttySessionGroup group) {
       if ( group == null ) {
         return;
       }
@@ -64,18 +64,18 @@ namespace libxputty_std20 {
       }
     }
 
-    public void AddGroups(IEnumerable<IPuttySessionsGroup> groups) {
+    public void AddGroups(IEnumerable<IPuttySessionGroup> groups) {
       if ( groups == null ) {
         return;
       }
       lock ( _LockGroups ) {
-        foreach ( IPuttySessionsGroup GroupItem in groups ) {
+        foreach ( IPuttySessionGroup GroupItem in groups ) {
           Groups.Add(GroupItem);
         }
       }
     }
 
-    public void RemoveGroup(IPuttySessionsGroup group) {
+    public void RemoveGroup(IPuttySessionGroup group) {
       if ( group == null ) {
         return;
       }
@@ -88,21 +88,21 @@ namespace libxputty_std20 {
       }
     }
 
-    public IEnumerable<IPuttySessionsGroup> GetAllGroups(bool recurse = true) {
+    public IEnumerable<IPuttySessionGroup> GetAllGroups(bool recurse = true) {
       if ( !Groups.Any() ) {
         yield break;
       }
-      foreach ( IPuttySessionsGroup GroupItem in Groups ) {
+      foreach ( IPuttySessionGroup GroupItem in Groups ) {
         yield return GroupItem;
         if ( recurse ) {
-          foreach ( IPuttySessionsGroup RecurseGroupItem in GroupItem.GetAllGroups(recurse) ) {
+          foreach ( IPuttySessionGroup RecurseGroupItem in GroupItem.GetAllGroups(recurse) ) {
             yield return RecurseGroupItem;
           }
         }
       }
     }
 
-    public IPuttySessionsGroup GetGroup(string groupId, bool recurse = true) {
+    public IPuttySessionGroup GetGroup(string groupId, bool recurse = true) {
       #region === Validate parameters ===
       if ( groupId == null ) {
         return null;
@@ -117,15 +117,15 @@ namespace libxputty_std20 {
         return this;
       }
 
-      foreach ( IPuttySessionsGroup GroupItem in Groups ) {
+      foreach ( IPuttySessionGroup GroupItem in Groups ) {
         if ( ID == groupId ) {
           return GroupItem;
         }
       }
 
       if ( recurse ) {
-        foreach ( IPuttySessionsGroup GroupItem in Groups ) {
-          IPuttySessionsGroup SubGroup = GroupItem.GetGroup(groupId, recurse);
+        foreach ( IPuttySessionGroup GroupItem in Groups ) {
+          IPuttySessionGroup SubGroup = GroupItem.GetGroup(groupId, recurse);
           if ( SubGroup != null ) {
             return SubGroup;
           }
@@ -182,14 +182,17 @@ namespace libxputty_std20 {
         yield return SessionItem;
       }
       if ( recurse ) {
-        if ( !Groups.Any() ) {
-          yield break;
-        }
-        foreach ( IPuttySessionsGroup GroupItem in Groups ) {
+        foreach ( IPuttySessionGroup GroupItem in Groups ) {
           foreach ( IPuttySession SessionItem in GroupItem.GetAllSessions(recurse) ) {
             yield return SessionItem;
           }
         }
+      }
+    }
+
+    public IEnumerable<(string, TPuttyProtocol)> GetAllSessionsList(bool recurse = true) {
+      foreach ( IPuttySession SessionItem in GetAllSessions(recurse) ) {
+        yield return (SessionItem.ID, SessionItem.Protocol);
       }
     }
 
@@ -214,7 +217,7 @@ namespace libxputty_std20 {
     }
 
     protected void _ClearGroups() {
-      foreach ( IPuttySessionsGroup GroupItem in Groups ) {
+      foreach ( IPuttySessionGroup GroupItem in Groups ) {
         GroupItem.Clear();
         GroupItem.Dispose();
       }
@@ -254,5 +257,45 @@ namespace libxputty_std20 {
     }
     #endregion --- Clear without lock -----------------------------------------
 
+    public static TPuttySessionGroup DemoPuttySessionGroupEmpty {
+      get {
+        if ( _DemoPuttySessionGroupEmpty == null ) {
+          _DemoPuttySessionGroupEmpty = new TPuttySessionGroup("Demo group empty");
+        }
+        return _DemoPuttySessionGroupEmpty;
+      }
+    }
+    private static TPuttySessionGroup _DemoPuttySessionGroupEmpty;
+
+    public static TPuttySessionGroup DemoPuttySessionGroup1 {
+      get {
+        if ( _DemoPuttySessionGroup1 == null ) {
+          _DemoPuttySessionGroup1 = new TPuttySessionGroup("Demo group 1") {
+            Comment = "Not a real comment",
+            Description = "Group 1 description"
+          };
+          _DemoPuttySessionGroup1.AddOrUpdateSession(TPuttySessionSSH.DemoPuttySessionSSH1);
+          _DemoPuttySessionGroup1.AddOrUpdateSession(TPuttySessionSSH.DemoPuttySessionSSH2);
+        }
+        return _DemoPuttySessionGroup1;
+      }
+    }
+    private static TPuttySessionGroup _DemoPuttySessionGroup1;
+
+    public static TPuttySessionGroup DemoPuttySessionGroup2 {
+      get {
+        if ( _DemoPuttySessionGroup2 == null ) {
+          _DemoPuttySessionGroup2 = new TPuttySessionGroup("Demo group 2") {
+            Comment = "Not a real comment",
+            Description = "Group with inner groups"
+          };
+          _DemoPuttySessionGroup2.AddOrUpdateSession(TPuttySessionSerial.DemoPuttySessionSerial1);
+          _DemoPuttySessionGroup2.AddOrUpdateGroup(DemoPuttySessionGroup1);
+          _DemoPuttySessionGroup2.AddOrUpdateGroup(DemoPuttySessionGroupEmpty);
+        }
+        return _DemoPuttySessionGroup2;
+      }
+    }
+    private static TPuttySessionGroup _DemoPuttySessionGroup2;
   }
 }

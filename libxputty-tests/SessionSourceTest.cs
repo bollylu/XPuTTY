@@ -62,7 +62,7 @@ namespace libxputty_tests {
     public void SessionSourceXml_ConvertGroupFromXml_MainGroupOk() {
       TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
       SourceTest.XmlDataCache = XDocument.Parse( XML_TEST_DATA_SOURCE).Root;
-      IEnumerable<IPuttySessionsGroup> Groups = SourceTest.GetGroupsFrom("", false);
+      IEnumerable<IPuttySessionGroup> Groups = SourceTest.GetGroupsFrom("", false);
       Assert.AreEqual(1, Groups.Count());
     }
 
@@ -71,17 +71,28 @@ namespace libxputty_tests {
     public void SessionSourceXml_ConvertGroupFromXml_SubGroupsOk() {
       TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
       SourceTest.XmlDataCache = XDocument.Parse(XML_TEST_DATA_SOURCE).Root;
-      IEnumerable<IPuttySessionsGroup> Groups = SourceTest.GetGroupsFrom(GROUP_ID_TEST1, true);
+      IEnumerable<IPuttySessionGroup> Groups = SourceTest.GetGroupsFrom(GROUP_ID_TEST1, true);
       Assert.AreEqual(2, Groups.Count());
     }
 
     [TestCategory("SessionSource")]
     [TestMethod]
-    public void SessionSourceXml_GetGroupsWongId_Zero() {
+    public void SessionSourceXml_GetGroupsWrongId_Zero() {
       TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
       SourceTest.XmlDataCache = XDocument.Parse(XML_TEST_DATA_SOURCE).Root;
-      IEnumerable<IPuttySessionsGroup> Groups = SourceTest.GetGroupsFrom(GROUP_ID_WRONG, false);
+      IEnumerable<IPuttySessionGroup> Groups = SourceTest.GetGroupsFrom(GROUP_ID_WRONG, false);
       Assert.AreEqual(0, Groups.Count());
+    }
+
+    [TestCategory("SessionSource")]
+    [TestMethod]
+    public void SessionSourceXml_GetGroup_ValueOk() {
+      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
+      SourceTest.XmlDataCache = XDocument.Parse(XML_TEST_DATA_SOURCE).Root;
+      IPuttySessionGroup Group = SourceTest.GetGroup(GROUP_ID_TEST1, true);
+      Assert.IsNotNull(Group);
+      Assert.AreEqual(GROUP_ID_TEST1, Group.ID);
+      Assert.AreEqual(2, Group.Groups.Count);
     }
   }
 }

@@ -171,11 +171,11 @@ namespace libxputty_std20 {
     //  throw new NotImplementedException();
     //}
 
-    public override IEnumerable<IPuttySessionsGroup> GetGroupsFrom(string groupId, bool recurse = false) {
+    public override IEnumerable<IPuttySessionGroup> GetGroupsFrom(string groupId, bool recurse = false) {
       throw new NotImplementedException();
     }
 
-    public override IPuttySessionsGroup GetGroup(string groupId, bool recurse = true) {
+    public override IPuttySessionGroup GetGroup(string groupId, bool recurse = true) {
       throw new NotImplementedException();
     }
 
@@ -183,23 +183,11 @@ namespace libxputty_std20 {
       throw new NotImplementedException();
     }
 
-    public override IEnumerable<(string, TPuttyProtocol)> GetSessionsList(IPuttySessionsGroup group, bool recurse) {
-      throw new NotImplementedException();
-    }
-
     public override IEnumerable<IPuttySession> GetSessions(string groupId, bool recurse = false) {
       throw new NotImplementedException();
     }
 
-    public override IEnumerable<IPuttySession> GetSessions(IPuttySessionsGroup group, bool recurse = false) {
-      throw new NotImplementedException();
-    }
-
-    public override IPuttySession GetSession(IPuttySessionsGroup group, string sessionId, bool recurse = true) {
-      throw new NotImplementedException();
-    }
-
-    public override void SaveGroup(IPuttySessionsGroup group) {
+    public override void SaveGroup(IPuttySessionGroup group) {
       throw new NotImplementedException();
     }
 

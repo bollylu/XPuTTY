@@ -10,7 +10,7 @@ using libxputty_std20;
 using libxputty_std20.Interfaces;
 
 namespace EasyPutty.ViewModels {
-  public class TVMPuttySession : TVMEasyPuttyBase, IHeaderedAndSelectable {
+  public class TVMPuttySession : TVMEasyPuttyBase {
 
     public IPuttySession PuttySession => _Data as IPuttySession;
 
@@ -30,48 +30,6 @@ namespace EasyPutty.ViewModels {
     public string Header => Name;
 
     public string TooltipComment => string.IsNullOrWhiteSpace(base.Comment) ? null : base.Comment;
-
-    public string GroupLevel1 {
-      get {
-        if ( string.IsNullOrWhiteSpace(_GroupLevel1) ) {
-          _GroupLevel1 = PuttySession == null ? "" : PuttySession.GroupLevel1;
-        }
-        return _GroupLevel1;
-      }
-      set {
-        _GroupLevel1 = value;
-        NotifyPropertyChanged(nameof(GroupLevel1));
-      }
-    }
-    private string _GroupLevel1;
-
-    public string GroupLevel2 {
-      get {
-        if ( string.IsNullOrWhiteSpace(_GroupLevel2) ) {
-          _GroupLevel2 = PuttySession == null ? "" : PuttySession.GroupLevel2;
-        }
-        return _GroupLevel2;
-      }
-      set {
-        _GroupLevel2 = value;
-        NotifyPropertyChanged(nameof(GroupLevel2));
-      }
-    }
-    private string _GroupLevel2;
-
-    public string Section {
-      get {
-        if ( string.IsNullOrWhiteSpace(_Section) ) {
-          _Section = PuttySession == null ? "" : PuttySession.Section;
-        }
-        return _Section;
-      }
-      set {
-        _Section = value;
-        NotifyPropertyChanged(nameof(Section));
-      }
-    }
-    private string _Section;
 
     public string RemoteCommand {
       get {
@@ -326,65 +284,34 @@ namespace EasyPutty.ViewModels {
     #endregion --- Edit session and events -----------------------------------------
 
     #region --- For design time --------------------------------------------
-    public static TVMPuttySession DesignVMPuttySession {
+    public static TVMPuttySession DesignVMPuttySessionSSH1 {
       get {
-        if ( _DesignVMPuttySession == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
-            GroupLevel1 = "Sharenet",
-            GroupLevel2 = "CMD",
-            Section = "LAN",
-            Port = 22,
-            HostName = "server.test.priv",
-            RemoteCommand = "tail -n 100 -f /var/log/syslog"
-          };
-          _DesignVMPuttySession = new TVMPuttySession(FakeSession);
+        if ( _DesignVMPuttySessionSSH1 == null ) {
+          _DesignVMPuttySessionSSH1 = new TVMPuttySession(TPuttySessionSSH.DemoPuttySessionSSH1);
         }
-        return _DesignVMPuttySession;
+        return _DesignVMPuttySessionSSH1;
       }
     }
-    private static TVMPuttySession _DesignVMPuttySession;
+    private static TVMPuttySession _DesignVMPuttySessionSSH1;
 
-    public static TVMPuttySession DesignVMPuttySession2 {
+    public static TVMPuttySession DesignVMPuttySessionSSH2 {
       get {
-        if ( _DesignVMPuttySession2 == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Other session") {
-            GroupLevel1 = "Sharenet",
-            GroupLevel2 = "CMD",
-            Section = "DMZ",
-            Port = 22,
-            HostName = "server2.test.priv",
-            RemoteCommand = "tail -n 200 -f /var/log/syslog"
-          };
-          _DesignVMPuttySession2 = new TVMPuttySession(FakeSession);
+        if ( _DesignVMPuttySessionSSH2 == null ) {
+          _DesignVMPuttySessionSSH2 = new TVMPuttySession(TPuttySessionSSH.DemoPuttySessionSSH2);
         }
-        return _DesignVMPuttySession2;
+        return _DesignVMPuttySessionSSH2;
       }
     }
-
-    private static TVMPuttySession _DesignVMPuttySession2;
+    private static TVMPuttySession _DesignVMPuttySessionSSH2;
 
     public static TVMPuttySession DesignVMPuttySessionSerial {
       get {
         if ( _DesignVMPuttySessionSerial == null ) {
-          TPuttySessionSerial FakeSession = new TPuttySessionSerial("Serial session") {
-            GroupLevel1 = "Sharenet",
-            GroupLevel2 = "CMD",
-            Section = "DMZ",
-            SerialLine = "COM4",
-            SerialSpeed = 9600,
-            SerialDataBits = 8,
-            SerialStopBits = 1,
-            SerialParity = "None",
-            RemoteCommand = "tail -n 200 -f /var/log/syslog"
-          };
-          _DesignVMPuttySessionSerial = new TVMPuttySession(FakeSession);
+          _DesignVMPuttySessionSerial = new TVMPuttySession(TPuttySessionSerial.DemoPuttySessionSerial1);
         }
         return _DesignVMPuttySessionSerial;
       }
     }
-
-    
-
     private static TVMPuttySession _DesignVMPuttySessionSerial;
     #endregion --- For design time --------------------------------------------
 
@@ -392,7 +319,5 @@ namespace EasyPutty.ViewModels {
       PuttySession.PuttyProcess.AssignProcess(process);
     }
 
-    public ObservableCollection<IHeaderedAndSelectable> Items { get; }
-    public void Clear() { }
   }
 }

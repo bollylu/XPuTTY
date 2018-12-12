@@ -21,7 +21,7 @@ namespace libxputty_std20 {
 
     public static XName XML_ELEMENT_SESSION = GetXName("Session");
     public const string XML_ATTRIBUTE_ID = "Id";
-    public const string ROOT_GROUP_ID = "";
+    
 
     public static XName XML_ELEMENT_DESCRIPTION = GetXName("Description");
     public static XName XML_ELEMENT_COMMENT = GetXName("Comment");
@@ -49,7 +49,7 @@ namespace libxputty_std20 {
     #region --- Cache --------------------------------------------
     public XElement XmlDataCache;
 
-    public IEnumerable<IPuttySessionsGroup> ProcessedDataCache {
+    public IEnumerable<IPuttySessionGroup> ProcessedDataCache {
       get {
         if ( XmlDataCache == null ) {
           return null;
@@ -61,9 +61,9 @@ namespace libxputty_std20 {
         return _ProcessedDataCache;
       }
     }
-    private IEnumerable<IPuttySessionsGroup> _ProcessedDataCache;
+    private IEnumerable<IPuttySessionGroup> _ProcessedDataCache;
 
-    public IPuttySessionsGroup RootGroup {
+    public IPuttySessionGroup RootGroup {
       get {
         if ( ProcessedDataCache == null ) {
           return null;
@@ -251,14 +251,14 @@ namespace libxputty_std20 {
     /// </summary>
     /// <param name="group">The XML data</param>
     /// <returns>One converted group</returns>
-    protected IPuttySessionsGroup _ConvertGroupFromXml(XElement group) {
+    protected IPuttySessionGroup _ConvertGroupFromXml(XElement group) {
       if ( group == null ) {
         throw new ArgumentNullException(nameof(group), "Missing or invalid xml group for conversion");
       }
 
       string Name = group.SafeReadAttribute<string>(XML_ATTRIBUTE_NAME, "");
 
-      IPuttySessionsGroup RetVal = new TPuttySessionGroup(Name) {
+      IPuttySessionGroup RetVal = new TPuttySessionGroup(Name) {
         ID = group.SafeReadAttribute<string>(XML_ATTRIBUTE_ID, "")
       };
 
@@ -278,7 +278,7 @@ namespace libxputty_std20 {
     /// </summary>
     /// <param name="groups">The list of XML data sessions</param>
     /// <returns>A list of groups</returns>
-    protected IEnumerable<IPuttySessionsGroup> _ConvertGroupsFromXml(IEnumerable<XElement> groups) {
+    protected IEnumerable<IPuttySessionGroup> _ConvertGroupsFromXml(IEnumerable<XElement> groups) {
       if ( groups == null || !groups.Any() ) {
         yield break;
       }
@@ -293,7 +293,7 @@ namespace libxputty_std20 {
     /// </summary>
     /// <param name="session">The source session</param>
     /// <returns>The XML data session</returns>
-    protected XElement _ConvertGroupToXml(IPuttySessionsGroup group) {
+    protected XElement _ConvertGroupToXml(IPuttySessionGroup group) {
 
       XElement RetVal = new XElement(XML_ELEMENT_GROUP);
 
@@ -328,7 +328,7 @@ namespace libxputty_std20 {
     /// </summary>
     /// <param name="sessions">The source sessions</param>
     /// <returns>The enumeration of XML data session</returns>
-    protected IEnumerable<XElement> _ConvertGroupsToXml(IEnumerable<IPuttySessionsGroup> groups) {
+    protected IEnumerable<XElement> _ConvertGroupsToXml(IEnumerable<IPuttySessionGroup> groups) {
       #region === Validate parameters ===
       if ( groups == null ) {
         yield break;
@@ -337,7 +337,7 @@ namespace libxputty_std20 {
         yield break;
       }
       #endregion === Validate parameters ===
-      foreach ( IPuttySessionsGroup PuttySessionsGroupItem in groups ) {
+      foreach ( IPuttySessionGroup PuttySessionsGroupItem in groups ) {
         yield return _ConvertGroupToXml(PuttySessionsGroupItem);
       }
     }
@@ -526,7 +526,7 @@ namespace libxputty_std20 {
 
     #endregion Xml IO
 
-    public override IEnumerable<IPuttySessionsGroup> GetGroupsFrom(string groupId = ROOT_GROUP_ID, bool recurse = false) {
+    public override IEnumerable<IPuttySessionGroup> GetGroupsFrom(string groupId = ROOT_GROUP_ID, bool recurse = false) {
       #region --- Is there any data --------------------------------------------
       if ( ProcessedDataCache == null ) {
         XmlDataCache = LoadXml();
@@ -536,7 +536,7 @@ namespace libxputty_std20 {
       }
       #endregion --- Is there any data -----------------------------------------
 
-      IPuttySessionsGroup FakeRootGroup;
+      IPuttySessionGroup FakeRootGroup;
 
       if ( groupId == ROOT_GROUP_ID ) {
         FakeRootGroup = RootGroup;
@@ -547,13 +547,13 @@ namespace libxputty_std20 {
         }
       }
 
-      foreach ( IPuttySessionsGroup GroupItem in FakeRootGroup.GetAllGroups(recurse) ) {
+      foreach ( IPuttySessionGroup GroupItem in FakeRootGroup.GetAllGroups(recurse) ) {
         yield return GroupItem;
       }
 
     }
 
-    public override IPuttySessionsGroup GetGroup(string groupId, bool recurse = true) {
+    public override IPuttySessionGroup GetGroup(string groupId, bool recurse = true) {
       if ( ProcessedDataCache == null ) {
         XmlDataCache = LoadXml();
       }
@@ -567,27 +567,59 @@ namespace libxputty_std20 {
       return RootGroup.GetAllGroups(recurse).FirstOrDefault(x => x.ID == groupId);
     }
 
-    public override IEnumerable<(string, TPuttyProtocol)> GetSessionsList(string groupId, bool recurse) {
-      throw new NotImplementedException();
-    }
+    public override IEnumerable<(string, TPuttyProtocol)> GetSessionsList(string groupId, bool recurse = true) {
+      #region --- Is there any data --------------------------------------------
+      if ( ProcessedDataCache == null ) {
+        XmlDataCache = LoadXml();
+      }
+      if ( RootGroup == null ) {
+        yield break;
+      }
+      #endregion --- Is there any data -----------------------------------------
 
-    public override IEnumerable<(string, TPuttyProtocol)> GetSessionsList(IPuttySessionsGroup group, bool recurse) {
-      throw new NotImplementedException();
+      IPuttySessionGroup FakeRootGroup;
+
+      if ( groupId == ROOT_GROUP_ID ) {
+        FakeRootGroup = RootGroup;
+      } else {
+        FakeRootGroup = RootGroup.GetGroup(groupId, recurse);
+        if ( FakeRootGroup == null ) {
+          yield break;
+        }
+      }
+
+      foreach ( IPuttySession SessionItem in FakeRootGroup.GetAllSessions(recurse) ) {
+        yield return (SessionItem.ID, SessionItem.Protocol);
+      }
     }
 
     public override IEnumerable<IPuttySession> GetSessions(string groupId, bool recurse = false) {
-      throw new NotImplementedException();
+      #region --- Is there any data --------------------------------------------
+      if ( ProcessedDataCache == null ) {
+        XmlDataCache = LoadXml();
+      }
+      if ( RootGroup == null ) {
+        yield break;
+      }
+      #endregion --- Is there any data -----------------------------------------
+
+      IPuttySessionGroup FakeRootGroup;
+
+      if ( groupId == ROOT_GROUP_ID ) {
+        FakeRootGroup = RootGroup;
+      } else {
+        FakeRootGroup = RootGroup.GetGroup(groupId, recurse);
+        if ( FakeRootGroup == null ) {
+          yield break;
+        }
+      }
+
+      foreach ( IPuttySession SessionItem in FakeRootGroup.GetAllSessions(recurse) ) {
+        yield return SessionItem;
+      }
     }
 
-    public override IEnumerable<IPuttySession> GetSessions(IPuttySessionsGroup group, bool recurse = false) {
-      throw new NotImplementedException();
-    }
-
-    public override IPuttySession GetSession(IPuttySessionsGroup group, string sessionId, bool recurse = true) {
-      throw new NotImplementedException();
-    }
-
-    public override void SaveGroup(IPuttySessionsGroup group) {
+    public override void SaveGroup(IPuttySessionGroup group) {
       throw new NotImplementedException();
     }
 
