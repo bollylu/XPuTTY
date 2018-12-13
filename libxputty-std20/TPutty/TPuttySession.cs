@@ -171,7 +171,7 @@ namespace libxputty_std20 {
         UseShellExecute = false
       };
       PuttyProcess.StartInfo = StartInfo;
-
+      
       PuttyProcess.Start(true);
     }
     protected virtual void _StartPlink(string arguments = "") {

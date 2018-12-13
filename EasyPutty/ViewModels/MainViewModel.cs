@@ -65,19 +65,19 @@ namespace EasyPutty.ViewModels {
     }
     private string _ApplicationTitle;
 
-    private readonly string _ApplicationTitleBase = $"{App.AppName} v0.1";
+    private readonly string _ApplicationTitleBase = $"{App.AppName} v0.2";
 
-    public TVMPuttyGroup SelectedItem {
+    public TVMPuttyGroup SelectedGroup {
       get {
-        return _SelectedItem;
+        return _SelectedGroup;
       }
       set {
-        _SelectedItem = value;
-        ContentLocation = _SelectedItem.Header;
-        NotifyPropertyChanged(nameof(SelectedItem));
+        _SelectedGroup = value;
+        ContentLocation = _SelectedGroup.Header;
+        NotifyPropertyChanged(nameof(SelectedGroup));
       }
     }
-    private TVMPuttyGroup _SelectedItem;
+    private TVMPuttyGroup _SelectedGroup;
 
     public string ContentLocation {
       get {
@@ -136,7 +136,7 @@ namespace EasyPutty.ViewModels {
     public MainViewModel(ISplitArgs appArgs) : base() {
       AppArgs = appArgs;
 
-      if ( App.AppArgs.IsDefined(App.PARAM_LOAD) ) {
+      if ( AppArgs.IsDefined(App.PARAM_LOAD) ) {
         #region --- Load data from PuttySessionSource --------------------------------------------
         Settings CurrentSettings = new Settings();
 
@@ -171,7 +171,7 @@ namespace EasyPutty.ViewModels {
           PuttyGroup.Add(SessionSource.GetGroup(TPuttySessionSource.ROOT_GROUP_ID));
         }
 
-          if ( PuttyGroup.Groups.Any() ) {
+        if ( PuttyGroup.Groups.Any() ) {
           PuttyGroup.SelectedGroup = PuttyGroup.Groups.First();
         }
         #endregion --- Reload data from previous PuttySessionSource --------------------------------------------
