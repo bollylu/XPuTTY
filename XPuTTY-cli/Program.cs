@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using BLTools;
 using libxputty_std20;
@@ -21,6 +22,8 @@ namespace XPuTTY_cli {
     private const string CMD_START_MENU = "menu";
     #endregion --- Command line arguments definition --------------------------------------------
 
+    private static ISessionManager SessionManager = new TSessionManagerCSV(Path.Combine(Path.GetTempPath(), @"xputty_cli.tmp"));
+
     private static void Main(string[] args) {
       SplitArgs Args = new SplitArgs(args);
 
@@ -34,7 +37,7 @@ namespace XPuTTY_cli {
       bool NeedRunning = true;
       do {
 
-        IPuttySessionSource SessionSource = TPuttySessionSource.GetPuttySessionSource(Source);
+        IPuttySessionSource SessionSource = TPuttySessionSource.GetPuttySessionSource(Source, SessionManager);
         if ( SessionSource == null ) {
           Usage($"Invalid session source : {Source}");
         }
@@ -49,7 +52,7 @@ namespace XPuTTY_cli {
 
           case CMD_START:
             if ( Source.ToLower().StartsWith(CMD_START_MENU) ) {
-              IEnumerable<IPuttySession> Menu = (new List<IPuttySession>() { new TPuttySessionSSH() { Name = "Cancel" } }).Concat(Sessions.Where(x => x.Protocol.IsSSH));
+              IEnumerable<IPuttySession> Menu = (new List<IPuttySession>() { new TPuttySessionSSH(SessionManager) { Name = "Cancel" } }).Concat(Sessions.Where(x => x.Protocol.IsSSH));
               Console.Clear();
               int Choice = InputList(Menu.Select(x => x.Name), "Sessions list", "Please select session to start : ", "Please select only numbers available in the list");
               if ( Choice == 1 ) {

@@ -17,10 +17,10 @@ namespace libxputty_std20 {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionRLogin() : base() {
+    public TPuttySessionRLogin(ISessionManager sessionManager) : base(sessionManager) {
       Protocol = TPuttyProtocol.RLogin;
     }
-    public TPuttySessionRLogin(string name) : base(name) {
+    public TPuttySessionRLogin(string name, ISessionManager sessionManager) : base(name, sessionManager) {
       Protocol = TPuttyProtocol.RLogin;
     }
 

@@ -27,7 +27,7 @@ namespace libxputty_std20 {
     public static IPuttySession Empty {
       get {
         if ( _Empty == null ) {
-          _Empty = new TPuttySession(EMPTY);
+          _Empty = new TPuttySession(EMPTY, TSessionManager.DEFAULT_SESSION_MANAGER);
         }
         return _Empty;
       }
@@ -61,10 +61,6 @@ namespace libxputty_std20 {
     public string RemoteCommand { get; set; }
     public string CleanedRemoteCommand => (RemoteCommand ?? "").Replace("\"", "\\\"");
 
-    public string GroupLevel1 { get; set; }
-    public string GroupLevel2 { get; set; }
-    public string Section { get; set; }
-
     protected string SessionTitle;
 
     public IList<ISupportContact> SupportContacts { get; } = new List<ISupportContact>();
@@ -72,6 +68,8 @@ namespace libxputty_std20 {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     protected string TempFileForRemoteCommand;
+
+    public ISessionManager SessionManager { get; }
 
     #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
@@ -87,31 +85,33 @@ namespace libxputty_std20 {
     #endregion --- Event handlers --------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySession() : base() {
+    public TPuttySession(ISessionManager sessionManager) : base() {
       Name = "<no name>";
       SessionType = ESessionType.Auto;
+      SessionManager = sessionManager;
+      PuttyProcess = new TRunProcess(SessionManager, ID);
     }
 
-    public TPuttySession(string name) : base(name) {
+    public TPuttySession(string name, ISessionManager sessionManager) : base(name) {
       SessionType = ESessionType.Auto;
+      SessionManager = sessionManager;
+      PuttyProcess = new TRunProcess(SessionManager, ID);
     }
 
-    public TPuttySession(IPuttySession session) {
+    public TPuttySession(IPuttySession session) : base(session.Name) {
       SessionType = session.SessionType;
-      Name = session.Name;
       Description = session.Description;
       Comment = session.Comment;
-      //GroupLevel1 = session.GroupLevel1;
-      //GroupLevel2 = session.GroupLevel2;
-      //Section = session.Section;
       RemoteCommand = session.RemoteCommand;
       Parent = session.Parent;
       SetLocalCredential(session.Credential);
+      SessionManager = session.SessionManager;
+      PuttyProcess = new TRunProcess(SessionManager, ID);
+      PuttyProcess.OnExit += PuttyProcess_OnExit;
+      PuttyProcess.OnStart += PuttyProcess_OnStart;
     }
 
     protected override void _Initialize() {
-      PuttyProcess.OnExit += PuttyProcess_OnExit;
-      PuttyProcess.OnStart += PuttyProcess_OnStart;
     }
     public override void Dispose() {
       PuttyProcess.OnExit -= PuttyProcess_OnExit;
@@ -124,7 +124,7 @@ namespace libxputty_std20 {
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Windows processes --------------------------------------------
-    public TRunProcess PuttyProcess { get; protected set; } = new TRunProcess();
+    public TRunProcess PuttyProcess { get; protected set; }
     public bool IsRunning => PuttyProcess.IsRunning;
     public int PID => PuttyProcess.PID;
     public string CommandLine => TRunProcess.GetCommandLine(PID);
@@ -224,7 +224,6 @@ namespace libxputty_std20 {
       }
       yield break;
     }
-
     #endregion --- Windows processes -------------------------------------------- 
 
   }

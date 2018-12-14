@@ -16,27 +16,31 @@ namespace libxputty_std20 {
     public ESourceType SourceType { get; protected set; }
 
     public virtual string DataSourceName => "";
+
+    protected ISessionManager SessionManager;
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSource() : base() { }
+    public TPuttySessionSource(ISessionManager sessionManager) : base() {
+      SessionManager = sessionManager;
+    }
 
     protected override void _Initialize() {
 
     } 
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
-    public static IPuttySessionSource GetPuttySessionSource(string sourceUri) {
+    public static IPuttySessionSource GetPuttySessionSource(string sourceUri, ISessionManager sessionManager) {
       if ( string.IsNullOrWhiteSpace(sourceUri) ) {
         return null;
       }
       switch ( sourceUri.Before("://").ToLower() ) {
         case TPuttySessionSourceRegistry.DATASOURCE_PREFIX:
-          return new TPuttySessionSourceRegistry();
+          return new TPuttySessionSourceRegistry(sessionManager);
         case TPuttySessionSourceXml.DATASOURCE_PREFIX:
-          return new TPuttySessionSourceXml(sourceUri.After("://"));
+          return new TPuttySessionSourceXml(sourceUri.After("://"), sessionManager);
         case TPuttySessionSourceJson.DATASOURCE_PREFIX:
-          return new TPuttySessionSourceJson(sourceUri.After("://"));
+          return new TPuttySessionSourceJson(sourceUri.After("://"), sessionManager);
         default:
           Log.Write($"Unable to get PuttySessionSource : sourceUri is invalid : {sourceUri}");
           return null;

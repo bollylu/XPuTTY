@@ -99,7 +99,7 @@ namespace libxputty_tests {
       const string TestName = "Test group";
       const string TestSession1 = "Session 1";
       IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
-      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
+      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession1, TSessionManager.DEFAULT_SESSION_MANAGER));
 
       Assert.AreEqual(1, Test.Sessions.Count);
       Assert.AreEqual(1, Test.GetAllSessions().Count());
@@ -113,9 +113,9 @@ namespace libxputty_tests {
       const string TestSession2 = "Session 2";
       const string TestSession3 = "Session 3";
       IPuttySessionGroup Test = new TPuttySessionGroup(TestName);
-      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
-      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
-      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));
+      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession1, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession2, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test.AddOrUpdateSession(new TPuttySessionSSH(TestSession3, TSessionManager.DEFAULT_SESSION_MANAGER));
 
       Assert.AreEqual(3, Test.Sessions.Count);
       Assert.AreEqual(3, Test.GetAllSessions().Count());
@@ -131,9 +131,9 @@ namespace libxputty_tests {
       const string TestSession3 = "Session 3";
       IPuttySessionGroup Test1 = new TPuttySessionGroup(TestGroup1);
       IPuttySessionGroup Test2 = new TPuttySessionGroup(TestGroup2);
-      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
-      Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
-      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));
+      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3, TSessionManager.DEFAULT_SESSION_MANAGER));
       Test1.AddOrUpdateGroup(Test2);
 
       Assert.AreEqual(2, Test1.Sessions.Count);
@@ -151,9 +151,9 @@ namespace libxputty_tests {
       const string TestSession3 = "Session 3";
       IPuttySessionGroup Test1 = new TPuttySessionGroup(TestGroup1);
       IPuttySessionGroup Test2 = new TPuttySessionGroup(TestGroup2);
-      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
-      Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
-      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));
+      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3, TSessionManager.DEFAULT_SESSION_MANAGER));
       Test1.AddOrUpdateGroup(Test2);
       Test2.RemoveSession(TestSession2);
 
@@ -171,9 +171,9 @@ namespace libxputty_tests {
       const string TestSession3 = "Session 3";
       IPuttySessionGroup Test1 = new TPuttySessionGroup(TestGroup1);
       IPuttySessionGroup Test2 = new TPuttySessionGroup(TestGroup2);
-      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1));
-      Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2));
-      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3));
+      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession1, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test2.AddOrUpdateSession(new TPuttySessionSSH(TestSession2, TSessionManager.DEFAULT_SESSION_MANAGER));
+      Test1.AddOrUpdateSession(new TPuttySessionSSH(TestSession3, TSessionManager.DEFAULT_SESSION_MANAGER));
       Test1.AddOrUpdateGroup(Test2);
 
       Test2.ClearSessions();

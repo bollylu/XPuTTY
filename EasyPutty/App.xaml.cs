@@ -20,16 +20,18 @@ namespace EasyPutty {
     public const string PARAM_LOGBASE = "logbase";
     public const string PARAM_CONFIG = "config";
     public const string PARAM_LOAD = "load";
+    public const string PARAM_SESSION_MANAGER = "session_manager";
 
     public static readonly string AppName = Assembly.GetExecutingAssembly().GetName().Name;
 
     public static readonly string DEFAULT_PROD_LOGBASE = $@"c:\Logs\{AppName}";
     public static readonly string DEFAULT_DEV_LOGBASE = $@"c:\Logs\{AppName}";
     public const string DEFAULT_CONFIG = "config.xml";
+    public static readonly string DEFAULT_SESSION_MANAGER_CSV = Path.Combine(Path.GetTempPath(), AppName);
 
     public static ISplitArgs AppArgs;
     public static NetworkCredential CurrentUserCredential;
-    
+
     public static readonly string AppUsername = string.IsNullOrWhiteSpace(Environment.UserDomainName) ? Environment.UserName : $@"{Environment.UserDomainName}\{Environment.UserName}";
 
     public static bool AppIsStartingUp = true;
@@ -66,7 +68,7 @@ namespace EasyPutty {
         Trace.Listeners.Add(new TimeStampTraceListener(Path.Combine(LogBase, LogFile), "default"));
       } else {
         string LogFilename = Path.Combine(LogBase, $"{Path.GetFileNameWithoutExtension(TraceFactory.GetTraceDefaultLogFilename())}.log");
-        Trace.Listeners.Add(new TimeStampTraceListener(LogFilename,"default"));
+        Trace.Listeners.Add(new TimeStampTraceListener(LogFilename, "default"));
       }
       //foreach ( TimeStampTraceListener TraceListenerItem in Trace.Listeners.OfType<TimeStampTraceListener>() ) {
       //  TraceListenerItem.DisplayUserId = true;

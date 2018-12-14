@@ -1,92 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using BLTools;
 
 namespace libxputty_std20 {
-  public class TSessionManager : ISessionManager {
-
-    protected const char SPLIT_CHAR = ';';
+  public abstract class TSessionManager : ISessionManager {
 
     protected IDictionary<int, string> Sessions = new Dictionary<int, string>();
 
     public string StorageLocation { get; protected set; } = "";
 
-    public TSessionManager() {
-      _Load();
-    }
+    protected readonly object _Lock = new object();
 
-    public TSessionManager(string storageLocation) {
-      StorageLocation = storageLocation;
-    }
-
-    protected async void _Save() {
-      if ( StorageLocation == "" ) {
-        return;
-      }
-
-      try {
-        using ( StreamWriter SessionManagerStream = File.CreateText(StorageLocation) ) {
-          foreach ( KeyValuePair<int, string> SessionItem in Sessions ) {
-            await SessionManagerStream.WriteAsync(SessionItem.Key.ToString());
-            await SessionManagerStream.WriteAsync(SPLIT_CHAR);
-            await SessionManagerStream.WriteLineAsync(SessionItem.Value);
-          }
-          await SessionManagerStream.FlushAsync();
-          SessionManagerStream.Close();
-        }
-
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to save data to {StorageLocation} : {ex.Message}");
-        return;
-      }
-    }
-
-    protected void _Load() {
-      if ( StorageLocation == "" ) {
-        return;
-      }
-
-      try {
-        Sessions.Clear();
-        foreach ( string DictPairItem in File.ReadLines(StorageLocation) ) {
-          int PID = int.Parse(DictPairItem.Before(SPLIT_CHAR));
-          string Tag = DictPairItem.After(SPLIT_CHAR);
-          Sessions.Add(PID, Tag);
-        }
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to load data from {StorageLocation} : {ex.Message}");
-        return;
-      }
-    }
-
-    public void AddSession(int PID, string tag) {
-      try {
-        Sessions.Add(PID, tag);
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to add ({PID},{tag}) to the list of sessions : {ex.Message}");
-      }
-      _Save();
-    }
-
-    public int GetSession(string tag) {
-      try {
-        return Sessions.First(x => x.Value == tag).Key;
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to get PID for session {tag} : {ex.Message}");
-        return -1;
-      }
-    }
-
-    public string GetSession(int PID) {
-      return Sessions.TryGetValue(PID, out string RetVal) ? RetVal : "";
-    }
-
-    public IEnumerable<(int, string)> GetSessions() {
+    public override string ToString() {
+      StringBuilder RetVal = new StringBuilder();
       foreach ( KeyValuePair<int, string> SessionItem in Sessions ) {
-        yield return (SessionItem.Key, SessionItem.Value);
+        RetVal.AppendLine($"{SessionItem.Key};{SessionItem.Value}");
+      }
+      return RetVal.ToString();
+    }
+
+    public virtual void AddSession(int PID, string tag) {
+      lock ( _Lock ) {
+        try {
+          Sessions.Add(PID, tag);
+        } catch ( Exception ex ) {
+          Log.Write($"Unable to add ({PID},{tag}) to the list of sessions : {ex.Message}");
+        }
+        _Save();
+      }
+    }
+
+    public KeyValuePair<int, string> GetSession(string tag) {
+      lock ( _Lock ) {
+        try {
+          return new KeyValuePair<int, string>(Sessions.First(x => x.Value == tag).Key, tag);
+        } catch ( Exception ex ) {
+          Log.Write($"Unable to get PID for session {tag} : {ex.Message}");
+          return new KeyValuePair<int, string>(-1, "");
+        }
+      }
+    }
+
+    public KeyValuePair<int, string> GetSession(int PID) {
+      lock ( _Lock ) {
+        return Sessions.TryGetValue(PID, out string RetVal) ? new KeyValuePair<int, string>(PID, RetVal) : new KeyValuePair<int, string>(-1, "");
+      }
+    }
+
+    public IEnumerable<KeyValuePair<int, string>> GetSessions() {
+      lock ( _Lock ) {
+        foreach ( KeyValuePair<int, string> SessionItem in Sessions ) {
+          yield return SessionItem;
+        }
       }
     }
 
@@ -94,24 +62,49 @@ namespace libxputty_std20 {
       return Sessions.ContainsKey(PID);
     }
 
-    public void RemoveSession(int PID) {
-      try {
-        Sessions.Remove(PID);
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to remove {PID} to the list of sessions : {ex.Message}");
+    public virtual void RemoveSession(int PID) {
+      lock ( _Lock ) {
+        try {
+          Sessions.Remove(PID);
+        } catch ( Exception ex ) {
+          Log.Write($"Unable to remove {PID} to the list of sessions : {ex.Message}");
+        }
+        _Save();
       }
-      _Save();
     }
 
-    public void RemoveSession(string tag) {
-      int PID = 0;
-      try {
-        PID = GetSession(tag);
-        Sessions.Add(PID, tag);
-      } catch ( Exception ex ) {
-        Log.Write($"Unable to add ({PID},{tag}) to the list of sessions : {ex.Message}");
+    public virtual void RemoveSession(string tag) {
+      lock ( _Lock ) {
+        int PID = 0;
+        try {
+          Sessions.Add(GetSession(tag).Key, tag);
+        } catch ( Exception ex ) {
+          Log.Write($"Unable to add ({PID},{tag}) to the list of sessions : {ex.Message}");
+        }
+        _Save();
       }
-      _Save();
     }
+
+    public virtual void Clear() {
+      lock ( _Lock ) {
+        Sessions.Clear();
+        _Reset();
+      }
+    }
+
+    protected abstract void _Save();
+    protected abstract void _Load();
+    protected abstract void _Reset();
+
+
+    public static ISessionManager DEFAULT_SESSION_MANAGER {
+      get {
+        if ( _DEFAULT_SESSION_MANAGER == null ) {
+          _DEFAULT_SESSION_MANAGER = new TSessionManagerMemory();
+        }
+        return _DEFAULT_SESSION_MANAGER;
+      }
+    }
+    private static ISessionManager _DEFAULT_SESSION_MANAGER;
   }
 }

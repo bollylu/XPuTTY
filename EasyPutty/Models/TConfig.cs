@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using EasyPutty.Interfaces;
+using libxputty_std20.Interfaces;
 
 namespace EasyPutty.Models {
   public class TConfig : IName {

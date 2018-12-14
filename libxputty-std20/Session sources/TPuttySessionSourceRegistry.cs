@@ -36,7 +36,7 @@ namespace libxputty_std20 {
     public override string DataSourceName => $"{DATASOURCE_PREFIX}://{StorageLocation.Replace('\\', '/')}";
 
     #region --- Constructor(s) --------------------------------------------
-    public TPuttySessionSourceRegistry() : base() {
+    public TPuttySessionSourceRegistry(ISessionManager sessionManager) : base(sessionManager) {
       SourceType = ESourceType.Registry;
       StorageLocation = $@"HKCU\{REG_KEYNAME_BASE}";
     }

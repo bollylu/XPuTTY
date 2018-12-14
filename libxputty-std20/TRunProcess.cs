@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using BLTools;
 using libxputty_std20.DllImports;
 
 using static System.Management.ManagementObjectCollection;
-using static libxputty_std20.DllImports.Kernel32dll;
 
 namespace libxputty_std20 {
   public class TRunProcess {
@@ -37,12 +35,20 @@ namespace libxputty_std20 {
     private CancellationTokenSource WatcherCancellation = new CancellationTokenSource();
 
     public string ProcessTitle;
+
+    protected ISessionManager SessionManager;
+    protected string Tag;
+
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TRunProcess() {
+    public TRunProcess(ISessionManager sessionManager, string tag) {
+      SessionManager = sessionManager;
+      Tag = tag;
       StartInfo = new ProcessStartInfo();
     }
 
-    public TRunProcess(ProcessStartInfo startInfo) {
+    public TRunProcess(ISessionManager sessionManager, ProcessStartInfo startInfo, string tag) {
+      SessionManager = sessionManager;
+      Tag = tag;
       StartInfo = startInfo;
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
@@ -86,6 +92,7 @@ namespace libxputty_std20 {
         OnStart(this, EventArgs.Empty);
       }
 
+      SessionManager.AddSession(_Process.Id, Tag);
       _StartWatcher();
 
       Log.Write("Start completed.");
@@ -123,6 +130,7 @@ namespace libxputty_std20 {
             Log.Write("Killing process");
             _Process.Kill();
           }
+          SessionManager.RemoveSession(PID);
           if ( OnExit != null ) {
             OnExit(this, EventArgs.Empty);
           }

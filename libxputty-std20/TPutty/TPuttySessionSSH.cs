@@ -23,10 +23,10 @@ namespace libxputty_std20 {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSSH() : base() {
+    public TPuttySessionSSH(ISessionManager sessionManager) : base(sessionManager) {
       Protocol = TPuttyProtocol.SSH;
     }
-    public TPuttySessionSSH(string name) : base(name) {
+    public TPuttySessionSSH(string name, ISessionManager sessionManager) : base(name, sessionManager) {
       Protocol = TPuttyProtocol.SSH;
     }
 
@@ -141,7 +141,7 @@ namespace libxputty_std20 {
     public static TPuttySessionSSH DemoPuttySessionSSH1 {
       get {
         if (_DemoPuttySessionSSH1==null) {
-          _DemoPuttySessionSSH1 = new TPuttySessionSSH("SSH Demo1") {
+          _DemoPuttySessionSSH1 = new TPuttySessionSSH("SSH Demo1",TSessionManager.DEFAULT_SESSION_MANAGER) {
             Port = 22,
             HostName = "demo1.test.priv"
           };
@@ -154,7 +154,7 @@ namespace libxputty_std20 {
     public static TPuttySessionSSH DemoPuttySessionSSH2 {
       get {
         if ( _DemoPuttySessionSSH2 == null ) {
-          _DemoPuttySessionSSH2 = new TPuttySessionSSH("SSH Demo2") {
+          _DemoPuttySessionSSH2 = new TPuttySessionSSH("SSH Demo2", TSessionManager.DEFAULT_SESSION_MANAGER) {
             Port = 22,
             HostName = "demo2.test.priv",
             RemoteCommand = "tail -n 200 -f /var/log/syslog"

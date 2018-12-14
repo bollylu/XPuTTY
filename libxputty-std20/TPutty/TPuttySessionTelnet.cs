@@ -12,10 +12,10 @@ namespace libxputty_std20 {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionTelnet() : base() {
+    public TPuttySessionTelnet(ISessionManager sessionManager) : base(sessionManager) {
       Protocol = TPuttyProtocol.Telnet;
     }
-    public TPuttySessionTelnet(string name) : base(name) {
+    public TPuttySessionTelnet(string name,ISessionManager sessionManager) : base(name,sessionManager) {
       Protocol = TPuttyProtocol.Telnet;
     }
 

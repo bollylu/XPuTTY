@@ -23,11 +23,11 @@ namespace libxputty_std20 {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSerial() : base() {
+    public TPuttySessionSerial(ISessionManager sessionManager) : base(sessionManager) {
       Protocol = TPuttyProtocol.Serial;
     }
 
-    public TPuttySessionSerial(string name) : base(name) {
+    public TPuttySessionSerial(string name, ISessionManager sessionManager) : base(name, sessionManager) {
       Protocol = TPuttyProtocol.Serial;
     }
 
@@ -78,7 +78,7 @@ namespace libxputty_std20 {
     public static TPuttySessionSerial DemoPuttySessionSerial1 {
       get {
         if ( _DemoPuttySessionSerial1 == null ) {
-          _DemoPuttySessionSerial1 = new TPuttySessionSerial("Serial Demo1") {
+          _DemoPuttySessionSerial1 = new TPuttySessionSerial("Serial Demo1", TSessionManager.DEFAULT_SESSION_MANAGER) {
             SerialLine = "COM4",
             SerialSpeed = 9600,
             SerialDataBits = 8,

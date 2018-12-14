@@ -17,18 +17,18 @@ namespace libxputty_std20 {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionRaw() : base() {
+    public TPuttySessionRaw(ISessionManager sessionManager) : base(sessionManager) {
       Protocol = TPuttyProtocol.Raw;
     }
-    public TPuttySessionRaw(string name) : base(name) {
+    public TPuttySessionRaw(string name, ISessionManager sessionManager) : base(name, sessionManager) {
       Protocol = TPuttyProtocol.Raw;
     }
 
     public TPuttySessionRaw(IPuttySession session) : base(session) {
       Protocol = TPuttyProtocol.Raw;
-      if ( session is ISessionTypeNetwork SessionHAP ) {
-        HostName = SessionHAP.HostName;
-        Port = SessionHAP.Port;
+      if ( session is ISessionTypeNetwork SessionNetwork ) {
+        HostName = SessionNetwork.HostName;
+        Port = SessionNetwork.Port;
       }
     }
 

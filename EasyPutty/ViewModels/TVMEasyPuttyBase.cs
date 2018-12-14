@@ -2,15 +2,15 @@
 
 using BLTools;
 using BLTools.MVVM;
-
+using EasyPutty.Interfaces;
 using libxputty_std20.Interfaces;
 
 namespace EasyPutty.ViewModels {
-  public abstract class TVMEasyPuttyBase : MVVMBase, IParent, IDisposable {
+  public abstract class TVMEasyPuttyBase : MVVMBase, IParent, IDisposable, IDataDirty {
 
     protected object _Data { get; set; }
     protected object _Lock = new object();
-
+    
     #region Public properties
     /// <summary>
     /// Name of the item
@@ -81,12 +81,14 @@ namespace EasyPutty.ViewModels {
 
     #region Constructor(s)
     public TVMEasyPuttyBase() : base() {
+      ResetDataDirty();
       _InitializeCommands();
       _Initialize();
     }
 
     public TVMEasyPuttyBase(object data) : base() {
       _Data = data;
+      ResetDataDirty();
       _InitializeCommands();
       _Initialize();
     }
@@ -97,6 +99,7 @@ namespace EasyPutty.ViewModels {
       }
       _Data = vmEasyPutty._Data;
       Parent = vmEasyPutty.Parent;
+      ResetDataDirty();
       _Initialize();
     }
 
@@ -119,6 +122,31 @@ namespace EasyPutty.ViewModels {
       return Parent.GetParent<T>();
     }
     #endregion IParent
+
+    #region --- IDataDirty --------------------------------------------
+    public bool IsDataDirty {
+      get {
+        if ( _Data is IDataDirty DataWithDirtyState ) {
+          return (_DataIsDirty || DataWithDirtyState.IsDataDirty);
+        }
+        return _DataIsDirty;
+      }
+    }
+    private bool _DataIsDirty;
+
+    public void ResetDataDirty(bool recurse = false) {
+      _DataIsDirty = false;
+      if ( recurse && _Data is IDataDirty DataWithDirtyState ) {
+        DataWithDirtyState.ResetDataDirty(recurse);
+      }
+      NotifyPropertyChanged(nameof(IsDataDirty));
+    }
+
+    public void SetDataDirty() {
+      _DataIsDirty = true;
+      NotifyPropertyChanged(nameof(IsDataDirty));
+    }
+    #endregion --- IDataDirty -----------------------------------------
 
     #region IDisposable Support
     private bool disposedValue = false; // To detect redundant calls

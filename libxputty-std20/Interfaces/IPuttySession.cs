@@ -10,9 +10,7 @@ namespace libxputty_std20.Interfaces {
   public interface IPuttySession : IDisposable, IName, ICredentialContainer {
 
     ESessionType SessionType { get; set; }
-    //string GroupLevel1 { get; set; }
-    //string GroupLevel2 { get; set; }
-    //string Section { get; set; }
+    
     string RemoteCommand { get; set; }
 
     string ID { get; set; }
@@ -20,6 +18,7 @@ namespace libxputty_std20.Interfaces {
     string CommandLine { get; }
     bool IsRunning { get; }
     TRunProcess PuttyProcess { get; }
+    ISessionManager SessionManager { get; }
 
     TPuttyProtocol Protocol { get; set; }
 

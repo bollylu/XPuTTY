@@ -44,7 +44,7 @@ namespace libxputty_tests {
     [TestCategory("SessionSource")]
     [TestMethod]
     public void SessionSourceXml_CreateEmpty_InitOk() {
-      TPuttySessionSource SourceTest = new TPuttySessionSourceXml();
+      TPuttySessionSource SourceTest = new TPuttySessionSourceXml(TSessionManager.DEFAULT_SESSION_MANAGER);
       Assert.IsTrue(SourceTest.SourceType.Equals(ESourceType.Xml));
       Assert.IsTrue(SourceTest.DataSourceName.StartsWith(TPuttySessionSourceXml.DATASOURCE_PREFIX));
       Assert.IsTrue(string.IsNullOrEmpty(SourceTest.StorageLocation));
@@ -53,14 +53,14 @@ namespace libxputty_tests {
     [TestCategory("SessionSource")]
     [TestMethod]
     public void SessionSourceXml_CreateFile_InitOk() {
-      TPuttySessionSource SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
+      TPuttySessionSource SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME, TSessionManager.DEFAULT_SESSION_MANAGER);
       Assert.AreEqual(SOURCE_TEST_FILENAME, SourceTest.StorageLocation);
     }
 
     [TestCategory("SessionSource")]
     [TestMethod]
     public void SessionSourceXml_ConvertGroupFromXml_MainGroupOk() {
-      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
+      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME, TSessionManager.DEFAULT_SESSION_MANAGER);
       SourceTest.XmlDataCache = XDocument.Parse( XML_TEST_DATA_SOURCE).Root;
       IEnumerable<IPuttySessionGroup> Groups = SourceTest.GetGroupsFrom("", false);
       Assert.AreEqual(1, Groups.Count());
@@ -69,7 +69,7 @@ namespace libxputty_tests {
     [TestCategory("SessionSource")]
     [TestMethod]
     public void SessionSourceXml_ConvertGroupFromXml_SubGroupsOk() {
-      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
+      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME, TSessionManager.DEFAULT_SESSION_MANAGER);
       SourceTest.XmlDataCache = XDocument.Parse(XML_TEST_DATA_SOURCE).Root;
       IEnumerable<IPuttySessionGroup> Groups = SourceTest.GetGroupsFrom(GROUP_ID_TEST1, true);
       Assert.AreEqual(2, Groups.Count());
@@ -78,7 +78,7 @@ namespace libxputty_tests {
     [TestCategory("SessionSource")]
     [TestMethod]
     public void SessionSourceXml_GetGroupsWrongId_Zero() {
-      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
+      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME, TSessionManager.DEFAULT_SESSION_MANAGER);
       SourceTest.XmlDataCache = XDocument.Parse(XML_TEST_DATA_SOURCE).Root;
       IEnumerable<IPuttySessionGroup> Groups = SourceTest.GetGroupsFrom(GROUP_ID_WRONG, false);
       Assert.AreEqual(0, Groups.Count());
@@ -87,7 +87,7 @@ namespace libxputty_tests {
     [TestCategory("SessionSource")]
     [TestMethod]
     public void SessionSourceXml_GetGroup_ValueOk() {
-      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME);
+      TPuttySessionSourceXml SourceTest = new TPuttySessionSourceXml(SOURCE_TEST_FILENAME, TSessionManager.DEFAULT_SESSION_MANAGER);
       SourceTest.XmlDataCache = XDocument.Parse(XML_TEST_DATA_SOURCE).Root;
       IPuttySessionGroup Group = SourceTest.GetGroup(GROUP_ID_TEST1, true);
       Assert.IsNotNull(Group);

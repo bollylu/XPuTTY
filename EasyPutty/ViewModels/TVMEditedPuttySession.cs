@@ -83,10 +83,7 @@ namespace EasyPutty.ViewModels {
     public static TVMPuttySession DesignVMEditedPuttySession {
       get {
         if ( _DesignVMEditedPuttySession == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
-            GroupLevel1 = "Sharenet",
-            GroupLevel2 = "CMD",
-            Section = "LAN",
+          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session", TSessionManager.DEFAULT_SESSION_MANAGER) {
             Port = 22,
             HostName = "server.test.priv",
             RemoteCommand = "tail -n 100 -f /var/log/syslog"

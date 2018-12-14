@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
+
 using BLTools;
 
 
@@ -42,17 +43,6 @@ namespace EasyPutty.ViewModels {
     #endregion RelayCommand
 
     private ISplitArgs AppArgs;
-
-    public bool DataIsDirty {
-      get {
-        return _DataIsDirty;
-      }
-      set {
-        _DataIsDirty = value;
-        NotifyPropertyChanged(nameof(DataIsDirty));
-      }
-    }
-    private bool _DataIsDirty;
 
     public string ApplicationTitle {
       get {
@@ -132,9 +122,13 @@ namespace EasyPutty.ViewModels {
 
     public bool IsSessionSourceNotRegistry => !(SessionSource is TPuttySessionSourceRegistry);
 
+    private ISessionManager SessionManager;
+
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public MainViewModel(ISplitArgs appArgs) : base() {
       AppArgs = appArgs;
+
+      SessionManager = new TSessionManagerCSV(AppArgs.GetValue<string>(App.PARAM_SESSION_MANAGER, App.DEFAULT_SESSION_MANAGER_CSV));
 
       if ( AppArgs.IsDefined(App.PARAM_LOAD) ) {
         #region --- Load data from PuttySessionSource --------------------------------------------
@@ -146,7 +140,7 @@ namespace EasyPutty.ViewModels {
           return;
         }
 
-        SessionSource = TPuttySessionSource.GetPuttySessionSource(NewDataSource);
+        SessionSource = TPuttySessionSource.GetPuttySessionSource(NewDataSource, SessionManager);
         if ( SessionSource != null ) {
           PuttyGroup.Add(SessionSource.GetGroup(TPuttySessionSource.ROOT_GROUP_ID));
           CurrentSettings.LastDataSource = NewDataSource;
@@ -166,7 +160,7 @@ namespace EasyPutty.ViewModels {
           return;
         }
 
-        SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource);
+        SessionSource = TPuttySessionSource.GetPuttySessionSource(CurrentSettings.LastDataSource, SessionManager);
         if ( SessionSource != null ) {
           PuttyGroup.Add(SessionSource.GetGroup(TPuttySessionSource.ROOT_GROUP_ID));
         }
@@ -212,7 +206,7 @@ namespace EasyPutty.ViewModels {
 
     #region --- Menu --------------------------------------------
     private void _FileNew() {
-      DataIsDirty = false;
+      ResetDataDirty();
       PuttyGroup.Clear();
       SessionSource = null;
     }
@@ -233,7 +227,7 @@ namespace EasyPutty.ViewModels {
         WorkInProgress = false;
         return;
       }
-      SessionSource = new TPuttySessionSourceXml(OFD.FileName);
+      SessionSource = new TPuttySessionSourceXml(OFD.FileName, SessionManager);
 
       Log.Write($"Refreshing sessions from XML file {OFD.FileName}");
       NotifyExecutionProgress("Reading sessions ...");
@@ -245,6 +239,7 @@ namespace EasyPutty.ViewModels {
         PuttyGroup.SelectedGroup = PuttyGroup.Groups.First();
       }
 
+      ResetDataDirty();
       NotifyExecutionStatus($"{TotalSessionsCount} session(s)");
       Log.Write("Refresh done.");
       WorkInProgress = false;
@@ -270,7 +265,7 @@ namespace EasyPutty.ViewModels {
 
     private void _FileOpenRegistry() {
       WorkInProgress = true;
-      SessionSource = new TPuttySessionSourceRegistry();
+      SessionSource = new TPuttySessionSourceRegistry(SessionManager);
       NotifyPropertyChanged(nameof(ApplicationTitle));
       Log.Write("Refreshing sessions from registry ...");
       NotifyExecutionProgress("Reading sessions ...");
@@ -288,10 +283,10 @@ namespace EasyPutty.ViewModels {
 
     #region --- File Save --------------------------------------------
     private void _FileSave() {
-      if ( DataIsDirty ) {
+      if ( IsDataDirty ) {
         WorkInProgress = true;
         //SessionSource.SaveSessions(AllPuttySessions);
-        DataIsDirty = false;
+        ResetDataDirty();
         WorkInProgress = false;
       }
     }
@@ -312,13 +307,12 @@ namespace EasyPutty.ViewModels {
       SFD.Filter = "XML files (.xml)|*.xml";
 
       if ( SFD.ShowDialog() == true ) {
-        SessionSource = new TPuttySessionSourceXml(SFD.FileName);
+        SessionSource = new TPuttySessionSourceXml(SFD.FileName, SessionManager);
         //SessionSource.SaveSessions(AllPuttySessions);
-        DataIsDirty = false;
+        ResetDataDirty();
       }
 
       NotifyExecutionCompleted("Done.");
-      DataIsDirty = false;
       WorkInProgress = false;
     }
 
@@ -350,10 +344,10 @@ namespace EasyPutty.ViewModels {
 
       Log.Write("Saving all sessions to XML");
       NotifyExecutionProgress("Save sessions to XML");
-      SessionSource = new TPuttySessionSourceRegistry();
+      SessionSource = new TPuttySessionSourceRegistry(TSessionManager.DEFAULT_SESSION_MANAGER);
       //SessionSource.SaveSessions(AllPuttySessions);
       NotifyExecutionCompleted("Done.");
-      DataIsDirty = false;
+      ResetDataDirty();
 
       WorkInProgress = false;
     }

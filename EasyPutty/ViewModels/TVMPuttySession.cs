@@ -255,7 +255,7 @@ namespace EasyPutty.ViewModels {
     private void VMEditedPuttySession_OnEditCompleted(object sender, bool e) {
       VMEditedPuttySession.OnEditCompleted -= VMEditedPuttySession_OnEditCompleted;
       if ( e ) {
-        RootVM.DataIsDirty = true;
+        SetDataDirty();
         Description = VMEditedPuttySession.Description;
         Comment = VMEditedPuttySession.Comment;
         RemoteCommand = VMEditedPuttySession.RemoteCommand;

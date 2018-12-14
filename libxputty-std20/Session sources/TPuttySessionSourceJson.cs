@@ -39,10 +39,10 @@ namespace libxputty_std20 {
     public override string DataSourceName => $@"{DATASOURCE_PREFIX}://{StorageLocation ?? ""}";
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSourceJson() : base() {
+    public TPuttySessionSourceJson(ISessionManager sessionManager) : base(sessionManager) {
       SourceType = ESourceType.Json;
     }
-    public TPuttySessionSourceJson(string location) : base() {
+    public TPuttySessionSourceJson(string location, ISessionManager sessionManager) : base(sessionManager) {
       SourceType = ESourceType.Json;
       StorageLocation = location;
     }

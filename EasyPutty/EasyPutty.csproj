@@ -226,8 +226,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Interfaces\IDataDirty.cs" />
     <Compile Include="Interfaces\IHeaderedAndSelectable.cs" />
-    <Compile Include="Interfaces\IName.cs" />
     <Compile Include="Interfaces\IPassword.cs" />
     <Compile Include="Interfaces\IView.cs" />
     <Compile Include="Models\TConfig.cs" />

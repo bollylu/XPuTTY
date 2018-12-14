@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace EasyPutty.Interfaces {
-  public interface IName {
-    string Name { get; }
-    string Description { get; set; }
-    string Comment { get; set; }
+  public interface IDataDirty {
+    bool IsDataDirty { get; }
+    void ResetDataDirty(bool recurse = false);
+    void SetDataDirty();
   }
 }

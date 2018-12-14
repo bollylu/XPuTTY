@@ -74,9 +74,9 @@ namespace libxputty_std20 {
     #endregion --- Cache -----------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSourceXml() : base() {
+    public TPuttySessionSourceXml(ISessionManager sessionManager) : base(sessionManager) {
     }
-    public TPuttySessionSourceXml(string location) : base() {
+    public TPuttySessionSourceXml(string location, ISessionManager sessionManager) : base(sessionManager) {
       StorageLocation = location;
     }
 
@@ -101,7 +101,7 @@ namespace libxputty_std20 {
         return TPuttySession.Empty;
       }
 
-      TPuttySession BaseSession = new TPuttySession(Name) {
+      TPuttySession BaseSession = new TPuttySession(Name, SessionManager) {
         ID = session.SafeReadAttribute<string>(XML_ATTRIBUTE_ID, ""),
         Description = session.SafeReadElementValue<string>(XML_ELEMENT_DESCRIPTION, ""),
         Comment = session.SafeReadElementValue<string>(XML_ELEMENT_COMMENT, ""),
