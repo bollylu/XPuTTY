@@ -1,0 +1,64 @@
+﻿<Window x:Class="EasyPutty.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:bltoolswpfctrl="clr-namespace:BLTools.WPF.Controls;assembly=BLTools.WPF.Controls.45"
+        xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
+        xmlns:localViews="clr-namespace:EasyPutty.Views"
+        xmlns:easyputty="clr-namespace:EasyPutty"
+        mc:Ignorable="d"
+        Title="{Binding Path=ApplicationTitle}"
+        Height="800"
+        Width="750"
+        MinWidth="725" Closing="Window_Closing">
+
+  <Window.Resources>
+    <ResourceDictionary Source="Views\Menus.xaml" />
+  </Window.Resources>
+  
+  <Grid DataContext="{Binding}"
+        d:DataContext="{Binding Source={x:Static localViewModels:MainViewModel.DesignMainViewModel}}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <Menu Template="{StaticResource ResourceKey=MainMenu}" />
+
+    <Grid Grid.Row="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      <Border Grid.Row="0"
+              Margin="10"
+              BorderThickness="0,0,0,2"
+              BorderBrush="Red">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="20" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Text="{Binding Path=ContentLocation, Mode=OneWay}"
+                   FontSize="18"
+                   FontFamily="Arial"
+                   FontWeight="Bold"
+                   Margin="0,0,0,5" />
+          <Image Grid.Column="1"
+                 Source="{Binding Path=FileSavePicture, Mode=OneWay}"
+                 Width="24"
+                 Height="24"
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Center"
+                 Visibility="{Binding Path=DataIsDirty, Mode=OneWay, Converter={StaticResource BoolToVisibility}}" />
+        </Grid>
+      </Border>
+      <localViews:ViewGroupLevel1ByTabs Grid.Row="1" DataContext="{Binding Path=PuttyGroup}" />
+    </Grid>
+
+    <bltoolswpfctrl:ExtendedStatusBar x:Name="stsBar"
+                                      Grid.Row="2" />
+  </Grid>
+</Window>

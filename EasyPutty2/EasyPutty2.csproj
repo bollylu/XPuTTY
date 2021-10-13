@@ -1,0 +1,179 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Base classes\TParentBase.cs" />
+    <Compile Remove="Properties\AssemblyInfo.cs" />
+    <Compile Remove="ViewModels\TVMSection.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="easyputty.ico" />
+    <None Remove="Pictures\cluster.png" />
+    <None Remove="Pictures\connect_icon.png" />
+    <None Remove="Pictures\easyputty.ico" />
+    <None Remove="Pictures\ExpanderDown.png" />
+    <None Remove="Pictures\ExpanderUp.png" />
+    <None Remove="Pictures\FileOpen.png" />
+    <None Remove="Pictures\FileQuit.png" />
+    <None Remove="Pictures\FileSave.png" />
+    <None Remove="Pictures\folder.png" />
+    <None Remove="Pictures\Help.png" />
+    <None Remove="Pictures\putty_icon.png" />
+    <None Remove="Pictures\refresh.png" />
+    <None Remove="Pictures\resource-disk.png" />
+    <None Remove="Pictures\resource-ip.png" />
+    <None Remove="Pictures\resource-service.png" />
+    <None Remove="Pictures\restart.png" />
+    <None Remove="Pictures\role.png" />
+    <None Remove="Pictures\server.png" />
+    <None Remove="Pictures\serverRDS.png" />
+    <None Remove="Pictures\service.png" />
+    <None Remove="Pictures\ServicesManager.ico" />
+    <None Remove="Pictures\TVMCluster.png" />
+    <None Remove="Pictures\TVMClusterResource.png" />
+    <None Remove="Pictures\ViewConsole.png" />
+    <None Remove="Pictures\xputtyman.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BLTools" Version="4.5.27" />
+    <PackageReference Include="BLTools.WPF.45" Version="3.45.2" />
+    <PackageReference Include="BLTools.WPF.Controls.45" Version="3.45.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\libxputty-std20\libxputty-std20.csproj" />
+    <ProjectReference Include="..\libxputty\libxputty.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="easyputty.ico" />
+    <Resource Include="Pictures\cluster.png" />
+    <Resource Include="Pictures\connect_icon.png" />
+    <Resource Include="Pictures\easyputty.ico" />
+    <Resource Include="Pictures\ExpanderDown.png" />
+    <Resource Include="Pictures\ExpanderUp.png" />
+    <Resource Include="Pictures\FileOpen.png" />
+    <Resource Include="Pictures\FileQuit.png" />
+    <Resource Include="Pictures\FileSave.png" />
+    <Resource Include="Pictures\folder.png" />
+    <Resource Include="Pictures\Help.png" />
+    <Resource Include="Pictures\putty_icon.png" />
+    <Resource Include="Pictures\refresh.png" />
+    <Resource Include="Pictures\resource-disk.png" />
+    <Resource Include="Pictures\resource-ip.png" />
+    <Resource Include="Pictures\resource-service.png" />
+    <Resource Include="Pictures\restart.png" />
+    <Resource Include="Pictures\role.png" />
+    <Resource Include="Pictures\server.png" />
+    <Resource Include="Pictures\serverRDS.png" />
+    <Resource Include="Pictures\service.png" />
+    <Resource Include="Pictures\ServicesManager.ico" />
+    <Resource Include="Pictures\TVMCluster.png" />
+    <Resource Include="Pictures\TVMClusterResource.png" />
+    <Resource Include="Pictures\ViewConsole.png" />
+    <Resource Include="Pictures\xputtyman.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Update="App.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="App.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="MainWindow.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Views\DisplaySupportInformationControl.xaml.cs">
+      <DependentUpon>DisplaySupportInformationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\PopupDisplaySupportContact.xaml.cs">
+      <DependentUpon>PopupDisplaySupportContact.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ViewEditSession.xaml.cs">
+      <DependentUpon>ViewEditSession.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ViewGroupLevel1ByTabs.xaml.cs">
+      <DependentUpon>ViewGroupLevel1ByTabs.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ViewGroupLevel2ByTabs.xaml.cs">
+      <DependentUpon>ViewGroupLevel2ByTabs.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ViewOneSession.xaml.cs">
+      <DependentUpon>ViewOneSession.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ViewSessionsBySectionsWithExpander.xaml.cs">
+      <DependentUpon>ViewSessionsBySectionsWithExpander.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\WindowEditRemoteCommand.xaml.cs">
+      <DependentUpon>WindowEditRemoteCommand.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\DisplaySupportInformationControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Menus.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\PopupDisplaySupportContact.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SmallVisuals.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ViewEditSession.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ViewGroupLevel1ByTabs.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ViewGroupLevel2ByTabs.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ViewOneSession.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ViewSessionsBySectionsWithExpander.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\WindowEditRemoteCommand.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

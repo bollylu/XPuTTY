@@ -1,19 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>NET5.0</TargetFramework>
     <RootNamespace>XPuTTY_cli</RootNamespace>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BLTools.45" Version="3.45.1" />
-    <PackageReference Include="BLTools.45.Json" Version="3.45.1" />
+    <PackageReference Include="BLTools" Version="4.5.27" />
+    <PackageReference Include="BLTools.Json.dns.20" Version="4.5.27" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\libxputty-std20\libxputty-std20.csproj" />
+    <ProjectReference Include="..\libxputty\libxputty.csproj" />
   </ItemGroup>
 
 </Project>

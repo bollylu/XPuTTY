@@ -1,0 +1,45 @@
+﻿<Window x:Class="EasyPutty.Views.WindowEditRemoteCommand"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:localViews="clr-namespace:EasyPutty.Views"
+        xmlns:localViewModels="clr-namespace:EasyPutty.ViewModels"
+        xmlns:libxputty="clr-namespace:libxputty;assembly=libxputty"
+        mc:Ignorable="d"
+        Title="{Binding Path=CleanName, StringFormat='Edit [{0}] remote command'}"
+        Height="450"
+        Width="800"
+        DataContext="{Binding}"
+        d:DataContext="{Binding Source={x:Static localViewModels:TVMPuttySession.DesignVMPuttySession}}"
+        WindowStyle="SingleBorderWindow"
+        WindowStartupLocation="CenterOwner">
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="30" />
+    </Grid.RowDefinitions>
+
+    <TextBox Grid.Row="0"
+             Margin="10"
+             FontFamily="Consolas,Courier New"
+             Text="{Binding Path=RemoteCommand}" />
+
+    <Grid Grid.Row="1"
+          Margin="0,0,0,10">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition />
+        <ColumnDefinition />
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0"
+              Margin="10,0,10,0"
+              Content="Ok"
+              Command="{Binding Path=CommandEditSessionRemoteCommandOk}"></Button>
+      <Button Grid.Column="1"
+              Margin="10,0,10,0"
+              Content="Cancel"
+              Command="{Binding Path=CommandEditSessionRemoteCommandCancel}"></Button>
+    </Grid>
+  </Grid>
+</Window>

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using BLTools;
 using static BLTools.ConsoleExtension.ConsoleExtension;
-using libxputty_std20;
-using libxputty_std20.Interfaces;
+using libxputty;
+using libxputty.Interfaces;
 
 namespace XPuTTY_cli {
   internal class Program {
