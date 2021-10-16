@@ -10,12 +10,10 @@ using System.Xml.Linq;
 using BLTools;
 using BLTools.Json;
 
-using libxputty.Interfaces;
-
 using Microsoft.Win32;
 
 namespace libxputty {
-  public class TPuttySessionSSH : TPuttySession, IHostAndPort {
+  public class TSessionPuttySsh : ASessionPutty, IHostAndPort {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -23,14 +21,14 @@ namespace libxputty {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSSH() : base() {
+    public TSessionPuttySsh() : base() {
       Protocol = TPuttyProtocol.SSH;
     }
-    public TPuttySessionSSH(string name) : base(name) {
+    public TSessionPuttySsh(string name) : base(name) {
       Protocol = TPuttyProtocol.SSH;
     }
 
-    public TPuttySessionSSH(IPuttySession session) : base(session) {
+    public TSessionPuttySsh(ISessionPutty session) : base(session) {
       Protocol = TPuttyProtocol.SSH;
       if ( session is IHostAndPort SessionHAP ) {
         HostName = SessionHAP.HostName;
@@ -43,11 +41,8 @@ namespace libxputty {
       base.Dispose();
     }
 
-    public override IPuttySession Duplicate() {
-      TPuttySessionSSH RetVal = new TPuttySessionSSH(base.Duplicate());
-      RetVal.HostName = HostName;
-      RetVal.Port = Port;
-      return RetVal;
+    public override ISession Duplicate() {
+      return new TSessionPuttySsh(this);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -79,27 +74,26 @@ namespace libxputty {
 
       string Args;
       if ( arguments == "" ) {
-        IList<string> BaseArguments = CommandLineBuilder.BuildSSHCommandLine()
-                                                        .AddCredentialsToCommandLine(Credential)
-                                                        .AddHostnameAndPort(HostName, Port)
-                                                        .AddRemoteCommandToCommandLine(TempFileForRemoteCommand);
-
-        Args = string.Join(" ", BaseArguments);
+        TCommandLineBuilderPutty Builder = new TCommandLineBuilderPutty()
+                                                 .AddCredentials(Credential)
+                                                 .AddHostnameAndPort(HostName, Port)
+                                                 .AddRemoteCommand(TempFileForRemoteCommand);
+        Args = Builder.Build();
       } else {
         Args = arguments;
       }
 
       switch ( SessionType ) {
 
-        case ESessionType.Putty:
+        case ESessionPuttyType.Putty:
           _StartPutty(Args);
           break;
 
-        case ESessionType.Plink:
+        case ESessionPuttyType.Plink:
           _StartPlink(Args);
           break;
 
-        case ESessionType.Auto:
+        case ESessionPuttyType.Auto:
         default: {
             if ( RemoteCommand != "" ) {
               _StartPlink(Args);

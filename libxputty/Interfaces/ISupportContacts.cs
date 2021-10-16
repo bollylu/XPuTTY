@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace libxputty.Interfaces {
+namespace libxputty {
   interface ISupportContacts {
     IList<ISupportContact> SupportContacts { get; }
   }

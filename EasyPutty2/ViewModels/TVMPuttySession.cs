@@ -7,12 +7,11 @@ using BLTools;
 using EasyPutty.Interfaces;
 
 using libxputty;
-using libxputty.Interfaces;
 
 namespace EasyPutty.ViewModels {
   public class TVMPuttySession : AVMEasyPuttyBase, IHeaderedAndSelectable {
 
-    public IPuttySession PuttySession => _Data as IPuttySession;
+    public ISessionPutty PuttySession => _Data as ISessionPutty;
 
     public ISerial PuttySessionSerial => PuttySession as ISerial;
     public IHostAndPort PuttySessionHAP => PuttySession as IHostAndPort;
@@ -228,7 +227,7 @@ namespace EasyPutty.ViewModels {
     protected TVMEditedPuttySession VMEditedPuttySession;
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TVMPuttySession(IPuttySession puttySession) : base(puttySession) {
+    public TVMPuttySession(ISession session) : base(session) {
     }
 
     protected override void _InitializeCommands() {
@@ -278,7 +277,7 @@ namespace EasyPutty.ViewModels {
       }
       IsEditSessionInProgress = true;
 
-      IPuttySession EditedPuttySession = PuttySession.Duplicate();
+      ISession EditedPuttySession = PuttySession.Duplicate();
 
       EditSessionWindow = new Views.ViewEditSession();
       
@@ -330,7 +329,7 @@ namespace EasyPutty.ViewModels {
     public static TVMPuttySession DesignVMPuttySession {
       get {
         if ( _DesignVMPuttySession == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
+          TSessionPuttySsh FakeSession = new TSessionPuttySsh("Fake session") {
             GroupLevel1 = "Sharenet",
             GroupLevel2 = "CMD",
             Section = "LAN",
@@ -348,7 +347,7 @@ namespace EasyPutty.ViewModels {
     public static TVMPuttySession DesignVMPuttySession2 {
       get {
         if ( _DesignVMPuttySession2 == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Other session") {
+          TSessionPuttySsh FakeSession = new TSessionPuttySsh("Other session") {
             GroupLevel1 = "Sharenet",
             GroupLevel2 = "CMD",
             Section = "DMZ",
@@ -367,7 +366,7 @@ namespace EasyPutty.ViewModels {
     public static TVMPuttySession DesignVMPuttySessionSerial {
       get {
         if ( _DesignVMPuttySessionSerial == null ) {
-          TPuttySessionSerial FakeSession = new TPuttySessionSerial("Serial session") {
+          TSessionPuttySerial FakeSession = new TSessionPuttySerial("Serial session") {
             GroupLevel1 = "Sharenet",
             GroupLevel2 = "CMD",
             Section = "DMZ",

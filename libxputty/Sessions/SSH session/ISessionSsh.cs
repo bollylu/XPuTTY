@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace libxputty {
-  public enum ESessionType {
-    Auto,
-    Putty,
-    Plink,
-    Pscp
+  public interface ISessionSsh : ISession {
   }
 }

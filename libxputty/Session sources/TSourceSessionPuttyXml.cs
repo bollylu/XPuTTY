@@ -7,18 +7,16 @@ using System.Xml.Linq;
 
 using BLTools;
 
-using libxputty.Interfaces;
-
 namespace libxputty {
-  public class TPuttySessionSourceXml : APuttySessionSource {
+  public class TSourceSessionPuttyXml : ASourceSession {
 
     #region --- Constants --------------------------------------------
-    public static XName XML_ROOT => GetXName("Root");
-    public static XName XML_ELEMENT_SESSIONS => GetXName("Sessions");
+    public static readonly XName XML_ROOT = GetXName("Root");
+    public static readonly XName XML_ELEMENT_SESSIONS = GetXName("Sessions");
 
-    public static XName XML_ELEMENT_SESSION = GetXName("Session");
-    public static XName XML_ELEMENT_DESCRIPTION = GetXName("Description");
-    public static XName XML_ELEMENT_COMMENT = GetXName("Comment");
+    public static readonly XName XML_ELEMENT_SESSION = GetXName("Session");
+    public static readonly XName XML_ELEMENT_DESCRIPTION = GetXName("Description");
+    public static readonly XName XML_ELEMENT_COMMENT = GetXName("Comment");
 
     protected const string XML_ATTRIBUTE_SESSION_TYPE = "SessionType";
 
@@ -29,7 +27,7 @@ namespace libxputty {
 
     protected const string XML_ATTRIBUTE_HOSTNAME = "HostName";
     protected const string XML_ATTRIBUTE_PORT = "PortNumber";
-    protected static XName XML_ELEMENT_SSH_REMOTE_COMMAND = GetXName("RemoteCommand");
+    protected static readonly XName XML_ELEMENT_SSH_REMOTE_COMMAND = GetXName("RemoteCommand");
 
     protected const string XML_ATTRIBUTE_SERIAL_LINE = "SerialLine";
     protected const string XML_ATTRIBUTE_SERIAL_SPEED = "SerialSpeed";
@@ -44,9 +42,9 @@ namespace libxputty {
     public override string DataSourceName => $@"{DATASOURCE_PREFIX}://{Location ?? ""}";
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSourceXml() : base() {
+    public TSourceSessionPuttyXml() : base() {
     }
-    public TPuttySessionSourceXml(string location) : base() {
+    public TSourceSessionPuttyXml(string location) : base() {
       Location = location;
     }
 
@@ -61,73 +59,49 @@ namespace libxputty {
     /// </summary>
     /// <param name="session">The XML data</param>
     /// <returns>One converted session or an Empty session in case of error</returns>
-    protected IPuttySession _ConvertFromXml(XElement session) {
+    protected ISessionPutty _ConvertFromXml(XElement session) {
 
-      string Name = session.SafeReadAttribute<string>(XML_ATTRIBUTE_NAME, "");
-      TPuttyProtocol Protocol = session.SafeReadAttribute<string>(XML_ATTRIBUTE_PROTOCOL_TYPE, EPuttyProtocol.Unknown.ToString());
+      string Name = session.SafeReadAttribute(XML_ATTRIBUTE_NAME, "");
+      TPuttyProtocol Protocol = session.SafeReadAttribute(XML_ATTRIBUTE_PROTOCOL_TYPE, EPuttyProtocol.Unknown.ToString());
 
       if (string.IsNullOrWhiteSpace(Name)) {
         LogError($"Unable to convert XML Putty session : Name is empty or invalid");
-        return TPuttySession.Empty;
+        return ASessionPutty.Empty;
       }
 
-      TPuttySession BaseSession = new TPuttySession(Name) {
-        Description = session.SafeReadElementValue<string>(XML_ELEMENT_DESCRIPTION, ""),
-        Comment = session.SafeReadElementValue<string>(XML_ELEMENT_COMMENT, ""),
-        SessionType = (ESessionType)Enum.Parse(typeof(ESessionType), session.SafeReadAttribute<string>(XML_ATTRIBUTE_SESSION_TYPE, ESessionType.Auto.ToString()), true),
-        GroupLevel1 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL1, LocalExtensions.EMPTY),
-        GroupLevel2 = session.SafeReadAttribute<string>(XML_ATTRIBUTE_GROUP_LEVEL2, LocalExtensions.EMPTY),
-        Section = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SECTION, LocalExtensions.EMPTY),
-        RemoteCommand = session.SafeReadElementValue<string>(XML_ELEMENT_SSH_REMOTE_COMMAND, "")
-      };
+      ISessionPutty BaseSession = ASessionPutty.BuildSessionPutty(Protocol.Value, Logger);
+      BaseSession.Name = Name;
+      BaseSession.Description = session.SafeReadElementValue(XML_ELEMENT_DESCRIPTION, "");
+      BaseSession.Comment = session.SafeReadElementValue(XML_ELEMENT_COMMENT, "");
+      BaseSession.SessionType = Enum.Parse<ESessionPuttyType>(session.SafeReadAttribute(XML_ATTRIBUTE_SESSION_TYPE, ESessionPuttyType.Auto.ToString()), true);
+      BaseSession.GroupLevel1 = session.SafeReadAttribute(XML_ATTRIBUTE_GROUP_LEVEL1, LocalExtensions.EMPTY);
+      BaseSession.GroupLevel2 = session.SafeReadAttribute(XML_ATTRIBUTE_GROUP_LEVEL2, LocalExtensions.EMPTY);
+      BaseSession.Section = session.SafeReadAttribute(XML_ATTRIBUTE_SECTION, LocalExtensions.EMPTY);
+      BaseSession.RemoteCommand = session.SafeReadElementValue(XML_ELEMENT_SSH_REMOTE_COMMAND, "");
 
       XElement SessionCredential = session.SafeReadElement(TCredential.XML_THIS_ELEMENT);
+
       if (SessionCredential.HasAttributes) {
         BaseSession.SetLocalCredential(new TCredential(SessionCredential, BaseSession));
       }
 
-      if (Protocol.IsSerial) {
-        TPuttySessionSerial NewSession = new TPuttySessionSerial(BaseSession) {
-          SerialLine = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SERIAL_LINE, ""),
-          SerialSpeed = session.SafeReadAttribute<int>(XML_ATTRIBUTE_SERIAL_SPEED, 9600),
-          SerialDataBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_DATA_BITS, 0),
-          SerialStopBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_STOP_BITS, 0),
-          SerialParity = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SERIAL_PARITY, "n"),
-          SerialFlowControl = session.SafeReadAttribute<string>(XML_ATTRIBUTE_SERIAL_FLOW_CONTROL, "")
-        };
-        return NewSession;
+      if (BaseSession is TSessionPuttySerial Serial) {
+        Serial.SerialLine = session.SafeReadAttribute(XML_ATTRIBUTE_SERIAL_LINE, "");
+        Serial.SerialSpeed = session.SafeReadAttribute(XML_ATTRIBUTE_SERIAL_SPEED, 9600);
+        Serial.SerialDataBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_DATA_BITS, 0);
+        Serial.SerialStopBits = session.SafeReadAttribute<byte>(XML_ATTRIBUTE_SERIAL_STOP_BITS, 0);
+        Serial.SerialParity = session.SafeReadAttribute(XML_ATTRIBUTE_SERIAL_PARITY, "n");
+        Serial.SerialFlowControl = session.SafeReadAttribute(XML_ATTRIBUTE_SERIAL_FLOW_CONTROL, "");
+        return BaseSession;
       }
 
-      #region --- Session with host and port --------------------------------------------
-      IHostAndPort SessionHAP;
-
-      switch (Protocol.Value) {
-        case EPuttyProtocol.SSH:
-          SessionHAP = new TPuttySessionSSH(BaseSession);
-          break;
-
-        case EPuttyProtocol.Telnet:
-          SessionHAP = new TPuttySessionTelnet(BaseSession);
-          break;
-
-        case EPuttyProtocol.RLogin:
-          SessionHAP = new TPuttySessionRLogin(BaseSession);
-          break;
-
-        case EPuttyProtocol.Raw:
-          SessionHAP = new TPuttySessionRaw(BaseSession);
-          break;
-
-        default:
-          LogError("Unable to convert session from XML : Protocol type is missing or invalid");
-          return TPuttySession.Empty;
+      if (BaseSession is IHostAndPort SessionHAP) {
+        SessionHAP.HostName = session.SafeReadAttribute(XML_ATTRIBUTE_HOSTNAME, "");
+        SessionHAP.Port = session.SafeReadAttribute(XML_ATTRIBUTE_PORT, 0);
+        return BaseSession;
       }
 
-      SessionHAP.HostName = session.SafeReadAttribute<string>(XML_ATTRIBUTE_HOSTNAME, "");
-      SessionHAP.Port = session.SafeReadAttribute<int>(XML_ATTRIBUTE_PORT, 0);
-
-      return SessionHAP as IPuttySession;
-      #endregion --- Session with host and port --------------------------------------------
+      return BaseSession;
     }
 
     /// <summary>
@@ -135,8 +109,8 @@ namespace libxputty {
     /// </summary>
     /// <param name="sessions">The list of XML data sessions</param>
     /// <returns>A list of sessions</returns>
-    protected IEnumerable<IPuttySession> _ConvertFromXml(IEnumerable<XElement> sessions) {
-      if (sessions == null || !sessions.Any()) {
+    protected IEnumerable<ISessionPutty> _ConvertFromXml(IEnumerable<XElement> sessions) {
+      if (sessions is null || sessions.IsEmpty()) {
         yield break;
       }
       foreach (XElement SessionItem in sessions) {
@@ -145,16 +119,20 @@ namespace libxputty {
       yield break;
     }
 
+    protected XElement _ConvertToXml(ISession session) {
+      return _ConvertToXml(session as ISessionPutty);
+    }
+
     /// <summary>
     /// Convert one session to one XML data session
     /// </summary>
     /// <param name="session">The source session</param>
     /// <returns>The XML data session</returns>
-    protected XElement _ConvertToXml(IPuttySession session) {
+    protected XElement _ConvertToXml(ISessionPutty session) {
 
       XElement RetVal = new XElement(XML_ELEMENT_SESSION);
 
-      if (session.SessionType != ESessionType.Auto) {
+      if (session.SessionType != ESessionPuttyType.Auto) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SESSION_TYPE, session.SessionType.ToString());
       }
       string StrippedName = session.CleanName.Replace($"[{session.GroupLevel1}]", "")
@@ -172,7 +150,7 @@ namespace libxputty {
 
       RetVal.SetAttributeValue(XML_ATTRIBUTE_PROTOCOL_TYPE, session.Protocol);
 
-      if (session.Credential != null) {
+      if (session.Credential is not null) {
         RetVal.Add(session.Credential.ToXml());
       }
 
@@ -195,7 +173,7 @@ namespace libxputty {
         RetVal.SetElementValue(XML_ELEMENT_SSH_REMOTE_COMMAND, session.RemoteCommand);
       }
 
-      if (session is TPuttySessionSerial PuttySession) {
+      if (session is TSessionPuttySerial PuttySession) {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_LINE, PuttySession.SerialLine);
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_SPEED, PuttySession.SerialSpeed);
         RetVal.SetAttributeValue(XML_ATTRIBUTE_SERIAL_DATA_BITS, PuttySession.SerialDataBits);
@@ -212,7 +190,7 @@ namespace libxputty {
     /// </summary>
     /// <param name="sessions">The source sessions</param>
     /// <returns>The enumeration of XML data session</returns>
-    protected IEnumerable<XElement> _ConvertToXml(IEnumerable<IPuttySession> sessions) {
+    protected IEnumerable<XElement> _ConvertToXml(IEnumerable<ISessionPutty> sessions) {
       #region === Validate parameters ===
       if (sessions == null) {
         yield break;
@@ -221,7 +199,7 @@ namespace libxputty {
         yield break;
       }
       #endregion === Validate parameters ===
-      foreach (IPuttySession PuttySessionItem in sessions) {
+      foreach (ISessionPutty PuttySessionItem in sessions) {
         yield return _ConvertToXml(PuttySessionItem);
       }
     }
@@ -240,8 +218,8 @@ namespace libxputty {
       }
 
       foreach (XElement SessionItem in Root.Elements(XML_ELEMENT_SESSIONS)) {
-        string SessionName = SessionItem.SafeReadAttribute<string>(XML_ATTRIBUTE_NAME, "");
-        TPuttyProtocol SessionProtocol = SessionItem.SafeReadAttribute<string>(XML_ATTRIBUTE_PROTOCOL_TYPE, "Unknown");
+        string SessionName = SessionItem.SafeReadAttribute(XML_ATTRIBUTE_NAME, "");
+        TPuttyProtocol SessionProtocol = SessionItem.SafeReadAttribute(XML_ATTRIBUTE_PROTOCOL_TYPE, "Unknown");
         yield return (SessionName, SessionProtocol);
       }
     }
@@ -252,28 +230,29 @@ namespace libxputty {
     /// <param name="name">The name of the requested session</param>
     /// <param name="protocol">The protocol</param>
     /// <returns>The sessions converted from XML or an Empty session in case of error</returns>
-    protected override IPuttySession _ReadSession(string name, TPuttyProtocol protocol) {
+    protected override ISessionPutty _ReadSession(string name, TPuttyProtocol protocol) {
       #region === Validate parameters ===
       if (string.IsNullOrWhiteSpace(name)) {
         LogError($"Unable to get the sessions list from {Location} : Name is missing or invalid");
-        return TPuttySession.Empty;
+        return ASessionPutty.Empty;
       }
       if (protocol.IsUnknown) {
         LogError($"Unable to get the sessions list from {Location} : Protocol is unknown");
-        return TPuttySession.Empty;
+        return ASessionPutty.Empty;
       }
       #endregion === Validate parameters ===
 
       XElement Root = LoadXml();
       if (Root == null) {
-        return TPuttySession.Empty;
+        return ASessionPutty.Empty;
       }
 
       IEnumerable<XElement> PuttySessions = Root.Elements(XML_ELEMENT_SESSIONS);
-      XElement RequestedSession = PuttySessions.FirstOrDefault(x => x.Attribute(XML_ATTRIBUTE_NAME).Value == name && x.Attribute(XML_ATTRIBUTE_PROTOCOL_TYPE).Value == protocol.ToString());
+      XElement RequestedSession = PuttySessions.FirstOrDefault(x => x.Attribute(XML_ATTRIBUTE_NAME).Value.Equals(name, StringComparison.InvariantCultureIgnoreCase) && 
+                                                                    x.Attribute(XML_ATTRIBUTE_PROTOCOL_TYPE).Value == protocol.ToString());
 
-      if (RequestedSession == null) {
-        return TPuttySession.Empty;
+      if (RequestedSession is null) {
+        return ASessionPutty.Empty;
       }
 
       return _ConvertFromXml(RequestedSession);
@@ -284,19 +263,19 @@ namespace libxputty {
     /// Read all sessions
     /// </summary>
     /// <returns>An enumeration of the sessions</returns>
-    protected override IEnumerable<IPuttySession> _ReadSessions() {
+    protected override IEnumerable<ISessionPutty> _ReadSessions() {
       XElement Root = LoadXml();
-      if (Root == null) {
+      if (Root is null) {
         yield break;
       }
 
       IEnumerable<XElement> XmlPuttySessions = Root.Element(XML_ELEMENT_SESSIONS).Elements(XML_ELEMENT_SESSION);
 
       bool NeedToSecure = false;
-      IPuttySession[] PuttySessions = _ConvertFromXml(XmlPuttySessions).ToArray();
+      ISessionPutty[] PuttySessions = _ConvertFromXml(XmlPuttySessions).ToArray();
 
-      foreach (IPuttySession SessionItem in PuttySessions) {
-        if (SessionItem.Credential != null && !SessionItem.Credential.XmlSecure) {
+      foreach (ISessionPutty SessionItem in PuttySessions) {
+        if (SessionItem.Credential is not null && !SessionItem.Credential.XmlSecure) {
           SessionItem.Credential.SetSecure(true);
           NeedToSecure = true;
         }
@@ -309,7 +288,7 @@ namespace libxputty {
 
     protected override IEnumerable<TPuttySessionGroup> _ReadGroups() {
       XElement Root = LoadXml();
-      if (Root == null) {
+      if (Root is null) {
         yield break;
       }
       throw new NotImplementedException();
@@ -317,7 +296,7 @@ namespace libxputty {
     #endregion --- Read data --------------------------------------------
 
     #region --- Save data --------------------------------------------
-    protected override void _SaveSession(IPuttySession session) {
+    protected override void _SaveSession(ISession session) {
       #region === Validate parameters ===
       if (string.IsNullOrWhiteSpace(Location)) {
         return;
@@ -328,7 +307,7 @@ namespace libxputty {
 
     }
 
-    protected override void _SaveSessions(IEnumerable<IPuttySession> sessions) {
+    protected override void _SaveSessions(IEnumerable<ISession> sessions) {
       #region === Validate parameters ===
       if (string.IsNullOrWhiteSpace(Location)) {
         return;
@@ -336,8 +315,8 @@ namespace libxputty {
       #endregion === Validate parameters ===
 
       XElement SessionsToSave = new XElement(XML_ELEMENT_SESSIONS);
-      foreach (XElement SessionItem in _ConvertToXml(sessions)) {
-        SessionsToSave.Add(SessionItem);
+      foreach (ISessionPutty SessionItem in sessions) {
+        SessionsToSave.Add(_ConvertToXml(SessionItem));
       }
       SaveXml(SessionsToSave);
     }
@@ -388,7 +367,7 @@ namespace libxputty {
 
         Log("Parsing content...");
         XElement Root = XmlFile.Root;
-        if (Root == null) {
+        if (Root is null) {
           LogError("unable to read config file content");
           return null;
         }

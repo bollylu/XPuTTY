@@ -47,7 +47,7 @@
 
         <MenuItem Header="Save current sessions file"
                   Command="{Binding Path=CommandFileSave}"
-                  Visibility="{Binding Path=IsSessionSourceNotRegistry, Converter={StaticResource BoolToVisibility}}">
+                  Visibility="{Binding Path=IsSourceSessionNotRegistry, Converter={StaticResource BoolToVisibility}}">
           <MenuItem.Icon>
             <Image Source="{Binding Path=FileSavePicture}" />
           </MenuItem.Icon>

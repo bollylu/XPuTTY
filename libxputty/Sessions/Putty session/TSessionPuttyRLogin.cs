@@ -6,10 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
-using libxputty.Interfaces;
 
 namespace libxputty {
-  public class TPuttySessionRLogin : TPuttySession, IHostAndPort {
+  public class TSessionPuttyRLogin : ASessionPutty, IHostAndPort {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -17,14 +16,14 @@ namespace libxputty {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionRLogin() : base() {
+    public TSessionPuttyRLogin() : base() {
       Protocol = TPuttyProtocol.RLogin;
     }
-    public TPuttySessionRLogin(string name) : base(name) {
+    public TSessionPuttyRLogin(string name) : base(name) {
       Protocol = TPuttyProtocol.RLogin;
     }
 
-    public TPuttySessionRLogin(IPuttySession session) : base(session) {
+    public TSessionPuttyRLogin(ISessionPutty session) : base(session) {
       Protocol = TPuttyProtocol.RLogin;
       if ( session is IHostAndPort SessionHAP ) {
         HostName = SessionHAP.HostName;
@@ -35,11 +34,8 @@ namespace libxputty {
     public override void Dispose() {
       base.Dispose();
     }
-    public override IPuttySession Duplicate() {
-      TPuttySessionRLogin RetVal = new TPuttySessionRLogin(base.Duplicate());
-      RetVal.HostName = HostName;
-      RetVal.Port = Port;
-      return RetVal;
+    public override ISessionPutty Duplicate() {
+      return new TSessionPuttyRLogin(this);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 

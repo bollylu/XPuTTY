@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
-using libxputty.Interfaces;
-
 namespace libxputty {
-  public class XSupportContact : APuttyBase, ISupportContact {
+  public class XSupportContact : ASessionBase, ISupportContact {
     public string SupportMessage { get; private set; }
     public string Email { get; private set; }
     public string Phone { get; private set; }

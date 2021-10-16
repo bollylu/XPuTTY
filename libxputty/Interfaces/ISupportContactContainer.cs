@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace libxputty.Interfaces {
+namespace libxputty {
   public interface ISupportContactContainer {
     ISupportContact SupportContact { get; }
   }

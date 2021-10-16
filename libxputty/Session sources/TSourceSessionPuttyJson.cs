@@ -6,16 +6,15 @@ using System.Text;
 using System.Xml.Linq;
 using BLTools;
 using BLTools.Json;
-using libxputty.Interfaces;
 
 namespace libxputty {
-  public class TPuttySessionSourceJson : APuttySessionSource {
+  public class TSourceSessionPuttyJson : ASourceSession {
 
     #region --- Constants --------------------------------------------
     protected const string JSON_ELEMENT_SESSIONS = "Sessions";
 
     protected const string JSON_ELEMENT_SESSION = "Session";
-    protected const string JSON_ATTRIBUTE_NAME = "Name";
+    protected const string JSON_ATTRIBUTE_NAME = nameof(Name);
     protected const string JSON_ATTRIBUTE_GROUP_LEVEL1 = "GroupLevel1";
     protected const string JSON_ATTRIBUTE_GROUP_LEVEL2 = "GroupLevel2";
     protected const string JSON_ATTRIBUTE_SECTION = "Section";
@@ -39,23 +38,23 @@ namespace libxputty {
     public override string DataSourceName => $@"{DATASOURCE_PREFIX}://{Location ?? ""}";
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSourceJson() : base() {
+    public TSourceSessionPuttyJson() : base() {
       SourceType = ESourceType.Json;
     }
-    public TPuttySessionSourceJson(string location) : base() {
+    public TSourceSessionPuttyJson(string location) : base() {
       SourceType = ESourceType.Json;
       Location = location;
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Converters -------------------------------------------------------------------------------------
-    protected IPuttySession _ConvertFromJson(IJsonValue session) {
+    protected ISessionPutty _ConvertFromJson(IJsonValue session) {
 
-      return TPuttySession.Empty;
+      return ASessionPutty.Empty;
 
     }
 
-    protected IEnumerable<IPuttySession> _ConvertFromJson(IEnumerable<IJsonValue> sessions) {
+    protected IEnumerable<ISessionPutty> _ConvertFromJson(IEnumerable<IJsonValue> sessions) {
       if ( sessions == null || !sessions.Any() ) {
         yield break;
       }
@@ -65,13 +64,13 @@ namespace libxputty {
       yield break;
     }
 
-    protected IJsonValue _ConvertToJson(IPuttySession session) {
+    protected IJsonValue _ConvertToJson(ISessionPutty session) {
 
       return JsonNull.Default;
       
     }
 
-    protected IJsonValue _ConvertToJson(IEnumerable<IPuttySession> sessions) {
+    protected IJsonValue _ConvertToJson(IEnumerable<ISessionPutty> sessions) {
       //foreach ( IPuttySession PuttySessionItem in sessions ) {
       //  RetVal.Add(_ConvertToJson(PuttySessionItem));
       //}
@@ -107,11 +106,11 @@ namespace libxputty {
 
     }
 
-    protected override IPuttySession _ReadSession(string name, TPuttyProtocol protocol) {
+    protected override ISessionPutty _ReadSession(string name, TPuttyProtocol protocol) {
 
       if ( !File.Exists(Location) ) {
         LogError($"Unable to get the sessions list from {Location} : File is missing or access is denied");
-        return TPuttySession.Empty;
+        return ASessionPutty.Empty;
       }
 
       throw new NotImplementedException();
@@ -138,7 +137,7 @@ namespace libxputty {
 
     }
 
-    protected override IEnumerable<IPuttySession> _ReadSessions() {
+    protected override IEnumerable<ISessionPutty> _ReadSessions() {
       if ( !File.Exists(Location) ) {
         LogError($"Unable to get the sessions list from {Location} : File is missing or access is denied");
         yield break;
@@ -147,7 +146,7 @@ namespace libxputty {
       
     }
 
-    protected override void _SaveSession(IPuttySession session) {
+    protected override void _SaveSession(ISession session) {
       #region === Validate parameters ===
       if ( string.IsNullOrWhiteSpace(Location) ) {
         return;
@@ -158,7 +157,7 @@ namespace libxputty {
 
     }
 
-    protected override void _SaveSessions(IEnumerable<IPuttySession> sessions) {
+    protected override void _SaveSessions(IEnumerable<ISession> sessions) {
       #region === Validate parameters ===
       if ( string.IsNullOrWhiteSpace(Location) ) {
         return;

@@ -3,10 +3,9 @@ using System.Diagnostics;
 using System.Text;
 using System.Xml.Linq;
 using BLTools;
-using libxputty.Interfaces;
 
 namespace libxputty {
-  public class TSupportContact : APuttyBase, ISupportContact {
+  public class TSupportContact : ASessionBase, ISupportContact {
 
     #region XML constants
     public static XName XML_THIS_ELEMENT => GetXName("SupportContact");

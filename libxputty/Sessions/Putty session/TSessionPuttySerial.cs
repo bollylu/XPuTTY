@@ -7,10 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using BLTools;
 using Microsoft.Win32;
-using libxputty.Interfaces;
 
 namespace libxputty {
-  public class TPuttySessionSerial : TPuttySession, ISerial, IDisposable {
+  public class TSessionPuttySerial : ASessionPutty, ISerial, IDisposable {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string SerialLine { get; set; }
@@ -23,15 +22,15 @@ namespace libxputty {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionSerial() : base() {
+    public TSessionPuttySerial() : base() {
       Protocol = TPuttyProtocol.Serial;
     }
 
-    public TPuttySessionSerial(string name) : base(name) {
+    public TSessionPuttySerial(string name) : base(name) {
       Protocol = TPuttyProtocol.Serial;
     }
 
-    public TPuttySessionSerial(IPuttySession session) : base(session) {
+    public TSessionPuttySerial(ISessionPutty session) : base(session) {
       Protocol = TPuttyProtocol.Serial;
       if ( session is ISerial SessionSerial ) {
         SerialLine = SessionSerial.SerialLine;
@@ -43,15 +42,8 @@ namespace libxputty {
       }
     }
 
-    public override IPuttySession Duplicate() {
-      TPuttySessionSerial RetVal = new TPuttySessionSerial(base.Duplicate());
-      RetVal.SerialLine = SerialLine;
-      RetVal.SerialSpeed = SerialSpeed;
-      RetVal.SerialDataBits = SerialDataBits;
-      RetVal.SerialStopBits = SerialStopBits;
-      RetVal.SerialParity = SerialParity;
-      RetVal.SerialFlowControl = SerialFlowControl;
-      return RetVal;
+    public override ISession Duplicate() {
+      return new TSessionPuttySerial(this);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 

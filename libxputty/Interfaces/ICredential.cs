@@ -6,7 +6,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace libxputty.Interfaces {
+namespace libxputty {
   public interface ICredential : IToXml {
     string Username { get; set; }
     string Domain { get; }

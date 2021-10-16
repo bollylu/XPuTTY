@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using BLTools;
 
-namespace libxputty.Interfaces {
+namespace libxputty {
   public interface ISupportContact : IDisposable, IToXml {
 
     string SupportMessage { get; }

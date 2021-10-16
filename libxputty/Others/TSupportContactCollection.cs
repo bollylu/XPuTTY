@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
 using BLTools;
-using libxputty.Interfaces;
 
 namespace libxputty {
-  public class TSupportContactCollection : APuttyBase {
+  public class TSupportContactCollection : ASessionBase {
 
     #region XML constants
     public static XName XML_THIS_ELEMENT => GetXName("SupportContacts");

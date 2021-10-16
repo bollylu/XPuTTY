@@ -9,11 +9,9 @@ using System.Xml.Linq;
 using BLTools;
 using BLTools.Diagnostic.Logging;
 
-using libxputty.Interfaces;
-
 namespace libxputty {
 
-  public abstract class APuttyBase : ALoggable, IName, IDisposable, IParent, ICredentialContainer, IToXml {
+  public abstract class ASessionBase : ALoggable, IName, IDisposable, IParent, ICredentialContainer, IToXml {
 
     #region XML constants
     public const string XML_ATTRIBUTE_NAME = nameof(Name);
@@ -80,33 +78,40 @@ namespace libxputty {
     #endregion --- IName --------------------------------------------
 
     /// <summary>
-    /// The location where to save or load data
+    /// The location where to save or load information
     /// </summary>
     public string StorageLocation { get; set; }
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public APuttyBase() {
+    protected ASessionBase() {
       _Initialize();
     }
 
-    public APuttyBase(string name) {
+    protected ASessionBase(string name) {
       Name = name;
       _Initialize();
     }
 
-    public APuttyBase(APuttyBase puttyBase) {
-      if (puttyBase == null) {
+    protected ASessionBase(ISession sessionBase) {
+      if (sessionBase is null) {
         return;
       }
-      Name = puttyBase.Name;
-      Description = puttyBase.Description;
-      Comment = puttyBase.Comment;
-      StorageLocation = puttyBase.StorageLocation;
-      Parent = puttyBase.Parent;
-      LocalCredential = puttyBase.LocalCredential;
+      Name = sessionBase.Name;
+      Description = sessionBase.Description;
+      Comment = sessionBase.Comment;
+      StorageLocation = sessionBase.StorageLocation;
+      Parent = sessionBase.Parent;
+      _Initialize();
     }
 
-    protected abstract void _Initialize();
+    private bool _IsInitialized = false;
+    protected virtual void _Initialize() {
+      if (_IsInitialized) {
+        return;
+      }
+
+      _IsInitialized = true;
+    }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region ICredentialContainer
@@ -118,12 +123,12 @@ namespace libxputty {
       get
       {
         // If local credential, use it
-        if (LocalCredential != null) {
-          return LocalCredential;
+        if (_LocalCredential is not null) {
+          return _LocalCredential;
         }
 
         // If a parent is ICredentialContainer, use it
-        if (Parent != null && Parent is ICredentialContainer ParentWithCredential) {
+        if (Parent is not null && Parent is ICredentialContainer ParentWithCredential) {
           return ParentWithCredential.Credential;
         }
 
@@ -131,20 +136,20 @@ namespace libxputty {
         return null;
       }
     }
-    protected ICredential LocalCredential;
+    protected ICredential _LocalCredential;
 
     public void SetLocalCredential(ICredential credential) {
-      if (credential == null) {
+      if (credential is null) {
         return;
       }
       if (credential.HasValue) {
-        LocalCredential = new TCredential(credential, this);
+        _LocalCredential = new TCredential(credential, this);
       }
     }
 
     public virtual void SetSecure(bool value, bool recurse = true) {
-      if (LocalCredential != null) {
-        LocalCredential.SetSecure(value);
+      if (_LocalCredential is not null) {
+        _LocalCredential.SetSecure(value);
       }
 
       if (!recurse) {
@@ -152,11 +157,11 @@ namespace libxputty {
       }
 
       PropertyInfo ItemsProperty = this.GetType().GetProperty("Items");
-      if (ItemsProperty == null) {
+      if (ItemsProperty is null) {
         return;
       }
 
-      if (!(ItemsProperty.GetValue(this) is IEnumerable<object> LocalItems)) {
+      if (ItemsProperty.GetValue(this) is not IEnumerable<object> LocalItems) {
         return;
       }
 
@@ -166,21 +171,21 @@ namespace libxputty {
 
     }
 
-    public bool IsCredentialInherited => Parent != null && Parent is ICredentialContainer && LocalCredential == null;
+    public bool IsCredentialInherited => _LocalCredential is null && Parent is not null && Parent is ICredentialContainer;
 
     public virtual bool HasUnsecuredPassword
     {
       get
       {
-        if (LocalCredential != null && !LocalCredential.XmlSecure) {
+        if (_LocalCredential is not null && !_LocalCredential.XmlSecure) {
           return true;
         }
 
         // If tested item has sub-items, test them too
         PropertyInfo ItemsProperty = this.GetType().GetProperty("Items");
-        if (ItemsProperty != null) {
+        if (ItemsProperty is not null) {
           if (ItemsProperty.GetValue(this) is IEnumerable<object> LocalItems) {
-            return LocalItems.Where(x => x is ICredentialContainer).Cast<ICredentialContainer>().Any(x => x.HasUnsecuredPassword);
+            return LocalItems.OfType<ICredentialContainer>().Any(x => x.HasUnsecuredPassword);
           }
         }
 
@@ -214,8 +219,8 @@ namespace libxputty {
         RetVal.SetAttributeValue(XML_ATTRIBUTE_COMMENT, Comment);
       }
 
-      if (!IsCredentialInherited && LocalCredential != null) {
-        RetVal.Add(LocalCredential.ToXml());
+      if (!IsCredentialInherited) {
+        RetVal.Add(_LocalCredential.ToXml());
       }
 
       return RetVal;
@@ -236,7 +241,7 @@ namespace libxputty {
     #region IParent
     public IParent Parent { get; set; }
     public T GetParent<T>() {
-      if (Parent == null) {
+      if (Parent is null) {
         return default(T);
       }
       if (Parent.GetType().Name == typeof(T).Name) {

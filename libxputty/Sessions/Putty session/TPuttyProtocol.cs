@@ -4,15 +4,6 @@ using System.Text;
 
 namespace libxputty {
 
-  public enum EPuttyProtocol {
-    Unknown,
-    SSH,
-    Serial,
-    Telnet,
-    Raw,
-    RLogin
-  }
-
   public class TPuttyProtocol {
 
     public EPuttyProtocol Value { get; set; }
@@ -103,9 +94,8 @@ namespace libxputty {
 
     #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
-      StringBuilder RetVal = new StringBuilder();
-      string Text = this;
-      RetVal.Append(Text);
+      StringBuilder RetVal = new();
+      RetVal.Append(Value.ToString());
       return RetVal.ToString();
     } 
     #endregion --- Converters -------------------------------------------------------------------------------------

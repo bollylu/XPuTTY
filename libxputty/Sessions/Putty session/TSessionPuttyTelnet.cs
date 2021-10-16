@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Win32;
-using libxputty.Interfaces;
 
 namespace libxputty {
-  public class TPuttySessionRaw : TPuttySession, IHostAndPort {
+  public class TSessionPuttyTelnet : ASessionPutty, IHostAndPort {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -17,15 +10,15 @@ namespace libxputty {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionRaw() : base() {
-      Protocol = TPuttyProtocol.Raw;
+    public TSessionPuttyTelnet() : base() {
+      Protocol = TPuttyProtocol.Telnet;
     }
-    public TPuttySessionRaw(string name) : base(name) {
-      Protocol = TPuttyProtocol.Raw;
+    public TSessionPuttyTelnet(string name) : base(name) {
+      Protocol = TPuttyProtocol.Telnet;
     }
 
-    public TPuttySessionRaw(IPuttySession session) : base(session) {
-      Protocol = TPuttyProtocol.Raw;
+    public TSessionPuttyTelnet(ISessionPutty session) : base(session) {
+      Protocol = TPuttyProtocol.Telnet;
       if ( session is IHostAndPort SessionHAP ) {
         HostName = SessionHAP.HostName;
         Port = SessionHAP.Port;
@@ -36,11 +29,8 @@ namespace libxputty {
       base.Dispose();
     }
 
-    public override IPuttySession Duplicate() {
-      TPuttySessionRaw RetVal = new TPuttySessionRaw(base.Duplicate());
-      RetVal.HostName = HostName;
-      RetVal.Port = Port;
-      return RetVal;
+    public override ISession Duplicate() {
+      return new TSessionPuttyTelnet(this);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -56,7 +46,6 @@ namespace libxputty {
         RetVal.Append(", N/A");
       }
       RetVal.Append($":{Port}");
-      
 
       return RetVal.ToString();
     }

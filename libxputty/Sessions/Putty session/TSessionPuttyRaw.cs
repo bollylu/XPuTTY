@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
 using System.Text;
-
-using libxputty.Interfaces;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace libxputty {
-  public class TPuttySessionTelnet : TPuttySession, IHostAndPort {
+  public class TSessionPuttyRaw : ASessionPutty, IHostAndPort {
 
     #region --- Public properties ------------------------------------------------------------------------------
     public string HostName { get; set; }
@@ -12,15 +16,15 @@ namespace libxputty {
     #endregion --- Public properties ---------------------------------------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionTelnet() : base() {
-      Protocol = TPuttyProtocol.Telnet;
+    public TSessionPuttyRaw() : base() {
+      Protocol = TPuttyProtocol.Raw;
     }
-    public TPuttySessionTelnet(string name) : base(name) {
-      Protocol = TPuttyProtocol.Telnet;
+    public TSessionPuttyRaw(string name) : base(name) {
+      Protocol = TPuttyProtocol.Raw;
     }
 
-    public TPuttySessionTelnet(IPuttySession session) : base(session) {
-      Protocol = TPuttyProtocol.Telnet;
+    public TSessionPuttyRaw(ISessionPutty session) : base(session) {
+      Protocol = TPuttyProtocol.Raw;
       if ( session is IHostAndPort SessionHAP ) {
         HostName = SessionHAP.HostName;
         Port = SessionHAP.Port;
@@ -29,6 +33,10 @@ namespace libxputty {
 
     public override void Dispose() {
       base.Dispose();
+    }
+
+    public override ISession Duplicate() {
+      return new TSessionPuttyRaw(this);
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
@@ -44,6 +52,7 @@ namespace libxputty {
         RetVal.Append(", N/A");
       }
       RetVal.Append($":{Port}");
+      
 
       return RetVal.ToString();
     }

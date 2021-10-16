@@ -4,7 +4,6 @@ using System.Linq;
 using BLTools;
 using static BLTools.ConsoleExtension.ConsoleExtension;
 using libxputty;
-using libxputty.Interfaces;
 
 namespace XPuTTY_cli {
   internal class Program {
@@ -35,9 +34,9 @@ namespace XPuTTY_cli {
       bool NeedRunning = true;
       do {
 
-        TPuttySessionSourceRegistry RegSource = new TPuttySessionSourceRegistry();
+        TSourceSessionPuttyRegistry RegSource = new TSourceSessionPuttyRegistry();
 
-        IEnumerable<IPuttySession> Sessions = RegSource.GetSessions();
+        IEnumerable<ISessionPutty> Sessions = RegSource.GetSessions().OfType<ISessionPutty>();
 
         switch ( Command ) {
           case CMD_LIST:
@@ -47,14 +46,14 @@ namespace XPuTTY_cli {
 
           case CMD_START:
             if ( Source.ToLower().StartsWith(CMD_START_MENU) ) {
-              IEnumerable<IPuttySession> Menu = (new List<IPuttySession>() { new TPuttySessionSSH() { Name = "Cancel" } }).Concat(Sessions.Where(x => x.Protocol.IsSSH));
+              IEnumerable<ISessionPutty> Menu = (new List<ISessionPutty>() { new TSessionPuttySsh() { Name = "Cancel" } }).Concat(Sessions.Where(x => x.Protocol.IsSSH));
               Console.Clear();
               int Choice = InputList(Menu.Select(x => x.CleanName), "Sessions list", "Please select session to start : ", "Please select only numbers available in the list");
               if ( Choice == 1 ) {
                 NeedRunning = false;
                 break;
               }
-              IPuttySession Selected = Menu.ElementAt(Choice);
+              ISessionPutty Selected = Menu.ElementAt(Choice);
               Console.WriteLine($"You have select session {Selected.CleanName}");
               Selected.Start();
               break;

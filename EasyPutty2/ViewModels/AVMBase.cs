@@ -14,7 +14,6 @@ using EasyPutty;
 using EasyPutty.Models;
 
 using libxputty;
-using libxputty.Interfaces;
 
 namespace EasyPutty.ViewModels {
   public abstract class AVMBase : AVMEasyPuttyBase, IEquatable<AVMBase> {

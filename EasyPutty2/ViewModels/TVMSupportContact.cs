@@ -2,7 +2,6 @@
 using System.Windows;
 using BLTools.MVVM;
 using libxputty;
-using libxputty.Interfaces;
 using EasyPutty.Views;
 
 namespace EasyPutty.ViewModels {

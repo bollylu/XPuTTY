@@ -6,7 +6,6 @@ using BLTools;
 using EasyPutty.Interfaces;
 
 using libxputty;
-using libxputty.Interfaces;
 
 namespace EasyPutty.ViewModels {
   public sealed class TVMEditedPuttySession : TVMPuttySession {
@@ -38,7 +37,7 @@ namespace EasyPutty.ViewModels {
     }
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TVMEditedPuttySession(IPuttySession puttySession, IView view) : base(puttySession) {
+    public TVMEditedPuttySession(ISession session, IView view) : base(session) {
       View = view;
     }
     protected override void _InitializeCommands() {
@@ -83,7 +82,7 @@ namespace EasyPutty.ViewModels {
     public static TVMPuttySession DesignVMEditedPuttySession {
       get {
         if ( _DesignVMEditedPuttySession == null ) {
-          TPuttySessionSSH FakeSession = new TPuttySessionSSH("Fake session") {
+          TSessionPuttySsh FakeSession = new TSessionPuttySsh("Fake session") {
             GroupLevel1 = "Sharenet",
             GroupLevel2 = "CMD",
             Section = "LAN",

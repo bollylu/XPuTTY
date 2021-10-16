@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 using BLTools;
-using libxputty.Interfaces;
 
 namespace libxputty {
-  public class TPuttySessionGroup : APuttyBase {
+  public class TPuttySessionGroup : ASessionBase {
 
-    public APuttySessionSource SessionSource { get; private set; }
+    public ASourceSession SessionSource { get; private set; }
 
-    public List<APuttyBase> Items { get; private set; } = new();
+    public List<ASessionBase> Items { get; private set; } = new();
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     public TPuttySessionGroup() : base() { }

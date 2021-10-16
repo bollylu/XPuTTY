@@ -11,10 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="TPutty\TPuttySessionList.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BLTools" Version="4.5.27" />
     <PackageReference Include="BLTools.Json.dns.20" Version="4.5.27" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />

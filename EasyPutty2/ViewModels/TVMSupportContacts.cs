@@ -10,7 +10,6 @@ using EasyPutty.ViewModels;
 using EasyPutty.Views;
 
 using libxputty;
-using libxputty.Interfaces;
 
 namespace EasyPutty.ViewModels {
   public class TVMSupportContacts : AVMEasyPuttyBase {

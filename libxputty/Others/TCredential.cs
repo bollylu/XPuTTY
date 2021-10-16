@@ -7,10 +7,8 @@ using System.Xml.Linq;
 using BLTools;
 using BLTools.Encryption;
 
-using libxputty.Interfaces;
-
 namespace libxputty {
-  public class TCredential : APuttyBase, IDisposable, ICredential {
+  public class TCredential : ASessionBase, IDisposable, ICredential {
 
     #region XML contants
     public static XName XML_THIS_ELEMENT => GetXName("Credential");

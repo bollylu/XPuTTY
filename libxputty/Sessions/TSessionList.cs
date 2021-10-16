@@ -7,39 +7,36 @@ using System.Text;
 using System.Xml.Linq;
 using BLTools;
 using BLTools.Json;
-using libxputty_std20.Interfaces;
 using Microsoft.Win32;
 
-namespace libxputty_std20 {
-  public class TPuttySessionList : IToJson, IPuttySessionsList {
+namespace libxputty {
+  public class TSessionList : ISessionList {
 
     #region --- Public properties ------------------------------------------------------------------------------
     
-    public List<IPuttySession> Items { get; } = new List<IPuttySession>();
+    public List<ISession> Items { get; } = new();
+    private readonly object Lock_Content = new();
 
     public int Count => Items.Count;
     #endregion --- Public properties ---------------------------------------------------------------------------
 
-    #region Private variables
-    private readonly object Lock_Content = new object();
-    #endregion Private variables
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
-    public TPuttySessionList() { }
-    public TPuttySessionList(IEnumerable<IPuttySession> sessions) {
-      foreach ( IPuttySession PuttySessionItem in sessions ) {
-        Add(PuttySessionItem);
+    public TSessionList() { }
+    public TSessionList(IEnumerable<ISession> sessions) {
+      foreach ( ISession SessionItem in sessions ) {
+        Add(SessionItem);
       }
     }
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Converters -------------------------------------------------------------------------------------
     public override string ToString() {
-      StringBuilder RetVal = new StringBuilder();
+      StringBuilder RetVal = new();
       if ( Items.Any() ) {
         RetVal.AppendLine($"List of sessions ({Items.Count})");
-        foreach ( IPuttySession SessionItem in Items ) {
-          RetVal.AppendLine($"  {SessionItem.ToString()}");
+        foreach ( ISession SessionItem in Items ) {
+          RetVal.AppendLine($"  {SessionItem}");
         }
       } else {
         RetVal.Append("No session available");
@@ -48,19 +45,20 @@ namespace libxputty_std20 {
     }
 
     public IJsonValue ToJson() {
-      JsonArray Content = new JsonArray();
-      foreach ( IPuttySession PuttySessionItem in Items ) {
-        Content.Add(PuttySessionItem.ToJson());
-      }
-      JsonObject RetVal = new JsonObject() {
-        //{JSON_THIS_ELEMENT, Content }
-      };
-      return RetVal;
+      //JsonArray Content = new JsonArray();
+      //foreach ( ISession SessionItem in Items ) {
+      //  Content.Add(SessionItem.ToJson());
+      //}
+      //JsonObject RetVal = new JsonObject() {
+      //  //{JSON_THIS_ELEMENT, Content }
+      //};
+      //return RetVal;
+      return null;
     }
     #endregion --- Converters -------------------------------------------------------------------------------------
 
     #region --- Indexers --------------------------------------------
-    public IPuttySession this[int index] {
+    public ISession this[int index] {
       get {
         lock ( Lock_Content ) {
           return Items[index];
@@ -68,10 +66,10 @@ namespace libxputty_std20 {
       }
     }
 
-    public IPuttySession this[string sessionName] {
+    public ISession this[string sessionName] {
       get {
         lock ( Lock_Content ) {
-          return Items.FirstOrDefault(x => x.Name == sessionName);
+          return Items.FirstOrDefault(x => x.Name.Equals(sessionName, StringComparison.InvariantCultureIgnoreCase));
         }
       }
     }
@@ -83,15 +81,15 @@ namespace libxputty_std20 {
       }
     }
 
-    public void Add(IPuttySession session) {
+    public void Add(ISession session) {
       lock ( Lock_Content ) {
         Items.Add(session);
       }
     }
 
-    public void Add(IEnumerable<IPuttySession> sessions) {
+    public void Add(IEnumerable<ISession> sessions) {
       lock ( Lock_Content ) {
-        foreach ( IPuttySession PuttySessionItem in sessions ) {
+        foreach ( ISession PuttySessionItem in sessions ) {
           Items.Add(PuttySessionItem);
         }
       }
@@ -120,14 +118,14 @@ namespace libxputty_std20 {
     }
     #endregion --- Json --------------------------------------------
 
-    public static TPuttySessionList Empty {
+    public static TSessionList Empty {
       get {
         if ( _Empty == null ) {
-          _Empty = new TPuttySessionList();
+          _Empty = new TSessionList();
         }
         return _Empty;
       }
     }
-    private static TPuttySessionList _Empty;
+    private static TSessionList _Empty;
   }
 }

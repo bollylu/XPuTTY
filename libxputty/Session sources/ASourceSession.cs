@@ -5,10 +5,8 @@ using System.Linq;
 using BLTools;
 using BLTools.Diagnostic.Logging;
 
-using libxputty.Interfaces;
-
 namespace libxputty {
-  public abstract class APuttySessionSource : APuttyBase, IPuttySessionSource, IDisposable {
+  public abstract class ASourceSession : ASessionBase, ISourceSession, IDisposable {
     #region --- Public properties ------------------------------------------------------------------------------
 
     public ESourceType SourceType { get; protected set; }
@@ -18,33 +16,31 @@ namespace libxputty {
     public virtual string DataSourceName => "";
     #endregion --- Public properties ---------------------------------------------------------------------------
 
-    public APuttySessionSource() : base() { }
-
-    protected override void _Initialize() {
-    }
+    public ASourceSession() : base() { }
 
     #region --- Read data --------------------------------------------
     public IEnumerable<(string, TPuttyProtocol)> GetSessionsList() {
-      #region --- MyRegion --------------------------------------------
+      
       if (SourceType == ESourceType.Unknown) {
         LogError("Unable to read sessions : Source type is unknown");
         yield break;
       }
+
       if (string.IsNullOrWhiteSpace(Location)) {
         LogError("Unable to read sessions : Location is missing or invalid");
         yield break;
       }
-      #endregion --- MyRegion --------------------------------------------
+
       foreach ((string, TPuttyProtocol) Item in _GetSessionList()) {
         yield return Item;
       }
     }
 
-    public IPuttySession GetSession(string name) {
+    public ISession GetSession(string name) {
       return GetSessions().FirstOrDefault(x => x.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase));
     }
 
-    public IEnumerable<IPuttySession> GetSessions() {
+    public IEnumerable<ISession> GetSessions() {
       #region --- MyRegion --------------------------------------------
       if (SourceType == ESourceType.Unknown) {
         LogError("Unable to read sessions : Source type is unknown");
@@ -56,7 +52,7 @@ namespace libxputty {
       }
       #endregion --- MyRegion --------------------------------------------
 
-      foreach (IPuttySession PuttySessionItem in _ReadSessions()) {
+      foreach (ISessionPutty PuttySessionItem in _ReadSessions()) {
         yield return PuttySessionItem;
       }
     }
@@ -84,7 +80,7 @@ namespace libxputty {
     #endregion --- Read data --------------------------------------------
 
     #region --- Save data --------------------------------------------
-    public void SaveSession(IPuttySession session) {
+    public void SaveSession(ISession session) {
       #region === Validate parameters ===
       if (SourceType == ESourceType.Unknown) {
         LogError("Unable to save sessions : Source type is unknown");
@@ -102,7 +98,7 @@ namespace libxputty {
       _SaveSession(session);
     }
 
-    public void SaveSessions(IEnumerable<IPuttySession> sessions) {
+    public void SaveSessions(IEnumerable<ISession> sessions) {
       #region === Validate parameters ===
       if (SourceType == ESourceType.Unknown) {
         LogError("Unable to save sessions : Source type is unknown");
@@ -124,18 +120,18 @@ namespace libxputty {
     #region --- Abstract read data --------------------------------------------
     protected abstract IEnumerable<(string, TPuttyProtocol)> _GetSessionList();
 
-    protected abstract IEnumerable<IPuttySession> _ReadSessions();
-    protected abstract IPuttySession _ReadSession(string name, TPuttyProtocol protocol);
+    protected abstract IEnumerable<ISessionPutty> _ReadSessions();
+    protected abstract ISessionPutty _ReadSession(string name, TPuttyProtocol protocol);
 
     protected abstract IEnumerable<TPuttySessionGroup> _ReadGroups();
     #endregion --- Abstract read data --------------------------------------------
 
     #region --- Abstract save data --------------------------------------------
-    protected abstract void _SaveSession(IPuttySession session);
-    protected abstract void _SaveSessions(IEnumerable<IPuttySession> sessions);
+    protected abstract void _SaveSession(ISession session);
+    protected abstract void _SaveSessions(IEnumerable<ISession> sessions);
     #endregion --- Abstract save data --------------------------------------------
 
-    public static IPuttySessionSource GetPuttySessionSource(string sourceUri, ILogger logger) {
+    public static ISourceSession BuildSourceSession(string sourceUri, ILogger logger) {
 
       if (logger is null) {
         logger = ALogger.DEFAULT_LOGGER;
@@ -146,15 +142,29 @@ namespace libxputty {
       }
 
       switch (sourceUri.Before("://").ToLower()) {
-        case TPuttySessionSourceRegistry.DATASOURCE_PREFIX:
-          return new TPuttySessionSourceRegistry();
-        case TPuttySessionSourceXml.DATASOURCE_PREFIX:
-          return new TPuttySessionSourceXml(sourceUri.After("://"));
-        case TPuttySessionSourceJson.DATASOURCE_PREFIX:
-          return new TPuttySessionSourceJson(sourceUri.After("://"));
+
+        case TSourceSessionPuttyRegistry.DATASOURCE_PREFIX: {
+            ISourceSession RetVal = new TSourceSessionPuttyRegistry();
+            RetVal.SetLogger(logger);
+            return RetVal;
+          }
+
+        case TSourceSessionPuttyXml.DATASOURCE_PREFIX: {
+            ISourceSession RetVal = new TSourceSessionPuttyXml(sourceUri.After("://"));
+            RetVal.SetLogger(logger);
+            return RetVal;
+          }
+
+        case TSourceSessionPuttyJson.DATASOURCE_PREFIX: {
+            ISourceSession RetVal = new TSourceSessionPuttyJson(sourceUri.After("://"));
+            RetVal.SetLogger(logger);
+            return RetVal;
+          }
+
         default:
           logger.LogError($"Unable to get PuttySessionSource : sourceUri is invalid : {sourceUri}");
           return null;
+
       }
     }
 

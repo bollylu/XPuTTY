@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyPutty", "EasyPutty\Easy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libxputty", "libxputty\libxputty.csproj", "{2B9E7713-2477-401E-973A-7F157CD7F6F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyPutty2", "EasyPutty2\EasyPutty2.csproj", "{E97AA8D7-977F-4F5E-8548-C34B7F126E6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyPutty2", "EasyPutty2\EasyPutty2.csproj", "{E97AA8D7-977F-4F5E-8548-C34B7F126E6F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libxputtyTests", "libxputtyTests\libxputtyTests.csproj", "{8E5552A6-443B-4958-9F46-D02BF5699FBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{E97AA8D7-977F-4F5E-8548-C34B7F126E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E97AA8D7-977F-4F5E-8548-C34B7F126E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E97AA8D7-977F-4F5E-8548-C34B7F126E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E5552A6-443B-4958-9F46-D02BF5699FBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E5552A6-443B-4958-9F46-D02BF5699FBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E5552A6-443B-4958-9F46-D02BF5699FBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E5552A6-443B-4958-9F46-D02BF5699FBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

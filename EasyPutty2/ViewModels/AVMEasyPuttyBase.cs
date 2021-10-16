@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using BLTools;
 using BLTools.MVVM;
 
-using libxputty.Interfaces;
+using libxputty;
 
 namespace EasyPutty.ViewModels {
   public abstract class AVMEasyPuttyBase : AMVVM, IParent, IDisposable {
