@@ -164,20 +164,17 @@ namespace libxputty {
       }
     }
 
-    public static string GetCommandLine(int pid) {
+    public string GetCommandLine() {
       #region === Validate parameters ===
-      if (pid < 1) {
+      if (PID < 1) {
         return null;
       }
       #endregion === Validate parameters ===
-      using (ManagementObjectSearcher WmiSearch = new ManagementObjectSearcher($"SELECT CommandLine, ProcessId FROM Win32_Process WHERE ProcessId={pid}")) {
+      using (ManagementObjectSearcher WmiSearch = new ManagementObjectSearcher($"SELECT CommandLine, ProcessId FROM Win32_Process WHERE ProcessId={PID}")) {
         ManagementObjectCollection Processes = WmiSearch.Get();
         ManagementObjectEnumerator managementObjectEnumerator = Processes.GetEnumerator();
         managementObjectEnumerator.Reset();
-        if (managementObjectEnumerator.MoveNext()) {
-          return managementObjectEnumerator.Current["CommandLine"].ToString();
-        }
-        return "";
+        return managementObjectEnumerator.MoveNext() ? managementObjectEnumerator.Current["CommandLine"].ToString() : "";
       }
     }
 

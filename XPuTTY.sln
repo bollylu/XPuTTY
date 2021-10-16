@@ -5,13 +5,11 @@ VisualStudioVersion = 16.0.31702.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XPuTTY-cli", "XPuTTY-cli\XPuTTY-cli.csproj", "{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyPutty", "EasyPutty\EasyPutty.csproj", "{C3512F02-414E-493B-8C3C-4E790751BD23}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libxputty", "libxputty\libxputty.csproj", "{2B9E7713-2477-401E-973A-7F157CD7F6F4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyPutty2", "EasyPutty2\EasyPutty2.csproj", "{E97AA8D7-977F-4F5E-8548-C34B7F126E6F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libxputtyTests", "libxputtyTests\libxputtyTests.csproj", "{8E5552A6-443B-4958-9F46-D02BF5699FBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "libxputtyTests", "libxputtyTests\libxputtyTests.csproj", "{8E5552A6-443B-4958-9F46-D02BF5699FBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09B1D0D2-7D6F-4DA4-8151-738217DC4B29}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3512F02-414E-493B-8C3C-4E790751BD23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3512F02-414E-493B-8C3C-4E790751BD23}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3512F02-414E-493B-8C3C-4E790751BD23}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3512F02-414E-493B-8C3C-4E790751BD23}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2B9E7713-2477-401E-973A-7F157CD7F6F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2B9E7713-2477-401E-973A-7F157CD7F6F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B9E7713-2477-401E-973A-7F157CD7F6F4}.Release|Any CPU.ActiveCfg = Release|Any CPU

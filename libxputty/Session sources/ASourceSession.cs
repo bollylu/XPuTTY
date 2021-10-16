@@ -131,6 +131,13 @@ namespace libxputty {
     protected abstract void _SaveSessions(IEnumerable<ISession> sessions);
     #endregion --- Abstract save data --------------------------------------------
 
+
+    /// <summary>
+    /// Build a source of session from a prefixed string (url alike)
+    /// </summary>
+    /// <param name="sourceUri">Url to the source (registry://..., xml://..., json://...)</param>
+    /// <param name="logger">The logger for the operations</param>
+    /// <returns>One ISourceSession or null if SourceUri is invalid</returns>
     public static ISourceSession BuildSourceSession(string sourceUri, ILogger logger) {
 
       if (logger is null) {
@@ -141,30 +148,40 @@ namespace libxputty {
         return null;
       }
 
-      switch (sourceUri.Before("://").ToLower()) {
+      try {
+        switch (sourceUri.Before("://").ToLower()) {
 
-        case TSourceSessionPuttyRegistry.DATASOURCE_PREFIX: {
-            ISourceSession RetVal = new TSourceSessionPuttyRegistry();
-            RetVal.SetLogger(logger);
-            return RetVal;
-          }
+          case TSourceSessionPuttyRegistry.DATASOURCE_PREFIX: {
+              if (OperatingSystem.IsWindows()) {
+                ISourceSession RetVal = new TSourceSessionPuttyRegistry();
+                RetVal.SetLogger(logger);
+                return RetVal;
+              } else {
+                logger.LogError("Unable to build a source for sessions : registry is only available on Windows");
+                return null;
+              }
+            }
 
-        case TSourceSessionPuttyXml.DATASOURCE_PREFIX: {
-            ISourceSession RetVal = new TSourceSessionPuttyXml(sourceUri.After("://"));
-            RetVal.SetLogger(logger);
-            return RetVal;
-          }
+          case TSourceSessionPuttyXml.DATASOURCE_PREFIX: {
+              ISourceSession RetVal = new TSourceSessionPuttyXml(sourceUri.After("://"));
+              RetVal.SetLogger(logger);
+              return RetVal;
+            }
 
-        case TSourceSessionPuttyJson.DATASOURCE_PREFIX: {
-            ISourceSession RetVal = new TSourceSessionPuttyJson(sourceUri.After("://"));
-            RetVal.SetLogger(logger);
-            return RetVal;
-          }
+          case TSourceSessionPuttyJson.DATASOURCE_PREFIX: {
+              ISourceSession RetVal = new TSourceSessionPuttyJson(sourceUri.After("://"));
+              RetVal.SetLogger(logger);
+              return RetVal;
+            }
 
-        default:
-          logger.LogError($"Unable to get PuttySessionSource : sourceUri is invalid : {sourceUri}");
-          return null;
+          default:
+            logger.LogError($"Unable to build a source for sessions : sourceUri is invalid : {sourceUri}");
+            return null;
 
+        }
+      } catch (Exception ex) {
+        logger.LogError($"Unable to build a source for sessions : {ex.Message}");
+        return null;
       }
     }
 

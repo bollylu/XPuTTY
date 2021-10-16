@@ -10,7 +10,6 @@ using BLTools.Json;
 namespace libxputty {
   public interface ISessionPutty : ISession, ILoggable {
 
-    ESessionPuttyType SessionType { get; set; }
     string GroupLevel1 { get; set; }
     string GroupLevel2 { get; set; }
     string Section { get; set; }
@@ -18,7 +17,7 @@ namespace libxputty {
 
     string CleanName { get; }
     
-    TRunProcess PuttyProcess { get; }
+    
 
     TPuttyProtocol Protocol { get; set; }
   }

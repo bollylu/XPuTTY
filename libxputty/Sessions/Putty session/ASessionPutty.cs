@@ -10,7 +10,7 @@ using BLTools.Diagnostic.Logging;
 using BLTools.Json;
 
 namespace libxputty {
-  public abstract class ASessionPutty : ASessionBase, ISessionPutty, IDisposable, ISupportContactContainer {
+  public abstract class ASessionPutty : ASession, ISessionPutty, IDisposable, ISupportContactContainer {
 
     #region --- Constants --------------------------------------------
     public const string EXECUTABLE_PUTTY = "putty.exe";
@@ -36,8 +36,6 @@ namespace libxputty {
     #region --- Public properties ------------------------------------------------------------------------------
     public string CleanName => Name.Replace("%20", " ");
     public TPuttyProtocol Protocol { get; set; } = new TPuttyProtocol();
-
-    public ESessionPuttyType SessionType { get; set; }
 
     public string RemoteCommand { get; set; }
     public string CleanedRemoteCommand => (RemoteCommand ?? "").Replace("\"", "\\\"");
@@ -70,12 +68,6 @@ namespace libxputty {
     //}
     #endregion --- Converters -------------------------------------------------------------------------------------
 
-    #region --- Event handlers --------------------------------------------
-    public event EventHandler OnStart;
-    public event EventHandler OnExit;
-    public event EventHandler OnStarted;
-    public event EventHandler OnExited;
-    #endregion --- Event handlers --------------------------------------------
 
     #region --- Constructor(s) ---------------------------------------------------------------------------------
     protected ASessionPutty() : base() {
@@ -105,39 +97,21 @@ namespace libxputty {
       PuttyProcess.OnStart -= _PuttyProcess_OnStart;
     }
 
-    public virtual ISession Duplicate() {
-      ISessionPutty RetVal = BuildSessionPutty(Protocol.Value, Logger);
-      RetVal.Name = Name;
-      RetVal.Description = Description;
-      RetVal.Comment = Comment;
+    public override ISession Duplicate() {
+      ISessionPutty RetVal = base.Duplicate();
       RetVal.GroupLevel1 = GroupLevel1;
       RetVal.GroupLevel2 = GroupLevel2;
       RetVal.RemoteCommand = RemoteCommand;
       RetVal.Section = Section;
-      RetVal.SessionType = SessionType;
-      RetVal.StorageLocation = StorageLocation;
-      RetVal.SetLocalCredential(Credential);
       return RetVal;
     }
 
     #endregion --- Constructor(s) ------------------------------------------------------------------------------
 
     #region --- Windows processes --------------------------------------------
-    public TRunProcess PuttyProcess { get; protected set; } = new();
-
-    public bool IsRunning => PuttyProcess.IsRunning;
-    public int PID => PuttyProcess.PID;
-
-    public string CommandLine => TRunProcess.GetCommandLine(PID);
-
     public ISupportContact SupportContact => throw new NotImplementedException();
 
-
-    public virtual void Start(IEnumerable<string> arguments) {
-      Start(string.Join(" ", arguments));
-    }
-
-    public virtual void Start(string arguments = "") {
+    public override void Start(string arguments = "") {
 
       if (!string.IsNullOrWhiteSpace(RemoteCommand)) {
         string TempFileForRemoteCommand = Path.GetTempFileName();
@@ -147,15 +121,14 @@ namespace libxputty {
 
       switch (SessionType) {
 
-        case ESessionPuttyType.Putty:
+        case ESessionType.PuttySSH:
           _StartPutty(arguments);
           break;
 
-        case ESessionPuttyType.Plink:
+        case ESessionType.PLinkSSH:
           _StartPlink(arguments);
           break;
 
-        case ESessionPuttyType.Auto:
         default: {
             if (!string.IsNullOrWhiteSpace(RemoteCommand)) {
               _StartPlink(arguments);
@@ -175,10 +148,10 @@ namespace libxputty {
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
         UseShellExecute = false
       };
-      PuttyProcess.StartInfo = StartInfo;
+      RunProcess.StartInfo = StartInfo;
       OnStart?.Invoke(this, EventArgs.Empty);
 
-      PuttyProcess.Start(true);
+      RunProcess.Start(true);
     }
     protected virtual void _StartPlink(string arguments = "") {
       ProcessStartInfo StartInfo = new ProcessStartInfo {
@@ -186,9 +159,9 @@ namespace libxputty {
         Arguments = arguments == "" ? $"-load {"\"" + CleanName + "\""}" : arguments,
         UseShellExecute = false
       };
-      PuttyProcess.StartInfo = StartInfo;
+      RunProcess.StartInfo = StartInfo;
 
-      PuttyProcess.Start();
+      RunProcess.Start();
     }
 
     private void _PuttyProcess_OnStart(object sender, EventArgs e) {
@@ -210,12 +183,6 @@ namespace libxputty {
     public virtual void Stop() {
       OnExit?.Invoke(this, EventArgs.Empty);
       PuttyProcess.Cancel();
-    }
-
-    protected void SetProcessTitle(string title = "") {
-      if (PuttyProcess is not null) {
-        PuttyProcess.ProcessTitle = title;
-      }
     }
 
     public static IEnumerable<Process> GetAllPuttyProcess() {

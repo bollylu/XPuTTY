@@ -5,24 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 using BLTools;
+using BLTools.Diagnostic.Logging;
 
 namespace libxputty {
-  public interface ISession : IParent, IDisposable, IName, ICredentialContainer {
+  public interface ISession : IParent, IDisposable, IName, ICredentialContainer, ILoggable {
 
     /// <summary>
-    /// The PID of the executed process for the session
+    /// The type of the session
     /// </summary>
-    int PID { get; }
-
-    /// <summary>
-    /// The command line to start the process of the session
-    /// </summary>
-    string CommandLine { get; }
-
-    /// <summary>
-    /// Is the session process running ?
-    /// </summary>
-    bool IsRunning { get; }
+    ESessionType SessionType { get; }
 
     /// <summary>
     /// The location where to save or load session information
@@ -46,12 +37,35 @@ namespace libxputty {
     /// </summary>
     void Stop();
 
+    #region --- Process --------------------------------------------
+    /// <summary>
+    /// The process to be executed
+    /// </summary>
+    TRunProcess RunProcess { get; }
+
+    /// <summary>
+    /// Is the underlying process running
+    /// </summary>
+    bool IsRunning { get; }
+
+    /// <summary>
+    /// The PID of the underlying process
+    /// </summary>
+    int PID { get; }
+
+    /// <summary>
+    /// The command line info used to start the underlying process
+    /// </summary>
+    string CommandLine { get; } 
+    #endregion --- Process --------------------------------------------
+
     /// <summary>
     /// Duplicate the session in memory
     /// </summary>
     /// <returns></returns>
     ISession Duplicate();
 
+    #region --- Event handlers --------------------------------------------
     /// <summary>
     /// Event risen before starting the session
     /// </summary>
@@ -67,7 +81,8 @@ namespace libxputty {
     /// <summary>
     /// Event risen after the session is stopped (successfully or not)
     /// </summary>
-    event EventHandler OnExited;
-    
+    event EventHandler OnExited; 
+    #endregion --- Event handlers --------------------------------------------
+
   }
 }
